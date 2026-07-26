@@ -1,0 +1,15 @@
+.git
+.venv
+venv
+__pycache__
+*.pyc
+.pytest_cache
+.ruff_cache
+data
+logs
+reports
+notebooks
+tests
+docs
+# keep models/ (the served bundle) — do NOT ignore it
+!models

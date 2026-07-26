@@ -7,20 +7,23 @@ features:
   type: tfidf
   word:
     ngram_range: [1, 2]
-    min_df: 3
-    max_features: 50000
+    min_df: 5
+    max_features: 30000
     sublinear_tf: true
   char:
     analyzer: char_wb
     ngram_range: [3, 5]
-    min_df: 3
-    max_features: 50000
+    min_df: 5
+    max_features: 30000
     sublinear_tf: true
 model:
   type: lgbm
   params:
-    n_estimators: 400
+    n_estimators: 300
     learning_rate: 0.05
-    num_leaves: 63
+    num_leaves: 31
+    colsample_bytree: 0.5     # feature subsampling — big speedup on high-dim sparse TF-IDF
+    subsample: 0.8
+    subsample_freq: 1
     class_weight: balanced
     n_jobs: -1

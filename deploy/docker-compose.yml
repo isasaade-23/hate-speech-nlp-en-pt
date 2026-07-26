@@ -1,0 +1,23 @@
+# Run api + demo together:  docker compose -f deploy/docker-compose.yml up --build
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: hsc-api
+    ports:
+      - "8000:8000"
+    environment:
+      - HSC_MODEL_ID=${HSC_MODEL_ID:-}
+    restart: unless-stopped
+
+  demo:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.demo
+    image: hsc-demo
+    ports:
+      - "7860:7860"
+    depends_on:
+      - api
+    restart: unless-stopped

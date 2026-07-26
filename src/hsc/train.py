@@ -13,11 +13,12 @@ Outputs per run:
 
 from __future__ import annotations
 
-import json
 import subprocess
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
+from sklearn.metrics import f1_score
 
 from hsc.config import load_yaml, resolve
 from hsc.evaluate import bootstrap_macro_f1_ci, breakdown, classification_metrics, confusion
@@ -56,6 +57,21 @@ def _predict_scores(estimator, X):
     return None
 
 
+def _best_threshold(y_true, y_score) -> float:
+    """Threshold that maximizes macro-F1 on the validation set. Under class imbalance a
+    fixed 0.5 cut collapses to the majority class (esp. after probability calibration);
+    tuning on val and applying to test is a fair, standard fix used for every model."""
+    y_true = np.asarray(y_true)
+    y_score = np.asarray(y_score)
+    cands = np.unique(np.quantile(y_score, np.linspace(0.02, 0.98, 97)))
+    best_t, best_f = 0.5, -1.0
+    for t in cands:
+        f = f1_score(y_true, (y_score >= t).astype(int), average="macro", zero_division=0)
+        if f > best_f:
+            best_f, best_t = f, float(t)
+    return best_t
+
+
 def train_from_config(config_path: str, policy_override: str | None = None) -> dict:
     cfg = load_yaml(config_path)
     policy = policy_override or cfg.get("policy", "strict")
@@ -75,6 +91,10 @@ def train_from_config(config_path: str, policy_override: str | None = None) -> d
     est = build_estimator(cfg["model"], seed)
     est.fit(Xtr, tr["label"].values)
 
+    # Tune the decision threshold on validation (imbalance-aware, fair across models)
+    val_score = _predict_scores(est, vec.transform(va[text_col].values))
+    threshold = _best_threshold(va["label"].values, val_score)
+
     model_id = f"{cfg['name']}_{policy}_s{seed}"
     result = {
         "model_id": model_id,
@@ -84,14 +104,15 @@ def train_from_config(config_path: str, policy_override: str | None = None) -> d
         "seed": seed,
         "git_sha": _git_sha(),
         "n_train": int(len(tr)),
+        "threshold": round(threshold, 4),
         "splits": {},
     }
 
     for name, part in [("val", va), ("test", te)]:
         X = vec.transform(part[text_col].values)
         y = part["label"].values
-        y_pred = est.predict(X)
         y_score = _predict_scores(est, X)
+        y_pred = (np.asarray(y_score) >= threshold).astype(int)
         m = classification_metrics(y, y_pred, y_score)
         lo, hi = bootstrap_macro_f1_ci(y, y_pred, seed=seed)
         m["macro_f1_ci95"] = [round(lo, 4), round(hi, 4)]
@@ -119,7 +140,10 @@ def _persist(result: dict, cfg: dict, vec, est, model_id: str) -> None:
     write_json(result, metrics_dir / f"{model_id}.json")
 
     model_dir = ensure_dir(resolve("models") / model_id)
-    joblib.dump({"vectorizer": vec, "estimator": est, "config": cfg}, model_dir / "model.joblib")
+    joblib.dump(
+        {"vectorizer": vec, "estimator": est, "config": cfg, "threshold": result["threshold"]},
+        model_dir / "model.joblib",
+    )
     _write_model_card(result, cfg, model_dir / "model_card.md")
 
     # registry
@@ -131,6 +155,7 @@ def _persist(result: dict, cfg: dict, vec, est, model_id: str) -> None:
         "policy": result["policy"],
         "seed": result["seed"],
         "git_sha": result["git_sha"],
+        "threshold": result["threshold"],
         "val_macro_f1": result["splits"]["val"]["macro_f1"],
         "test_macro_f1": result["splits"]["test"]["macro_f1"],
     }

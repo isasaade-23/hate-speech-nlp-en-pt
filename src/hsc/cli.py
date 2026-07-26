@@ -34,6 +34,9 @@ def main(argv: list[str] | None = None) -> int:
     tr.add_argument("-c", "--config", required=True, help="path to a model config YAML")
     tr.add_argument("--policy", choices=["strict", "broad"], default=None, help="override config policy")
 
+    ed = sub.add_parser("eda", help="Fase 6: corpus composition figures")
+    ed.add_argument("--policy", choices=["strict", "broad"], default="strict")
+
     sub.add_parser("report", help="Fase 10: build leaderboard + breakdown tables")
 
     args = parser.parse_args(argv)
@@ -77,6 +80,12 @@ def main(argv: list[str] | None = None) -> int:
         from hsc.train import train_from_config
 
         train_from_config(args.config, policy_override=args.policy)
+        return 0
+
+    if args.cmd == "eda":
+        from hsc.eda import run_eda
+
+        run_eda(policy=args.policy)
         return 0
 
     if args.cmd == "report":

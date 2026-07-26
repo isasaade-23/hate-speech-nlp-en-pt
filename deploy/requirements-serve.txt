@@ -1,0 +1,13 @@
+# Lean serving stack (no mlflow/optuna/matplotlib/datasketch/fasttext).
+pandas>=2.1
+numpy>=1.26
+scikit-learn>=1.4
+lightgbm>=4.3
+lingua-language-detector>=2.0
+emoji>=2.10
+pyyaml>=6.0
+pydantic>=2.5
+joblib>=1.3
+fastapi>=0.110
+uvicorn[standard]>=0.29
+slowapi>=0.1.9
