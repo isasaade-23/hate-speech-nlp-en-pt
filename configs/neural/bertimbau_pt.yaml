@@ -1,0 +1,21 @@
+name: bertimbau_pt
+family: neural
+policy: strict
+seed: 42
+text_column: text_clean
+languages: [pt]          # per-language model: Portuguese only
+model:
+  hf_checkpoint: neuralmind/bert-base-portuguese-cased
+  max_length: 160
+  problem: binary
+train:
+  epochs: 4
+  batch_size: 16
+  lr: 2.0e-5
+  weight_decay: 0.01
+  warmup_ratio: 0.1
+  class_weights: balanced
+  fp16: true
+  seeds: [42, 43, 44]
+eval:
+  primary_metric: macro_f1

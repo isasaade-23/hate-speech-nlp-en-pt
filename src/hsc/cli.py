@@ -20,7 +20,21 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Include probe-gated sources even without a recorded probe decision",
     )
-    # Future: split, langid, train, evaluate, report
+
+    sub.add_parser("probe-dataset2", help="Fase 2: analyze tweets_ip 1/2/3 labels + open gate")
+
+    s = sub.add_parser("split", help="Fase 4: dedup + leakage-safe frozen split")
+    s.add_argument("--policy", choices=["strict", "broad"], default="strict")
+
+    lg = sub.add_parser("langid", help="Fase 5: language detection + evaluation")
+    lg.add_argument("--policy", choices=["strict", "broad"], default="strict")
+    lg.add_argument("--threshold", type=float, default=0.5)
+
+    tr = sub.add_parser("train", help="Fase 7+: train a model from a config")
+    tr.add_argument("-c", "--config", required=True, help="path to a model config YAML")
+    tr.add_argument("--policy", choices=["strict", "broad"], default=None, help="override config policy")
+
+    sub.add_parser("report", help="Fase 10: build leaderboard + breakdown tables")
 
     args = parser.parse_args(argv)
 
@@ -39,6 +53,36 @@ def main(argv: list[str] | None = None) -> int:
             include_auxiliary=args.aux,
             force_gated=args.force_gated,
         )
+        return 0
+
+    if args.cmd == "probe-dataset2":
+        from hsc.probe import run
+
+        run()
+        return 0
+
+    if args.cmd == "split":
+        from hsc.splits import run_split
+
+        run_split(policy=args.policy)
+        return 0
+
+    if args.cmd == "langid":
+        from hsc.langid import run_langid
+
+        run_langid(policy=args.policy, threshold=args.threshold)
+        return 0
+
+    if args.cmd == "train":
+        from hsc.train import train_from_config
+
+        train_from_config(args.config, policy_override=args.policy)
+        return 0
+
+    if args.cmd == "report":
+        from hsc.report import build_all
+
+        build_all()
         return 0
 
     parser.error(f"unknown command: {args.cmd}")

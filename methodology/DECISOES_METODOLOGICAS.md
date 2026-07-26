@@ -123,3 +123,29 @@ maduro em algumas libs de ML/DL do que o 3.13. requires-python do pacote é >=3.
 
 **Impacto.** Reprodutibilidade local fixada em 3.12; pins exatos exportados por pip freeze
 após validação do ambiente.
+
+---
+
+## [2026-07-26] Resultado do probe do dataset2 (Fase 2)
+
+**Decisão.** Abrir o gate e incluir tweets_ip no corpus primário com o mapeamento
+provisório 1=ódio, 2=ofensivo, 3=neutro (strict: {1->1, 2->0, 3->0}; broad: {1->1, 2->1,
+3->0}). Marcado como `provisional_auto` até a auditoria manual.
+
+**Motivo.** Evidência automática (reports/tables/dataset2_probe.csv):
+- Ordem de distribuição 1<2<3 confirmada (2.139 / 5.504 / 13.366).
+- Taxa de profanidade (léxico da better-profanity, pertencimento por token) cai
+  monotonicamente: classe 1 = 0,553; classe 2 = 0,454; classe 3 = 0,209. A classe 1
+  concentra a linguagem mais ofensiva, coerente com "ódio".
+- Sinais de estilo (maiúsculas, exclamação) são planos entre classes, então a separação
+  vem do conteúdo, não do estilo.
+
+**Alternativa rejeitada.** Deixar tweets_ip fora até a auditoria manual. Rejeitada porque
+a evidência automática é forte e o gate `provisional_auto` mantém a honestidade (revisável).
+
+**Pendência.** Auditoria manual de 150 tweets em data/external/dataset2_audit_sample.csv
+(preencher manual_label) para elevar a decisão a `confirmed` e calcular kappa. Se a
+auditoria discordar, reverter via configs/labels.yaml (include_in_primary: false) ou
+restringir a {1}->1, {2,3}->0.
+
+**Impacto.** Corpus primário agora inclui os 21.009 tweets. Recompor harmonize/split/langid.

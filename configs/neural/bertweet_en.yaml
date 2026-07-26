@@ -1,0 +1,24 @@
+name: bertweet_en
+family: neural
+policy: strict
+seed: 42
+text_column: text_clean
+languages: [en]          # per-language model: English only (tweet-domain pretraining)
+model:
+  hf_checkpoint: vinai/bertweet-base
+  max_length: 128
+  problem: binary
+train:
+  epochs: 4
+  batch_size: 16
+  lr: 2.0e-5
+  weight_decay: 0.01
+  warmup_ratio: 0.1
+  class_weights: balanced
+  fp16: true
+  seeds: [42, 43, 44]
+eval:
+  primary_metric: macro_f1
+notes: >
+  DistilBERT (distilbert-base-uncased) is the small/fast product twin for EN; train it
+  with the same config for the Pareto model-selection step (Fase 11).

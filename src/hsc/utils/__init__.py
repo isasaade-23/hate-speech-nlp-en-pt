@@ -3,6 +3,7 @@ from hsc.utils.io import (
     read_json,
     read_parquet,
     sha256_file,
+    sha256_text,
     write_json,
     write_parquet,
 )
@@ -16,6 +17,7 @@ __all__ = [
     "read_parquet",
     "write_parquet",
     "sha256_file",
+    "sha256_text",
     "get_logger",
     "set_all_seeds",
 ]
