@@ -1,0 +1,83 @@
+# ============================================================================
+# LABEL HARMONIZATION — the scientific crux of this project.
+# Maps each dataset's original labels to a binary target {0 not-hate, 1 hate}.
+# Human-readable justification: methodology/label_mapping.md
+# ============================================================================
+#
+# Two policies are materialized for every experiment:
+#   strict : only categories that are EXPLICITLY hate -> 1. Offensive-but-not-hate -> 0.
+#   broad  : offensiveness is folded into hate (offensive -> 1).
+# Reporting strict vs broad (and the gap) is a headline contribution, not a footnote.
+#
+# `include_in_primary` (per source, per policy) controls whether a source enters
+# the primary TRAINING corpus. Sources excluded from primary are still kept as
+# auxiliary / external-test sets. This makes scope a config change, not a rewrite.
+
+positive_class: 1        # 1 = hate, 0 = not-hate
+label_match: exact       # default; override per source (e.g. multioff uses prefix)
+
+sources:
+
+  memotion:
+    language: en
+    domain: meme_ocr
+    text_column: text_corrected
+    text_fallback: text_ocr        # use OCR when corrected is empty
+    label_column: offensive
+    strict:
+      map: { hateful_offensive: 1, very_offensive: 0, slight: 0, not_offensive: 0 }
+      include_in_primary: true
+    broad:
+      map: { hateful_offensive: 1, very_offensive: 1, slight: 0, not_offensive: 0 }
+      include_in_primary: true
+    confidence: { hateful_offensive: high, very_offensive: low, slight: high, not_offensive: high }
+
+  tweets_ip:
+    language: en
+    domain: tweet
+    text_column: tweet
+    label_column: label
+    # PROVISIONAL: 1/2/3 meaning is undocumented. Inferred 1=hate, 2=offensive, 3=neither.
+    # Fase 2 probe (notebooks/02_dataset2_label_probe) confirms or demotes this source.
+    # If the probe fails, set include_in_primary: false under both policies.
+    strict:
+      map: { "1": 1, "2": 0, "3": 0 }
+      include_in_primary: true
+    broad:
+      map: { "1": 1, "2": 1, "3": 0 }
+      include_in_primary: true
+    confidence: { "1": medium, "2": low, "3": medium }
+    probe_gate: true               # corpus build refuses to include until probe recorded
+
+  pt_fortuna:
+    language: pt
+    domain: web_comment
+    text_column: text
+    label_column: hatespeech_comb
+    # Purpose-built binary hate label (Fortuna et al. 2019). The gold standard here.
+    strict:
+      map: { "1": 1, "0": 0 }
+      include_in_primary: true
+    broad:
+      map: { "1": 1, "0": 0 }
+      include_in_primary: true
+    confidence: { "1": high, "0": high }
+
+  multioff:
+    language: en
+    domain: meme_ocr
+    text_column: sentence
+    label_column: label
+    label_match: prefix            # source stores truncated 'Non-offensiv'
+    # Offensiveness label, NOT hate. Apache-2.0 (the only commercially-clear source).
+    strict:
+      map: { "offensive": 0, "Non-offensiv": 0 }
+      include_in_primary: false    # under strict, no confirmed hate -> keep as aux/test only
+    broad:
+      map: { "offensive": 1, "Non-offensiv": 0 }
+      include_in_primary: true
+    confidence: { "offensive": low, "Non-offensiv": high }
+
+# Sources cleared for COMMERCIAL redistribution of a derived model (see
+# methodology/data_provenance.md). The product model trains only on these.
+commercial_whitelist: ["multioff"]

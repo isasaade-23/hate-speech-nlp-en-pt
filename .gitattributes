@@ -1,0 +1,15 @@
+# Normalize line endings so the repo behaves the same on Windows (local) and
+# Linux (Colab / CI). Text files stored as LF in git.
+* text=auto eol=lf
+
+# Binary assets — never touch line endings
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.parquet binary
+*.joblib binary
+*.pkl binary
+*.pt binary
+*.bin binary
+*.safetensors binary
+*.onnx binary

@@ -1,0 +1,64 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hsc"
+version = "0.1.0"
+description = "Bilingual (EN/PT) hate-speech text classifier: classical vs transformer models, plus a deployable API."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "hate-speech-project contributors" }]
+
+# Core (local, CPU) dependencies. Heavy DL libs live in requirements-colab.txt.
+dependencies = [
+    "pandas>=2.1",
+    "numpy>=1.26",
+    "pyarrow>=15.0",
+    "pyyaml>=6.0",
+    "pydantic>=2.5",
+    "scikit-learn>=1.4",
+    "lightgbm>=4.3",
+    "xgboost>=2.0",
+    "emoji>=2.10",
+    "datasketch>=1.6",          # MinHash/LSH near-duplicate detection
+    "lingua-language-detector>=2.0",
+    "fasttext-wheel>=0.9.2",    # lid.176 language id (prebuilt wheel, no compiler)
+    "optuna>=3.5",
+    "mlflow>=2.11",
+    "matplotlib>=3.8",
+    "seaborn>=0.13",
+    "tqdm>=4.66",
+]
+
+[project.optional-dependencies]
+embeddings = ["sentence-transformers>=2.6"]   # multilingual SBERT (pulls torch CPU)
+api = ["fastapi>=0.110", "uvicorn[standard]>=0.29", "slowapi>=0.1.9"]
+demo = ["gradio>=4.20"]
+dev = ["pytest>=8.0", "ruff>=0.3", "black>=24.0", "isort>=5.13", "pre-commit>=3.6", "nbstripout>=0.7"]
+
+[project.scripts]
+hsc = "hsc.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

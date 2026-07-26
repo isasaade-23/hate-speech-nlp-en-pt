@@ -1,0 +1,53 @@
+# Data (raw/interim/processed are reproducible from source zips in Downloads)
+data/raw/
+data/interim/
+data/processed/
+data/external/
+!data/**/.gitkeep
+
+# Models and large binaries (tracked via models/registry.json)
+models/**/*.bin
+models/**/*.safetensors
+models/**/*.pt
+models/**/*.onnx
+models/**/*.joblib
+models/**/*.pkl
+
+# Logs and experiment tracking
+logs/
+!logs/.gitkeep
+mlruns/
+
+# Reports: keep code-generated figures/tables out of git until release
+reports/figures/*
+reports/tables/*
+reports/metrics/*
+!reports/**/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+
+# Notebook outputs are stripped by nbstripout; ignore stray checkpoints
+notebooks/**/*-checkpoint.ipynb
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Secrets and local env
+.env
+*.local
+
+# OS
+Thumbs.db
+.DS_Store

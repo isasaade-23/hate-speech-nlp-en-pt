@@ -1,0 +1,73 @@
+# Data pipeline configuration. Every switch here is a documented methodological
+# choice (see methodology/DECISOES_METODOLOGICAS.md). Nothing is hidden in code.
+
+seed: 42
+
+paths:
+  source_dir: "C:/Users/Renato/Downloads/hate-speech"   # immutable source zips
+  raw: "data/raw"
+  interim: "data/interim"
+  processed: "data/processed"
+  external: "data/external"
+
+# Per-dataset source zips and the tabular members to extract (text-only project;
+# meme images are intentionally NOT extracted).
+sources:
+  memotion:
+    zip: "dataset1.zip"
+    member: "memotion_dataset_7k/labels.csv"
+    encoding: "utf-8-sig"
+  tweets_ip:
+    zip: "dataset2.zip"
+    member: "Hate and offensive speech detection.csv"
+    encoding: "utf-8"          # 3 baked-in U+FFFD in ~21k rows, negligible
+  pt_fortuna:
+    zip: "dataset3.zip"
+    member: "2019-05-28_portuguese_hate_speech_binary_classification.csv"
+    encoding: "latin-1"        # CRITICAL: utf-8 mojibakes the Portuguese accents
+  multioff:
+    zip: "dataset4.zip"
+    members:                    # official train/val/test, re-split by us (anti-leakage)
+      - "Dataset/Split Dataset/Training_meme_dataset.csv"
+      - "Dataset/Split Dataset/Validation_meme_dataset.csv"
+      - "Dataset/Split Dataset/Testing_meme_dataset.csv"
+    encoding: "utf-8-sig"
+
+# Cleaning (clean.py). Two profiles: light (transformers) and heavy (TF-IDF).
+clean:
+  min_tokens: 3
+  profiles:
+    light:
+      lowercase: false
+      url_token: "<url>"
+      user_token: "<user>"
+      strip_rt: true
+      keep_emoji: true          # emojis carry hate signal; ablate by setting false
+      demojize: true            # emoji -> :text: token
+      strip_hashtag_symbol: true
+    heavy:
+      lowercase: true
+      url_token: "<url>"
+      user_token: "<user>"
+      strip_rt: true
+      keep_emoji: false
+      demojize: true
+      strip_hashtag_symbol: true
+      strip_punct_noise: true
+
+# Deduplication (splits.py / clean.py)
+dedup:
+  exact: true                   # hash of normalized text
+  near: true
+  near_method: "char3gram_cosine"   # or "minhash_lsh"
+  near_threshold: 0.90
+
+# Leakage-safe split (splits.py)
+split:
+  ratios: { train: 0.70, val: 0.15, test: 0.15 }
+  stratify_by: ["language", "source_dataset", "label"]
+  group_by: "dup_cluster_id"    # paraphrases never straddle splits
+  freeze_to: "data/processed/splits.parquet"
+
+# Which label policy the corpus build materializes (both are generated)
+label_policy_default: "strict"
