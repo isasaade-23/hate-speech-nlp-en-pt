@@ -18,12 +18,18 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from sklearn.metrics import f1_score
 
 from hsc.config import load_yaml, resolve
-from hsc.evaluate import bootstrap_macro_f1_ci, breakdown, classification_metrics, confusion
-from hsc.features.tfidf import build_tfidf
+from hsc.evaluate import (
+    best_threshold,
+    bootstrap_macro_f1_ci,
+    breakdown,
+    classification_metrics,
+    confusion,
+)
+from hsc.features import build_features
 from hsc.models.classical import build_estimator
+from hsc.predictions import build_prediction_frame, predict_scores, save_predictions
 from hsc.utils import ensure_dir, get_logger, read_json, set_all_seeds, write_json
 
 log = get_logger("hsc.train")
@@ -48,30 +54,6 @@ def _load_split_corpus(policy: str) -> pd.DataFrame:
     return df
 
 
-def _predict_scores(estimator, X):
-    """Positive-class scores for ROC/PR; falls back to decision_function."""
-    if hasattr(estimator, "predict_proba"):
-        return estimator.predict_proba(X)[:, 1]
-    if hasattr(estimator, "decision_function"):
-        return estimator.decision_function(X)
-    return None
-
-
-def _best_threshold(y_true, y_score) -> float:
-    """Threshold that maximizes macro-F1 on the validation set. Under class imbalance a
-    fixed 0.5 cut collapses to the majority class (esp. after probability calibration);
-    tuning on val and applying to test is a fair, standard fix used for every model."""
-    y_true = np.asarray(y_true)
-    y_score = np.asarray(y_score)
-    cands = np.unique(np.quantile(y_score, np.linspace(0.02, 0.98, 97)))
-    best_t, best_f = 0.5, -1.0
-    for t in cands:
-        f = f1_score(y_true, (y_score >= t).astype(int), average="macro", zero_division=0)
-        if f > best_f:
-            best_f, best_t = f, float(t)
-    return best_t
-
-
 def train_from_config(config_path: str, policy_override: str | None = None) -> dict:
     cfg = load_yaml(config_path)
     policy = policy_override or cfg.get("policy", "strict")
@@ -86,14 +68,14 @@ def train_from_config(config_path: str, policy_override: str | None = None) -> d
     log.info("train=%d val=%d test=%d [%s]", len(tr), len(va), len(te), policy)
 
     # Features: fit ON TRAIN ONLY
-    vec = build_tfidf(cfg["features"])
+    vec = build_features(cfg["features"])
     Xtr = vec.fit_transform(tr[text_col].values)
     est = build_estimator(cfg["model"], seed)
     est.fit(Xtr, tr["label"].values)
 
     # Tune the decision threshold on validation (imbalance-aware, fair across models)
-    val_score = _predict_scores(est, vec.transform(va[text_col].values))
-    threshold = _best_threshold(va["label"].values, val_score)
+    val_score = predict_scores(est, vec.transform(va[text_col].values))
+    threshold = best_threshold(va["label"].values, val_score)
 
     model_id = f"{cfg['name']}_{policy}_s{seed}"
     result = {
@@ -111,7 +93,7 @@ def train_from_config(config_path: str, policy_override: str | None = None) -> d
     for name, part in [("val", va), ("test", te)]:
         X = vec.transform(part[text_col].values)
         y = part["label"].values
-        y_score = _predict_scores(est, X)
+        y_score = predict_scores(est, X)
         y_pred = (np.asarray(y_score) >= threshold).astype(int)
         m = classification_metrics(y, y_pred, y_score)
         lo, hi = bootstrap_macro_f1_ci(y, y_pred, seed=seed)
@@ -123,6 +105,9 @@ def train_from_config(config_path: str, policy_override: str | None = None) -> d
         m["by_language"] = breakdown(pred_df, "label", "pred", "language").to_dict("records")
         m["by_source"] = breakdown(pred_df, "label", "pred", "source_dataset").to_dict("records")
         result["splits"][name] = m
+
+        # Per-example predictions feed McNemar significance + calibration (Fase 9)
+        save_predictions(model_id, name, build_prediction_frame(part, y_score, threshold))
         log.info(
             "%s [%s]: macro-F1=%.4f (CI %.3f-%.3f) recall_hate=%.4f",
             model_id, name, m["macro_f1"], lo, hi, m["recall_hate"],

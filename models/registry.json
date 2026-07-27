@@ -58,5 +58,45 @@
     "threshold": 0.5753,
     "val_macro_f1": 0.698493678288399,
     "test_macro_f1": 0.7108423925775174
+  },
+  "sbert_logreg_strict_s42": {
+    "path": "models/sbert_logreg_strict_s42/model.joblib",
+    "config": "sbert_logreg",
+    "policy": "strict",
+    "seed": 42,
+    "git_sha": "c0ae91a",
+    "threshold": 0.6538,
+    "val_macro_f1": 0.6719651774772424,
+    "test_macro_f1": 0.669019087310257
+  },
+  "sbert_lgbm_strict_s42": {
+    "path": "models/sbert_lgbm_strict_s42/model.joblib",
+    "config": "sbert_lgbm",
+    "policy": "strict",
+    "seed": 42,
+    "git_sha": "c0ae91a",
+    "threshold": 0.2757,
+    "val_macro_f1": 0.681106343414958,
+    "test_macro_f1": 0.6886422407531162
+  },
+  "sbert_logreg_broad_s42": {
+    "path": "models/sbert_logreg_broad_s42/model.joblib",
+    "config": "sbert_logreg",
+    "policy": "broad",
+    "seed": 42,
+    "git_sha": "c0ae91a",
+    "threshold": 0.5739,
+    "val_macro_f1": 0.6835835848065387,
+    "test_macro_f1": 0.692438495927155
+  },
+  "sbert_lgbm_broad_s42": {
+    "path": "models/sbert_lgbm_broad_s42/model.joblib",
+    "config": "sbert_lgbm",
+    "policy": "broad",
+    "seed": 42,
+    "git_sha": "c0ae91a",
+    "threshold": 0.3953,
+    "val_macro_f1": 0.6879125780532285,
+    "test_macro_f1": 0.6949763612466686
   }
 }

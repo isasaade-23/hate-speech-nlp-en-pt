@@ -45,6 +45,22 @@ def classification_metrics(y_true, y_pred, y_score=None) -> dict:
     return out
 
 
+def best_threshold(y_true, y_score) -> float:
+    """Decision threshold maximizing macro-F1 on the given (validation) set. Under class
+    imbalance a fixed 0.5 cut collapses to the majority class (especially after
+    probability calibration); tuning on val and applying to test is a fair, standard fix
+    used identically for every model and every transfer experiment."""
+    y_true = np.asarray(y_true)
+    y_score = np.asarray(y_score, dtype=float)
+    cands = np.unique(np.quantile(y_score, np.linspace(0.02, 0.98, 97)))
+    best_t, best_f = 0.5, -1.0
+    for t in cands:
+        f = f1_score(y_true, (y_score >= t).astype(int), average="macro", zero_division=0)
+        if f > best_f:
+            best_f, best_t = f, float(t)
+    return best_t
+
+
 def bootstrap_macro_f1_ci(y_true, y_pred, n_boot: int = 1000, seed: int = 42, alpha: float = 0.05):
     y_true = np.asarray(y_true)
     y_pred = np.asarray(y_pred)
@@ -75,6 +91,57 @@ def mcnemar(y_true, pred_a, pred_b) -> dict:
 
 def confusion(y_true, y_pred) -> list[list[int]]:
     return confusion_matrix(y_true, y_pred, labels=[0, 1]).tolist()
+
+
+def _minmax_scale(y_score) -> np.ndarray:
+    """Map arbitrary scores into [0,1] so decision_function outputs (SVM) are comparable
+    to probabilities for calibration. Monotone, so ranking metrics are unaffected."""
+    y_score = np.asarray(y_score, dtype=float)
+    lo, hi = np.min(y_score), np.max(y_score)
+    if hi - lo < 1e-12:
+        return np.full_like(y_score, 0.5)
+    return (y_score - lo) / (hi - lo)
+
+
+def calibration_curve_bins(y_true, y_score, n_bins: int = 10) -> dict:
+    """Reliability-diagram data + summary scores.
+
+    Returns per-bin mean confidence vs. empirical accuracy plus ECE (expected
+    calibration error, gap weighted by bin population), MCE (worst bin gap) and the
+    Brier score. Scores are min-max scaled first so SVM decision_function values sit on
+    the same [0,1] axis as probabilities.
+    """
+    y_true = np.asarray(y_true, dtype=int)
+    p = np.clip(_minmax_scale(y_score), 0.0, 1.0)
+    edges = np.linspace(0.0, 1.0, n_bins + 1)
+    idx = np.clip(np.digitize(p, edges[1:-1]), 0, n_bins - 1)
+
+    bins = []
+    ece = 0.0
+    mce = 0.0
+    n = len(p)
+    for b in range(n_bins):
+        mask = idx == b
+        count = int(mask.sum())
+        if count == 0:
+            bins.append({"bin": b, "count": 0, "confidence": None, "accuracy": None})
+            continue
+        conf = float(p[mask].mean())
+        acc = float(y_true[mask].mean())
+        gap = abs(conf - acc)
+        ece += (count / n) * gap
+        mce = max(mce, gap)
+        bins.append(
+            {"bin": b, "count": count, "confidence": round(conf, 4), "accuracy": round(acc, 4)}
+        )
+    brier = float(np.mean((p - y_true) ** 2))
+    return {
+        "n_bins": n_bins,
+        "ece": round(float(ece), 4),
+        "mce": round(float(mce), 4),
+        "brier": round(brier, 4),
+        "bins": bins,
+    }
 
 
 def breakdown(df: pd.DataFrame, y_true_col: str, y_pred_col: str, by: str) -> pd.DataFrame:

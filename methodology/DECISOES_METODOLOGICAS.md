@@ -149,3 +149,48 @@ auditoria discordar, reverter via configs/labels.yaml (include_in_primary: false
 restringir a {1}->1, {2,3}->0.
 
 **Impacto.** Corpus primário agora inclui os 21.009 tweets. Recompor harmonize/split/langid.
+
+---
+
+## [2026-07-27] Avaliação aprofundada (Fase 9): significância, calibração, transferência
+
+**Decisão 1 — Significância pareada por McNemar + correção de Holm.** Comparar modelos
+por McNemar exato (binomial) sobre as predições por exemplo, não por diferença de
+macro-F1 pontual. As comparações são feitas SÓ dentro de uma política (strict/broad têm
+linhas e rótulos de teste diferentes; um teste pareado entre elas não tem sentido). Dentro
+da política, todos os modelos usam o mesmo split congelado, então as predições alinham por
+`id`. Múltiplas comparações por política são corrigidas por Holm-Bonferroni (α=0,05).
+
+**Motivo.** Diferenças de 1-2 pontos de macro-F1 podem não ser significativas; o revisor
+vai exigir o teste. McNemar é o padrão para classificadores pareados no mesmo conjunto.
+
+**Decisão 2 — Predições por exemplo persistidas (reports/predictions/).** train.py grava
+(id, y_true, y_score, y_pred) por split; modelos já treinados são reconstruídos do joblib
+congelado + corpus congelado, sem re-treinar. É o substrato de McNemar e da calibração.
+
+**Decisão 3 — Calibração reportada (ECE/MCE/Brier + diagrama de confiabilidade).** Scores
+passam por min-max antes dos bins para que o decision_function do SVM fique no mesmo eixo
+[0,1] das probabilidades (monotônico, não altera ranking/AUC). Uma figura por política.
+
+**Motivo.** O produto expõe um score; calibração diz se ele é interpretável como
+probabilidade. É requisito do "Reproducibility/Ethics statement" e da seção de produto.
+
+**Decisão 4 — Trilha SBERT (embeddings densos multilíngues).** Adicionar
+`paraphrase-multilingual-MiniLM-L12-v2` (encoder CONGELADO, sem fine-tuning) →
+LogReg/LightGBM, como baseline clássico forte que compartilha a ideia multilíngue do
+XLM-R sem GPU. O encoder congelado torna o anti-leakage automático (nada é aprendido de
+nenhum split); embeddings são cacheados por hash-de-texto (LogReg e LGBM reusam a matriz).
+
+**Motivo.** (a) LightGBM rendia mal e lento sobre TF-IDF esparso de 60k dim; 384 dim
+densos são seu habitat natural. (b) TF-IDF de palavra não compartilha vocabulário entre
+idiomas — necessário para a transferência cross-lingual.
+
+**Decisão 5 — Experimento de transferência cross-domínio e cross-lingual (destaque).**
+Treinar numa fatia e testar em fatia disjunta: cross-domínio EN (tweets↔memes) e
+cross-lingual zero-shot (EN→PT e PT→EN). Protocolo idêntico ao principal: features no
+treino apenas, limiar ajustado num val da fonte de treino, teste único na fonte-alvo. Como
+treino e teste são datasets diferentes, não há leakage na fronteira. Roda com TF-IDF E
+SBERT — o contraste (TF-IDF colapsa cross-lingual, SBERT transfere) é o resultado.
+
+**Alternativa rejeitada.** Reportar só números in-distribution. Rejeitada: mede o risco de
+domain shift de forma indireta; a transferência explícita é medida direta e vira a Fig. 5.

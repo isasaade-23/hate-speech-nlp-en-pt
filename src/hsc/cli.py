@@ -39,6 +39,13 @@ def main(argv: list[str] | None = None) -> int:
 
     sub.add_parser("report", help="Fase 10: build leaderboard + breakdown tables")
 
+    an = sub.add_parser("analyze", help="Fase 9: paired McNemar significance + calibration")
+    an.add_argument("--split", default="test", choices=["val", "test"])
+
+    tf = sub.add_parser("transfer", help="Fase 9: cross-domain + cross-lingual transfer")
+    tf.add_argument("--policy", choices=["strict", "broad", "both"], default="both")
+    tf.add_argument("--seed", type=int, default=42)
+
     args = parser.parse_args(argv)
 
     if args.cmd == "ingest":
@@ -92,6 +99,21 @@ def main(argv: list[str] | None = None) -> int:
         from hsc.report import build_all
 
         build_all()
+        return 0
+
+    if args.cmd == "analyze":
+        from hsc.analysis import run_all
+
+        run_all(split=args.split)
+        return 0
+
+    if args.cmd == "transfer":
+        from hsc import transfer
+
+        if args.policy == "both":
+            transfer.run_all(seed=args.seed)
+        else:
+            transfer.run_transfer(policy=args.policy, seed=args.seed)
         return 0
 
     parser.error(f"unknown command: {args.cmd}")

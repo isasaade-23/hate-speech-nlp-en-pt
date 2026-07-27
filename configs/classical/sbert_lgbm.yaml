@@ -1,0 +1,24 @@
+name: sbert_lgbm
+family: classical
+policy: strict
+seed: 42
+text_column: text_clean
+# LightGBM shines on dense low-dim features — the 384-dim SBERT space is its natural home
+# (unlike the 60k-dim sparse TF-IDF matrix where it was slow and weak).
+features:
+  type: embeddings
+  model_name: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+  batch_size: 64
+  normalize: true
+  cache: true
+model:
+  type: lgbm
+  params:
+    n_estimators: 500
+    learning_rate: 0.05
+    num_leaves: 63
+    subsample: 0.8
+    subsample_freq: 1
+    colsample_bytree: 0.8
+    class_weight: balanced
+    n_jobs: -1

@@ -1,0 +1,18 @@
+name: sbert_logreg
+family: classical
+policy: strict
+seed: 42
+text_column: text_clean
+features:
+  type: embeddings
+  model_name: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+  batch_size: 64
+  normalize: true
+  cache: true
+model:
+  type: logreg
+  params:
+    class_weight: balanced
+    max_iter: 2000
+    C: 1.0
+    n_jobs: -1

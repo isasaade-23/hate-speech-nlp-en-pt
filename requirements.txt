@@ -18,9 +18,12 @@ mlflow>=2.11
 matplotlib>=3.8
 seaborn>=0.13
 tqdm>=4.66
+sentence-transformers>=2.6        # multilingual SBERT track + cross-lingual transfer (pulls torch CPU)
 
-# Optional feature/serving extras (install as needed):
-#   sentence-transformers>=2.6      # multilingual embeddings baseline (pulls torch CPU)
+# Install torch CPU-only first to avoid the CUDA build:
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+# Optional serving extras (install as needed):
 #   fastapi>=0.110 uvicorn[standard]>=0.29 slowapi>=0.1.9   # product API
 #   gradio>=4.20                    # web demo
 
