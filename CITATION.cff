@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use this software or its findings, please cite it as below."
+title: "Bilingual Hate-Speech Detection (EN/PT): classical vs. transformer models"
+abstract: >-
+  A reproducible, leakage-safe study comparing classical models (TF-IDF and multilingual
+  sentence embeddings) with transformers (XLM-RoBERTa, BERTimbau, BERTweet) for binary
+  hate-speech classification in English and Portuguese, with calibration, identity-term
+  bias, cross-lingual transfer analyses, and a deployable inference API.
+type: software
+authors:
+  - family-names: "Venancio da Silva"
+    given-names: "Isabela"
+    orcid: "https://orcid.org/0000-0003-0156-7837"
+    affiliation: "University of São Paulo, School of Public Health (FSP-USP), LABDAPS"
+date-released: "2026-07-27"
+license: MIT
+repository-code: "https://github.com/isasaade-23/bilingual-hate-speech-detection"
+keywords:
+  - hate speech detection
+  - natural language processing
+  - multilingual NLP
+  - Portuguese
+  - text classification
+  - transformers
+  - cross-lingual transfer
+  - model calibration
+  - algorithmic bias
