@@ -46,6 +46,13 @@ def main(argv: list[str] | None = None) -> int:
     tf.add_argument("--policy", choices=["strict", "broad", "both"], default="both")
     tf.add_argument("--seed", type=int, default=42)
 
+    ea = sub.add_parser("errors", help="Fase 9: qualitative error analysis (best model)")
+    ea.add_argument("--policy", choices=["strict", "broad"], default="strict")
+    ea.add_argument("--model", default=None, help="model_id (default: best test macro-F1)")
+
+    bp = sub.add_parser("bias", help="Fase 9: identity-term false-positive-rate bias probe")
+    bp.add_argument("--policy", choices=["strict", "broad", "both"], default="both")
+
     args = parser.parse_args(argv)
 
     if args.cmd == "ingest":
@@ -114,6 +121,21 @@ def main(argv: list[str] | None = None) -> int:
             transfer.run_all(seed=args.seed)
         else:
             transfer.run_transfer(policy=args.policy, seed=args.seed)
+        return 0
+
+    if args.cmd == "errors":
+        from hsc.error_analysis import run_error_analysis
+
+        run_error_analysis(model_id=args.model, policy=args.policy)
+        return 0
+
+    if args.cmd == "bias":
+        from hsc import bias_probe
+
+        if args.policy == "both":
+            bias_probe.run_all()
+        else:
+            bias_probe.run_bias_probe(policy=args.policy)
         return 0
 
     parser.error(f"unknown command: {args.cmd}")

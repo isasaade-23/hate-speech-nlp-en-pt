@@ -4,99 +4,99 @@
     "config": "tfidf_logreg",
     "policy": "strict",
     "seed": 42,
-    "git_sha": "5fc983f",
-    "threshold": 0.5476,
-    "val_macro_f1": 0.6974860160075789,
-    "test_macro_f1": 0.7169263597036611
+    "git_sha": "e89602a",
+    "threshold": 0.665,
+    "val_macro_f1": 0.7083460697309975,
+    "test_macro_f1": 0.709432431067481
   },
   "tfidf_svm_strict_s42": {
     "path": "models/tfidf_svm_strict_s42/model.joblib",
     "config": "tfidf_svm",
     "policy": "strict",
     "seed": 42,
-    "git_sha": "5fc983f",
-    "threshold": 0.1548,
-    "val_macro_f1": 0.6708943194777369,
-    "test_macro_f1": 0.6890553038181548
+    "git_sha": "e89602a",
+    "threshold": 0.1476,
+    "val_macro_f1": 0.6754259338465926,
+    "test_macro_f1": 0.671576711294966
   },
   "tfidf_lgbm_strict_s42": {
     "path": "models/tfidf_lgbm_strict_s42/model.joblib",
     "config": "tfidf_lgbm",
     "policy": "strict",
     "seed": 42,
-    "git_sha": "5fc983f",
-    "threshold": 0.6333,
-    "val_macro_f1": 0.6843629962306454,
-    "test_macro_f1": 0.6986243843928419
+    "git_sha": "e89602a",
+    "threshold": 0.5742,
+    "val_macro_f1": 0.6911644570069724,
+    "test_macro_f1": 0.7065330373769416
   },
   "tfidf_logreg_broad_s42": {
     "path": "models/tfidf_logreg_broad_s42/model.joblib",
     "config": "tfidf_logreg",
     "policy": "broad",
     "seed": 42,
-    "git_sha": "5fc983f",
-    "threshold": 0.5983,
-    "val_macro_f1": 0.696253677672442,
-    "test_macro_f1": 0.7076537277321091
+    "git_sha": "e89602a",
+    "threshold": 0.557,
+    "val_macro_f1": 0.7040863231449299,
+    "test_macro_f1": 0.6976261343012704
   },
   "tfidf_svm_broad_s42": {
     "path": "models/tfidf_svm_broad_s42/model.joblib",
     "config": "tfidf_svm",
     "policy": "broad",
     "seed": 42,
-    "git_sha": "5fc983f",
-    "threshold": 0.3999,
-    "val_macro_f1": 0.6739546733718549,
-    "test_macro_f1": 0.6818064737522777
+    "git_sha": "e89602a",
+    "threshold": 0.3903,
+    "val_macro_f1": 0.6739239685498906,
+    "test_macro_f1": 0.6733948225372497
   },
   "tfidf_lgbm_broad_s42": {
     "path": "models/tfidf_lgbm_broad_s42/model.joblib",
     "config": "tfidf_lgbm",
     "policy": "broad",
     "seed": 42,
-    "git_sha": "5fc983f",
-    "threshold": 0.5753,
-    "val_macro_f1": 0.698493678288399,
-    "test_macro_f1": 0.7108423925775174
+    "git_sha": "e89602a",
+    "threshold": 0.5602,
+    "val_macro_f1": 0.7050565319215039,
+    "test_macro_f1": 0.6982832307135096
   },
   "sbert_logreg_strict_s42": {
     "path": "models/sbert_logreg_strict_s42/model.joblib",
     "config": "sbert_logreg",
     "policy": "strict",
     "seed": 42,
-    "git_sha": "c0ae91a",
-    "threshold": 0.6538,
-    "val_macro_f1": 0.6719651774772424,
-    "test_macro_f1": 0.669019087310257
+    "git_sha": "e89602a",
+    "threshold": 0.6803,
+    "val_macro_f1": 0.6544856715141146,
+    "test_macro_f1": 0.6645022006208239
   },
   "sbert_lgbm_strict_s42": {
     "path": "models/sbert_lgbm_strict_s42/model.joblib",
     "config": "sbert_lgbm",
     "policy": "strict",
     "seed": 42,
-    "git_sha": "c0ae91a",
-    "threshold": 0.2757,
-    "val_macro_f1": 0.681106343414958,
-    "test_macro_f1": 0.6886422407531162
+    "git_sha": "e89602a",
+    "threshold": 0.2425,
+    "val_macro_f1": 0.6710633791939931,
+    "test_macro_f1": 0.6834401530801104
   },
   "sbert_logreg_broad_s42": {
     "path": "models/sbert_logreg_broad_s42/model.joblib",
     "config": "sbert_logreg",
     "policy": "broad",
     "seed": 42,
-    "git_sha": "c0ae91a",
-    "threshold": 0.5739,
-    "val_macro_f1": 0.6835835848065387,
-    "test_macro_f1": 0.692438495927155
+    "git_sha": "e89602a",
+    "threshold": 0.5847,
+    "val_macro_f1": 0.6962451955195396,
+    "test_macro_f1": 0.6854049247046687
   },
   "sbert_lgbm_broad_s42": {
     "path": "models/sbert_lgbm_broad_s42/model.joblib",
     "config": "sbert_lgbm",
     "policy": "broad",
     "seed": 42,
-    "git_sha": "c0ae91a",
-    "threshold": 0.3953,
-    "val_macro_f1": 0.6879125780532285,
-    "test_macro_f1": 0.6949763612466686
+    "git_sha": "e89602a",
+    "threshold": 0.5234,
+    "val_macro_f1": 0.698493678288399,
+    "test_macro_f1": 0.6897572311784738
   }
 }

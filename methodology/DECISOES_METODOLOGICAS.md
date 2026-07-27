@@ -194,3 +194,34 @@ SBERT — o contraste (TF-IDF colapsa cross-lingual, SBERT transfere) é o resul
 
 **Alternativa rejeitada.** Reportar só números in-distribution. Rejeitada: mede o risco de
 domain shift de forma indireta; a transferência explícita é medida direta e vira a Fig. 5.
+
+---
+
+## [2026-07-27] CORREÇÃO: encoding do pt_fortuna era UTF-8, não latin-1 (bug)
+
+**Decisão.** Trocar o encoding do dataset3 (pt_fortuna) de `latin-1` para `utf-8` em
+configs/data.yaml e reconstruir todo o pipeline a jusante (ingest → harmonize → split →
+langid → train → report → analyze → transfer).
+
+**Motivo.** Prova por bytes crus, não por glifo de console. Para a palavra "parabéns" o
+arquivo contém `70 61 72 61 62 C3 A9 6E 73`. `C3 A9` é a codificação UTF-8 de `é`
+(U+00E9). Decodificado como UTF-8 dá `parabéns` (é = ord 233); decodificado como latin-1
+dá `parabÃ©ns` (Ã=195, ©=169). Contagem de marcadores de mojibake (Ã/Â) no arquivo:
+latin-1 → 12.045; utf-8 → ~257 (esses são ã/â legítimos do português). O arquivo é UTF-8
+válido em toda a extensão (decodifica sem erro). Portanto `latin-1` corrompia TODO acento
+do português: é→Ã©, ã→Ã£, ç→Ã§, etc., e a limpeza de controles (`\x7f-\x9f`) ainda comia
+o segundo byte, deixando "PARABÉNS" como "PARAB� NS".
+
+**Correção de uma decisão anterior.** A entrada de [2026-07-26] sobre latin-1 estava
+ERRADA (o teste empírico original provavelmente se enganou com a renderização do console
+do Windows, que não exibe acentos e mostra `latin-1` "parecendo" mais legível). Regra:
+validar encoding por codepoint/byte, nunca por glifo de terminal.
+
+**Impacto.** (1) O TF-IDF de char aprendeu a corrupção de forma consistente, então os
+números PT in-distribution mudam pouco (F1 ~0,64-0,69). (2) O SBERT e a transferência
+cross-lingual eram os mais prejudicados (o tokenizer multilíngue via `parabÃ©ns` como
+lixo) — espera-se melhora após a correção. (3) Cache de embeddings por-texto: os textos
+PT corretos são chaves novas (re-encodadas ~5,6k), o EN todo continua cache hit. (4)
+Splits recongelados (o conteúdo PT mudou; split_sha256 novo). Resultados da Fase 9
+recomputados sobre texto correto. Aprendizado para limitations.md: auditar encoding por
+bytes é parte do protocolo de proveniência.

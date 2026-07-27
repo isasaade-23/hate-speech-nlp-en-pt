@@ -80,3 +80,31 @@ def test_holm_monotone_rejection():
     rej = _holm(pvals)
     assert rej[0] is True
     assert rej[2] is False
+
+
+def test_bias_term_matching_is_word_bounded_and_per_language():
+    from hsc.bias_probe import IDENTITY_TERMS, _compile, _mentions
+
+    pats = _compile(IDENTITY_TERMS["sexual_orientation"])
+    assert _mentions("I am a gay man", "en", pats) is True
+    assert _mentions("sou uma pessoa trans", "pt", pats) is True
+    # word boundary: 'gaydar' must NOT match 'gay'
+    assert _mentions("my gaydar is broken", "en", pats) is False
+    # language routing: an EN term is looked up under 'en', so a pt row w/ only EN text misses
+    assert _mentions("a totally neutral sentence", "en", pats) is False
+
+
+def test_has_profanity_flag_is_token_membership():
+    import pandas as pd
+
+    from hsc.error_analysis import _has_profanity
+    from hsc.probe import _profanity_set
+
+    prof = _profanity_set()
+    if prof is None:  # wordlist unavailable in this env
+        return
+    bad = next(iter(prof))  # a real listed term — avoids hardcoding profanity
+    s = pd.Series([f"you are a {bad}", "have a lovely day zzz", "clean neutral sentence"])
+    flags = _has_profanity(s, prof)
+    assert bool(flags.iloc[0]) is True  # token membership fires
+    assert bool(flags.iloc[1]) is False and bool(flags.iloc[2]) is False

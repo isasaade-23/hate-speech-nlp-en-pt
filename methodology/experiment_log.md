@@ -30,54 +30,77 @@ significância pareada (McNemar) e calibração (Fase 9).
 
 ## Fase 9 — Avaliação aprofundada (2026-07-27)
 
-Fonte de verdade: reports/tables/{leaderboard,mcnemar_test,calibration_test,transfer_*}.csv
-e reports/figures/calibration_*.png. Seed 42; mesmos splits congelados.
+Fonte de verdade: reports/tables/{leaderboard,mcnemar_test,calibration_test,transfer_*,
+error_*,bias_*}.csv e reports/figures/calibration_*.png. Seed 42; splits congelados.
+**Todos os números abaixo são pós-correção do encoding UTF-8 do PT** (ver
+DECISOES_METODOLOGICAS 2026-07-27); substituem a primeira passada sobre PT corrompido.
 
 ### Trilha SBERT (paraphrase-multilingual-MiniLM-L12-v2, encoder congelado, 384 dim)
 
 | modelo | política | test macro-F1 | recall ódio | ROC-AUC |
 |--------|----------|:-------------:|:-----------:|:-------:|
-| sbert_lgbm | broad | 0,695 | **0,672** | 0,773 |
-| sbert_logreg | broad | 0,692 | 0,601 | 0,768 |
-| sbert_lgbm | strict | 0,689 | 0,503 | 0,814 |
-| sbert_logreg | strict | 0,669 | 0,556 | 0,808 |
+| sbert_lgbm | broad | 0,690 | 0,529 | 0,770 |
+| sbert_logreg | broad | 0,685 | 0,568 | 0,765 |
+| sbert_lgbm | strict | 0,683 | 0,520 | 0,808 |
+| sbert_logreg | strict | 0,665 | 0,487 | 0,801 |
 
-**Leitura.** In-distribution o SBERT congelado NÃO supera o TF-IDF (melhor clássico segue
-tfidf_logreg strict 0,717 / tfidf_lgbm broad 0,711). Mas o SBERT entrega **recall de ódio
-bem mais alto** (sbert_lgbm broad 0,672 vs tfidf_lgbm broad 0,544) — troca relevante
-eticamente. Sobre embeddings densos o LightGBM finalmente iguala o linear (habitat certo)
-e roda em segundos (vs ~130s no TF-IDF esparso). Encoding do corpus é cacheado por texto.
+**Leitura.** In-distribution o SBERT congelado NÃO supera o TF-IDF (melhor clássico:
+tfidf_logreg strict 0,709 / tfidf_lgbm broad 0,698); fica ~1-2 pontos atrás em macro-F1,
+com recall de ódio comparável. Sobre embeddings densos o LightGBM finalmente iguala o
+linear (habitat certo) e roda em segundos (vs ~130s no TF-IDF esparso). A vantagem real do
+SBERT aparece na transferência cross-lingual (abaixo), não in-distribution.
 
 ### Significância pareada (McNemar exato, Holm α=0,05) — reports/tables/mcnemar_test.csv
-- **tfidf_lgbm vs tfidf_logreg: NÃO significativo** nas duas políticas (empatam no topo).
-- **tfidf (logreg/lgbm) > SBERT** significativo em broad; em strict o tfidf_logreg vs
-  sbert_lgbm não é significativo (p=0,13).
-- SVM é consistentemente o mais fraco (perde significativamente para os GBMs).
+- Topo: em **strict tfidf_logreg > tfidf_lgbm** é significativo (p≈0); em **broad
+  tfidf_lgbm ≈ tfidf_logreg** empatam (p=1,0). O melhor clássico depende da política.
+- 6/10 pares significativos em strict, 2/10 em broad (rótulos broad mais ruidosos).
+- SVM segue o mais fraco.
 
 ### Calibração (ECE/MCE/Brier) — reports/tables/calibration_test.csv + figuras
-- **sbert_lgbm é dos mais calibrados** (broad ECE 0,054; strict 0,037), melhor que os
-  TF-IDF (logreg/lgbm broad ECE ~0,095; strict ~0,15).
-- sbert_logreg strict é o pior calibrado (ECE 0,273) — probabilidades infladas.
+- **sbert_lgbm é dos mais calibrados** (strict ECE 0,032; broad 0,056), bem melhor que
+  tfidf_logreg/lgbm (strict ECE ~0,16; broad ~0,09-0,10). tfidf_svm tem ECE baixo por ser
+  conservador (mas MCE alto).
+- sbert_logreg strict é o pior (ECE 0,284) — probabilidades infladas.
 - Implicação de produto: se o score precisa ser interpretável, sbert_lgbm é preferível
   apesar de ~2 pontos a menos de macro-F1.
 
 ### Transferência cross-domínio e cross-lingual — reports/tables/transfer_{strict,broad}.csv
 
-O resultado-título (política broad, densidades de rótulo comparáveis entre fontes):
+Resultado-título (política broad, densidades de rótulo comparáveis entre fontes):
 
 | experimento | TF-IDF macro-F1 (recall ódio) | SBERT macro-F1 (recall ódio) |
 |-------------|:-----------------------------:|:----------------------------:|
-| EN→PT (zero-shot) | 0,419 (0,012) | **0,583 (0,310)** |
-| PT→EN (zero-shot) | 0,447 (0,069) | **0,680 (0,583)** |
-| tweets→memes (cross-domínio EN) | 0,514 (0,198) | 0,513 (0,214) |
-| memes→tweets (cross-domínio EN) | 0,485 (0,158) | **0,554 (0,398)** |
+| EN→PT (zero-shot) | 0,418 (0,012) | **0,626 (0,373)** |
+| PT→EN (zero-shot) | 0,445 (0,075) | **0,674 (0,664)** |
+| tweets→memes (cross-domínio EN) | 0,504 (0,148) | **0,540 (0,308)** |
+| memes→tweets (cross-domínio EN) | 0,501 (0,212) | **0,550 (0,306)** |
 
-**Leitura.** Cross-lingual: TF-IDF de palavra COLAPSA (recall de ódio ~0,01-0,07 — não
-detecta ódio no outro idioma, como esperado por não compartilhar vocabulário); o SBERT
-transfere de fato (recall 0,31-0,58). Cross-domínio tweets→memes fica ~0,5 nos dois
-(meme não é aprendível só-texto, coerente com o in-distribution). Em strict o sinal
-cross-lingual é mais ruidoso (ódio raríssimo nas fontes EN strict), então broad é a
-vitrine. Esta é a Fig. 5 do artigo e a medida direta do risco de domain/language shift.
+**Leitura.** Cross-lingual: TF-IDF de palavra COLAPSA (recall de ódio ~0,01-0,08 — não
+detecta ódio no outro idioma, por não compartilhar vocabulário); o SBERT transfere de fato
+(0,63-0,67; recall 0,37-0,66). Cross-domínio EN o SBERT também ganha, mas fica ~0,55 (meme
+segue difícil só-texto). Esta é a Fig. 5 e a medida direta do risco de domain/language
+shift. Nota: a correção do UTF-8 elevou o SBERT EN→PT de 0,583 para 0,626 (o tokenizer
+multilíngue estava engasgando no PT corrompido); confirma o impacto do bug de encoding.
 
-Próximo: transformers no Colab (Fase 8) entram no mesmo leaderboard/McNemar; depois
-análise de erro qualitativa e sondagem de viés por termo de identidade.
+### Análise de erro qualitativa — reports/tables/error_{modes,rates,examples}_*.csv/md
+Melhor modelo strict (tfidf_logreg): 568 erros (313 FN / 255 FP).
+- **206 dos 313 FN são "ódio implícito"** (sem token de palavrão) — o modelo perde ódio
+  sutil/sem slur. É a maior fatia dos falso-negativos.
+- **70 FP são "over-flag por slur"** (não-ódio com palavrão marcado como ódio) — o modelo
+  super-confia na presença de palavrão.
+- **PT tem o maior erro (0,277), puxado por falso-positivo (0,185 vs 0,027 no EN)**: o
+  modelo super-marca PT como ódio (fonte menor, fronteira ofensa/ódio mais densa).
+- Erros por texto curto (7) e por divergência de langid (7) são raros.
+- FN "confiantes" em memes são majoritariamente memes cujo ódio está na IMAGEM, não no
+  OCR (texto benigno rotulado como ódio) — reforça a limitação só-texto.
+
+### Sondagem de viés por termo de identidade — reports/tables/bias_identity_fpr_*.csv
+FPR em linhas NÃO-ódio que citam um grupo (termos neutros), vs. FPR de fundo:
+- **orientação sexual é o grupo mais super-marcado**: broad tfidf_lgbm FPR 0,754 vs fundo
+  0,165 (gap **+0,589**); citar "gay/lésbica/trans" em texto benigno dispara ódio ~75%.
+- religião, nacionalidade/imigração e gênero também mostram gaps grandes (+0,25 a +0,41).
+- **SBERT tende a gaps menores que TF-IDF** (menos gatilhado por termo isolado), mas ainda
+  positivos. Viés não-intencional clássico (Dixon et al.) — entra no Ethics statement.
+
+Próximo: transformers no Colab (Fase 8) entram no mesmo leaderboard/McNemar/calibração;
+depois seleção do modelo de produto (Pareto F1×latência×tamanho×licença×viés).

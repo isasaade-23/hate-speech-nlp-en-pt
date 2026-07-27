@@ -24,7 +24,10 @@ sources:
   pt_fortuna:
     zip: "dataset3.zip"
     member: "2019-05-28_portuguese_hate_speech_binary_classification.csv"
-    encoding: "latin-1"        # CRITICAL: utf-8 mojibakes the Portuguese accents
+    encoding: "utf-8"          # CORRECTED 2026-07-27: file is UTF-8. Raw bytes for
+                               # "parabéns" are 70 61 72 61 62 C3 A9 6E 73 — C3 A9 is UTF-8
+                               # 'é'. latin-1 (the earlier config) split it into Ã+© and
+                               # corrupted every PT accent; see DECISOES_METODOLOGICAS.md.
   multioff:
     zip: "dataset4.zip"
     members:                    # official train/val/test, re-split by us (anti-leakage)
