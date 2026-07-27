@@ -14,7 +14,7 @@ authors:
     affiliation: "University of São Paulo, School of Public Health (FSP-USP), LABDAPS"
 date-released: "2026-07-27"
 license: MIT
-repository-code: "https://github.com/isasaade-23/bilingual-hate-speech-detection"
+repository-code: "https://github.com/isasaade-23/hate-speech-nlp-en-pt"
 keywords:
   - hate speech detection
   - natural language processing
