@@ -87,6 +87,17 @@ class EmbeddingVectorizer(BaseEstimator, TransformerMixin):
             self._model = SentenceTransformer(self.model_name)
         return self._model
 
+    def __getstate__(self):
+        # Never pickle the ~470 MB SentenceTransformer into the model joblib — it is a
+        # frozen, re-downloadable asset. Persist only config; reload the encoder on demand.
+        state = self.__dict__.copy()
+        state["_model"] = None
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self._model = None
+
     def fit(self, X, y=None):  # frozen encoder: nothing to learn
         return self
 

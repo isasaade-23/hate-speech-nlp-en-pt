@@ -28,8 +28,17 @@ def _resolve_model_id(model_id: str | None) -> str:
         if model_id not in reg:
             raise KeyError(f"model_id {model_id} not in registry")
         return model_id
-    # default: best test macro-F1
-    return max(reg, key=lambda k: reg[k].get("test_macro_f1", 0.0))
+    # Default: best test macro-F1 among LOCALLY-SERVABLE models. Neural entries live in the
+    # registry for the leaderboard, but their weights are a Colab HF dir, not a local
+    # model.joblib — serving them needs torch/GPU infra, so inference defaults to the best
+    # classical model that is actually loadable here (the product recommendation).
+    servable = {k: v for k, v in reg.items() if (resolve("models") / k / "model.joblib").exists()}
+    if not servable:
+        raise FileNotFoundError(
+            "no locally-servable model.joblib found — train a classical model first "
+            "(neural weights are not served locally)."
+        )
+    return max(servable, key=lambda k: servable[k].get("test_macro_f1", 0.0))
 
 
 def _score(estimator, X):

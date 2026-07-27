@@ -64,7 +64,7 @@
     "config": "sbert_logreg",
     "policy": "strict",
     "seed": 42,
-    "git_sha": "e89602a",
+    "git_sha": "450ee3c",
     "threshold": 0.6803,
     "val_macro_f1": 0.6544856715141146,
     "test_macro_f1": 0.6645022006208239
@@ -74,7 +74,7 @@
     "config": "sbert_lgbm",
     "policy": "strict",
     "seed": 42,
-    "git_sha": "e89602a",
+    "git_sha": "450ee3c",
     "threshold": 0.2425,
     "val_macro_f1": 0.6710633791939931,
     "test_macro_f1": 0.6834401530801104
@@ -84,7 +84,7 @@
     "config": "sbert_logreg",
     "policy": "broad",
     "seed": 42,
-    "git_sha": "e89602a",
+    "git_sha": "450ee3c",
     "threshold": 0.5847,
     "val_macro_f1": 0.6962451955195396,
     "test_macro_f1": 0.6854049247046687
@@ -94,7 +94,7 @@
     "config": "sbert_lgbm",
     "policy": "broad",
     "seed": 42,
-    "git_sha": "e89602a",
+    "git_sha": "450ee3c",
     "threshold": 0.5234,
     "val_macro_f1": 0.698493678288399,
     "test_macro_f1": 0.6897572311784738

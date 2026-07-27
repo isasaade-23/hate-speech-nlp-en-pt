@@ -94,6 +94,27 @@ def test_bias_term_matching_is_word_bounded_and_per_language():
     assert _mentions("a totally neutral sentence", "en", pats) is False
 
 
+def test_pareto_front_drops_dominated_models():
+    import pandas as pd
+
+    from hsc.product import _pareto_front
+
+    # C is dominated by A on every axis; A and B trade F1 vs latency -> both survive.
+    df = pd.DataFrame(
+        [
+            {"model_id": "A", "test_macro_f1": 0.75, "recall_hate": 0.6, "ece": 0.05,
+             "bias_gap": 0.10, "latency_p95_ms": 30.0, "size_mb": 400.0},
+            {"model_id": "B", "test_macro_f1": 0.70, "recall_hate": 0.5, "ece": 0.04,
+             "bias_gap": 0.08, "latency_p95_ms": 2.0, "size_mb": 4.0},
+            {"model_id": "C", "test_macro_f1": 0.68, "recall_hate": 0.4, "ece": 0.09,
+             "bias_gap": 0.20, "latency_p95_ms": 35.0, "size_mb": 450.0},
+        ]
+    )
+    front = set(_pareto_front(df)["model_id"])
+    assert "A" in front and "B" in front
+    assert "C" not in front
+
+
 def test_has_profanity_flag_is_token_membership():
     import pandas as pd
 

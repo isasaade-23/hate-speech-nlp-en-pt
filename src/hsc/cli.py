@@ -53,6 +53,9 @@ def main(argv: list[str] | None = None) -> int:
     bp = sub.add_parser("bias", help="Fase 9: identity-term false-positive-rate bias probe")
     bp.add_argument("--policy", choices=["strict", "broad", "both"], default="both")
 
+    pr = sub.add_parser("product", help="Fase 11: product model selection (Pareto: F1/latency/size/bias/license)")
+    pr.add_argument("--policy", choices=["strict", "broad", "both"], default="both")
+
     args = parser.parse_args(argv)
 
     if args.cmd == "ingest":
@@ -136,6 +139,15 @@ def main(argv: list[str] | None = None) -> int:
             bias_probe.run_all()
         else:
             bias_probe.run_bias_probe(policy=args.policy)
+        return 0
+
+    if args.cmd == "product":
+        from hsc import product
+
+        if args.policy == "both":
+            product.run_all()
+        else:
+            product.run_selection(policy=args.policy)
         return 0
 
     parser.error(f"unknown command: {args.cmd}")

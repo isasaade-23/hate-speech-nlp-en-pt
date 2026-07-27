@@ -1,7 +1,7 @@
 # Model card — sbert_logreg_strict_s42
 
 - Family: classical  |  Config: sbert_logreg  |  Policy: strict
-- Seed: 42  |  git: e89602a  |  train rows: 23499
+- Seed: 42  |  git: 450ee3c  |  train rows: 23499
 
 ## Test metrics
 - macro-F1: 0.6645 (95% CI [0.6468, 0.6827])

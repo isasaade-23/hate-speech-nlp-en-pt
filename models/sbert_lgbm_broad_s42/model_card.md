@@ -1,7 +1,7 @@
 # Model card — sbert_lgbm_broad_s42
 
 - Family: classical  |  Config: sbert_lgbm  |  Policy: broad
-- Seed: 42  |  git: e89602a  |  train rows: 24028
+- Seed: 42  |  git: 450ee3c  |  train rows: 24028
 
 ## Test metrics
 - macro-F1: 0.6898 (95% CI [0.6764, 0.7038])
