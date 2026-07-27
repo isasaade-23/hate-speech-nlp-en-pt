@@ -15,9 +15,16 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from hsc.config import load_yaml
-from hsc.evaluate import bootstrap_macro_f1_ci, breakdown, classification_metrics, confusion
-from hsc.utils import ensure_dir, get_logger, write_json
+from hsc.config import load_yaml, resolve
+from hsc.evaluate import (
+    best_threshold,
+    bootstrap_macro_f1_ci,
+    breakdown,
+    classification_metrics,
+    confusion,
+)
+from hsc.predictions import build_prediction_frame, save_predictions
+from hsc.utils import ensure_dir, get_logger, read_json, write_json
 
 log = get_logger("hsc.train_neural")
 
@@ -30,6 +37,7 @@ def _subset(df: pd.DataFrame, languages):
 
 def _metrics_block(part: pd.DataFrame, y_pred, y_score, seed: int) -> dict:
     y = part["label"].values
+    y_pred = np.asarray(y_pred)
     m = classification_metrics(y, y_pred, y_score)
     lo, hi = bootstrap_macro_f1_ci(y, y_pred, seed=seed)
     m["macro_f1_ci95"] = [round(lo, 4), round(hi, 4)]
@@ -43,7 +51,8 @@ def _metrics_block(part: pd.DataFrame, y_pred, y_score, seed: int) -> dict:
 
 def train_neural_from_config(
     config_path: str,
-    corpus_path: str,
+    corpus_path: str | None = None,
+    policy: str | None = None,
     out_root: str = "models",
     metrics_root: str = "reports/metrics",
     seed: int | None = None,
@@ -60,7 +69,11 @@ def train_neural_from_config(
 
     cfg = load_yaml(config_path)
     seed = int(seed if seed is not None else cfg.get("seed", 42))
-    policy = cfg.get("policy", "strict")
+    # policy override lets one config train both strict and broad; corpus defaults to the
+    # matching frozen parquet so the notebook cannot pair a policy with the wrong data.
+    policy = policy or cfg.get("policy", "strict")
+    if corpus_path is None:
+        corpus_path = str(resolve(f"data/processed/corpus_{policy}.parquet"))
     text_col = cfg.get("text_column", "text_clean")
     ckpt = cfg["model"]["hf_checkpoint"]
     max_len = int(cfg["model"].get("max_length", 160))
@@ -139,10 +152,14 @@ def train_neural_from_config(
     )
     trainer.train()
 
-    def predict(ds):
+    def score(ds):
         logits = trainer.predict(ds).predictions
-        probs = torch.softmax(torch.tensor(logits), dim=1).numpy()
-        return probs.argmax(1), probs[:, 1]
+        return torch.softmax(torch.tensor(logits), dim=1).numpy()[:, 1]
+
+    # Tune the decision threshold on val exactly like the classical models (imbalance-aware),
+    # so the classical-vs-neural comparison is fair — not 0.5 vs a tuned cut.
+    val_score = score(ds_va)
+    threshold = best_threshold(va["label"].values, val_score)
 
     result = {
         "model_id": model_id,
@@ -152,15 +169,44 @@ def train_neural_from_config(
         "seed": seed,
         "hf_checkpoint": ckpt,
         "n_train": int(len(tr)),
+        "threshold": round(float(threshold), 4),
         "splits": {},
     }
-    for name, part, ds in [("val", va, ds_va), ("test", te, ds_te)]:
-        y_pred, y_score = predict(ds)
+    scores = {"val": val_score, "test": score(ds_te)}
+    for name, part in [("val", va), ("test", te)]:
+        y_score = scores[name]
+        y_pred = (np.asarray(y_score) >= threshold).astype(int)
         result["splits"][name] = _metrics_block(part, y_pred, y_score, seed)
-        log.info("%s [%s]: macro-F1=%.4f", model_id, name, result["splits"][name]["macro_f1"])
+        # Per-example predictions -> McNemar + calibration include neural once copied back.
+        save_predictions(model_id, name, build_prediction_frame(part, y_score, threshold))
+        log.info(
+            "%s [%s]: macro-F1=%.4f recall_hate=%.4f",
+            model_id, name, result["splits"][name]["macro_f1"], result["splits"][name]["recall_hate"],
+        )
 
     write_json(result, ensure_dir(Path(metrics_root)) / f"{model_id}.json")
     tokenizer.save_pretrained(out_dir / "hf")
     trainer.save_model(str(out_dir / "hf"))
-    log.info("saved neural model + metrics: %s", model_id)
+    _register(result)
+    log.info("saved neural model + metrics + predictions: %s", model_id)
     return result
+
+
+def _register(result: dict) -> None:
+    """Add/refresh the registry entry so report/analyze/bias/errors see neural models
+    alongside classical ones (same schema as classical train.py)."""
+    reg_path = resolve("models") / "registry.json"
+    reg = read_json(reg_path) if reg_path.exists() else {}
+    mid = result["model_id"]
+    reg[mid] = {
+        "path": f"models/{mid}/hf",
+        "config": result["config"],
+        "family": "neural",
+        "policy": result["policy"],
+        "seed": result["seed"],
+        "hf_checkpoint": result.get("hf_checkpoint"),
+        "threshold": result["threshold"],
+        "val_macro_f1": result["splits"]["val"]["macro_f1"],
+        "test_macro_f1": result["splits"]["test"]["macro_f1"],
+    }
+    write_json(reg, reg_path)

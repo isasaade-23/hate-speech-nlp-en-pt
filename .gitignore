@@ -52,3 +52,7 @@ notebooks/**/*-checkpoint.ipynb
 # OS
 Thumbs.db
 .DS_Store
+
+# Colab transfer bundles (regenerable)
+colab_bundle.zip
+hsc_neural_results.zip
