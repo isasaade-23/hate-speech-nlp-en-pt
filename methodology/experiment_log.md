@@ -102,5 +102,44 @@ FPR em linhas NÃO-ódio que citam um grupo (termos neutros), vs. FPR de fundo:
 - **SBERT tende a gaps menores que TF-IDF** (menos gatilhado por termo isolado), mas ainda
   positivos. Viés não-intencional clássico (Dixon et al.) — entra no Ethics statement.
 
-Próximo: transformers no Colab (Fase 8) entram no mesmo leaderboard/McNemar/calibração;
-depois seleção do modelo de produto (Pareto F1×latência×tamanho×licença×viés).
+---
+
+## Fase 8 — Resultados neurais + comparação final clássico vs neural (2026-07-27)
+
+Transformers treinados no Colab (T4, seed 42, fp16), MESMO corpus/split/limiar dos
+clássicos. Fonte de verdade: reports/tables/leaderboard.csv (16 modelos).
+
+| modelo | política | test macro-F1 | recall ódio | ROC-AUC |
+|--------|----------|:-------------:|:-----------:|:-------:|
+| xlm-roberta-base | strict | **0,750** | 0,554 | 0,855 |
+| bertimbau (PT) | strict | 0,747 | **0,796** | 0,853 |
+| bertweet (EN) | broad | 0,748 | 0,613 | 0,826 |
+| xlm-roberta-base | broad | 0,732 | 0,585 | 0,809 |
+| bertimbau (PT) | broad | 0,712 | 0,561 | 0,834 |
+| bertweet (EN) | strict | 0,707 | 0,518 | 0,817 |
+
+**Resultado central (a tese do artigo).** Os transformers superam o melhor clássico nas
+duas políticas: strict 0,750 (XLM-R) vs 0,709 (tfidf_logreg); broad 0,748 (BERTweet) vs
+0,698 (tfidf_lgbm) — cerca de +0,04 macro-F1. **McNemar + Holm confirma significância**:
+XLM-R > tfidf_logreg strict (p=0,0026); BERTweet > tfidf_lgbm broad (p≈0).
+
+**Calibração (nuance para o produto).** Os neurais NÃO calibram melhor: sbert_lgbm e
+tfidf_svm seguem os mais calibrados (ECE strict 0,03), enquanto XLM-R/BERTweet têm MCE
+alto. Vitória neural em F1/significância, mas não em calibração → decisão de produto por
+Pareto, não só por F1.
+
+**Viés (transformers ajudam).** No over-flag de identidade, os transformers de verdade têm
+os menores gaps: XLM-R/BERTweet ~0,258 em orientação sexual (broad) vs TF-IDF 0,42-0,59;
+BERTimbau 0,35; SBERT no meio. Ainda positivo em todos — o viés persiste.
+
+**Análise de erro (XLM-R strict vs tfidf_logreg strict).** O transformer erra menos
+(506 vs 568), com menos falso-negativo (260 vs 313) e **menos ódio implícito perdido
+(183 vs 206)** — coerente com um modelo contextual pegar ódio sem slur. Custo: super-marca
+por slur um pouco mais (88 vs 70 FP).
+
+**Ganho do fix de encoding.** BERTimbau PT strict com recall de ódio 0,796 sobre texto PT
+correto (UTF-8) — o modelo dedicado ao PT rende quando os acentos não estão corrompidos.
+
+Próximo: seleção do modelo de produto (Pareto F1×latência×tamanho×licença×viés — candidatos
+fortes: XLM-R por F1, sbert_lgbm por calibração+CPU, tfidf_logreg por tamanho/licença);
+opcional multi-seed (42/43/44) para IC nos neurais; depois Fase 12/13 (Docker, docs, DOI).

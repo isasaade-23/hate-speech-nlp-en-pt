@@ -98,5 +98,71 @@
     "threshold": 0.5234,
     "val_macro_f1": 0.698493678288399,
     "test_macro_f1": 0.6897572311784738
+  },
+  "xlmr_multilingual_strict_s42": {
+    "path": "models/xlmr_multilingual_strict_s42/hf",
+    "config": "xlmr_multilingual",
+    "family": "neural",
+    "policy": "strict",
+    "seed": 42,
+    "hf_checkpoint": "FacebookAI/xlm-roberta-base",
+    "threshold": 0.5711,
+    "val_macro_f1": 0.7310967587205128,
+    "test_macro_f1": 0.7497078416316414
+  },
+  "xlmr_multilingual_broad_s42": {
+    "path": "models/xlmr_multilingual_broad_s42/hf",
+    "config": "xlmr_multilingual",
+    "family": "neural",
+    "policy": "broad",
+    "seed": 42,
+    "hf_checkpoint": "FacebookAI/xlm-roberta-base",
+    "threshold": 0.5456,
+    "val_macro_f1": 0.7356181083835849,
+    "test_macro_f1": 0.7323018765295868
+  },
+  "bertimbau_pt_strict_s42": {
+    "path": "models/bertimbau_pt_strict_s42/hf",
+    "config": "bertimbau_pt",
+    "family": "neural",
+    "policy": "strict",
+    "seed": 42,
+    "hf_checkpoint": "neuralmind/bert-base-portuguese-cased",
+    "threshold": 0.104,
+    "val_macro_f1": 0.7377659866252425,
+    "test_macro_f1": 0.7466806171620566
+  },
+  "bertimbau_pt_broad_s42": {
+    "path": "models/bertimbau_pt_broad_s42/hf",
+    "config": "bertimbau_pt",
+    "family": "neural",
+    "policy": "broad",
+    "seed": 42,
+    "hf_checkpoint": "neuralmind/bert-base-portuguese-cased",
+    "threshold": 0.5617,
+    "val_macro_f1": 0.7636023610542926,
+    "test_macro_f1": 0.7116958925562964
+  },
+  "bertweet_en_strict_s42": {
+    "path": "models/bertweet_en_strict_s42/hf",
+    "config": "bertweet_en",
+    "family": "neural",
+    "policy": "strict",
+    "seed": 42,
+    "hf_checkpoint": "vinai/bertweet-base",
+    "threshold": 0.1381,
+    "val_macro_f1": 0.6973503125161841,
+    "test_macro_f1": 0.7071971455802928
+  },
+  "bertweet_en_broad_s42": {
+    "path": "models/bertweet_en_broad_s42/hf",
+    "config": "bertweet_en",
+    "family": "neural",
+    "policy": "broad",
+    "seed": 42,
+    "hf_checkpoint": "vinai/bertweet-base",
+    "threshold": 0.608,
+    "val_macro_f1": 0.7505320449030186,
+    "test_macro_f1": 0.7481211856218339
   }
 }
