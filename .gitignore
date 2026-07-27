@@ -55,3 +55,7 @@ Thumbs.db
 
 # Colab transfer bundles (regenerable)
 hsc_neural_results.zip
+
+# MkDocs build output
+site/
+.cache/

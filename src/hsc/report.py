@@ -92,6 +92,49 @@ def build_breakdowns(split: str = "test", write: bool = True) -> pd.DataFrame:
     return df
 
 
+def build_seed_aggregate(write: bool = True) -> pd.DataFrame:
+    """Aggregate across seeds: mean +/- std of test macro-F1 and recall-on-hate per
+    (family, config, policy). With a single seed this reports that value and std 0; with
+    multiple seeds it is the paper's confidence-interval-style summary."""
+    rows = []
+    for r in _load_all_metrics():
+        te = r["splits"]["test"]
+        rows.append(
+            {
+                "family": r.get("family", "?"),
+                "config": r.get("config", "?"),
+                "policy": r.get("policy", "?"),
+                "seed": r.get("seed", 0),
+                "test_macro_f1": te["macro_f1"],
+                "recall_hate": te["recall_hate"],
+            }
+        )
+    if not rows:
+        return pd.DataFrame()
+    df = pd.DataFrame(rows)
+    agg = (
+        df.groupby(["family", "config", "policy"])
+        .agg(
+            n_seeds=("seed", "nunique"),
+            macro_f1_mean=("test_macro_f1", "mean"),
+            macro_f1_std=("test_macro_f1", "std"),
+            recall_hate_mean=("recall_hate", "mean"),
+            recall_hate_std=("recall_hate", "std"),
+        )
+        .reset_index()
+    )
+    for c in ("macro_f1_mean", "macro_f1_std", "recall_hate_mean", "recall_hate_std"):
+        agg[c] = agg[c].round(4)
+    agg = agg.sort_values(["policy", "macro_f1_mean"], ascending=[True, False]).reset_index(drop=True)
+    if write:
+        tdir = ensure_dir(resolve("reports/tables"))
+        agg.to_csv(tdir / "leaderboard_agg.csv", index=False)
+        log.info("seed-aggregate leaderboard (%d seeds max):\n%s",
+                 int(agg["n_seeds"].max()), agg.to_string(index=False))
+    return agg
+
+
 def build_all() -> None:
     build_leaderboard()
+    build_seed_aggregate()
     build_breakdowns("test")

@@ -1,0 +1,25 @@
+{
+  "title": "Bilingual Hate-Speech Detection (EN/PT): classical vs. transformer models",
+  "description": "A reproducible, leakage-safe study comparing classical models (TF-IDF and multilingual sentence embeddings) with transformers (XLM-RoBERTa, BERTimbau, BERTweet) for binary hate-speech classification in English and Portuguese, with calibration, identity-term bias, cross-lingual transfer analyses, and a deployable inference API.",
+  "upload_type": "software",
+  "access_right": "open",
+  "license": "MIT",
+  "creators": [
+    {
+      "name": "Venancio da Silva, Isabela",
+      "orcid": "0000-0003-0156-7837",
+      "affiliation": "University of Sao Paulo, School of Public Health (FSP-USP), LABDAPS"
+    }
+  ],
+  "keywords": [
+    "hate speech detection",
+    "natural language processing",
+    "multilingual NLP",
+    "Portuguese",
+    "text classification",
+    "transformers",
+    "cross-lingual transfer",
+    "model calibration",
+    "algorithmic bias"
+  ]
+}

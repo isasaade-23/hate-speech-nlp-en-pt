@@ -17,6 +17,13 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / "assets"
+DOCS_IMG = ROOT / "docs" / "img"  # mirror for the mkdocs site
+
+
+def _save(fig, name: str) -> None:
+    DOCS_IMG.mkdir(parents=True, exist_ok=True)
+    for d in (ASSETS, DOCS_IMG):
+        fig.savefig(d / name, dpi=150, bbox_inches="tight")
 
 # Visual identity
 SLATE = "#3D5A80"    # classical
@@ -62,7 +69,7 @@ def leaderboard_figure():
                ncol=2, frameon=False, fontsize=11, bbox_to_anchor=(0.5, 1.02))
     fig.suptitle("")
     fig.tight_layout(rect=[0, 0, 1, 0.96])
-    fig.savefig(ASSETS / "leaderboard.png", dpi=150, bbox_inches="tight")
+    _save(fig, "leaderboard.png")
     plt.close(fig)
     print("wrote assets/leaderboard.png")
 
@@ -90,7 +97,7 @@ def transfer_figure():
     ax.tick_params(colors=INK)
     ax.legend(frameon=False, fontsize=10, loc="lower right")
     fig.tight_layout()
-    fig.savefig(ASSETS / "transfer.png", dpi=150, bbox_inches="tight")
+    _save(fig, "transfer.png")
     plt.close(fig)
     print("wrote assets/transfer.png")
 
