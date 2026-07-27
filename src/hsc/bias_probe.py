@@ -83,7 +83,7 @@ def run_bias_probe(policy: str = "strict", models: list[str] | None = None) -> p
 
         for group, pats in patterns.items():
             mask = nonhate.apply(
-                lambda r: _mentions(r["text_clean"], r["language"], pats), axis=1
+                lambda r, pats=pats: _mentions(r["text_clean"], r["language"], pats), axis=1
             )
             sub = nonhate[mask]
             n = int(len(sub))

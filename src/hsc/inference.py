@@ -7,8 +7,6 @@ and returns a structured prediction. Used by api/service.py and demo/app.py.
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import numpy as np
 
 from hsc.clean import clean_text

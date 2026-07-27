@@ -5,15 +5,17 @@ from __future__ import annotations
 import pytest
 
 from hsc.config import resolve
-from hsc.utils import read_json
 
 
-def _has_model() -> bool:
-    reg = resolve("models") / "registry.json"
-    return reg.exists() and bool(read_json(reg))
+def _has_servable_model() -> bool:
+    # A locally-loadable classical bundle (joblib), not just a registry entry — neural
+    # weights live on Colab and the joblibs are gitignored, so CI skips this contract test.
+    return any(resolve("models").glob("*/model.joblib"))
 
 
-pytestmark = pytest.mark.skipif(not _has_model(), reason="no trained model in registry")
+pytestmark = pytest.mark.skipif(
+    not _has_servable_model(), reason="no locally-servable model.joblib (e.g. fresh CI checkout)"
+)
 
 
 def test_predict_contract():

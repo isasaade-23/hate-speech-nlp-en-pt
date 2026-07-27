@@ -7,13 +7,11 @@ Text-only project: only CSV/label members are extracted; meme images are ignored
 
 from __future__ import annotations
 
-import io
 import zipfile
 from pathlib import Path
 
 import pandas as pd
 
-from hsc.config import data_config, resolve
 from hsc.schema import INTERIM_COLUMNS, VALID_DOMAINS, VALID_LANGUAGES, VALID_SOURCES
 from hsc.utils import ensure_dir, get_logger, sha256_file
 

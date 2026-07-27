@@ -30,7 +30,7 @@ def sha256_text(text: str) -> str:
 
 
 def read_json(path: str | Path) -> Any:
-    with open(path, "r", encoding="utf-8") as fh:
+    with open(path, encoding="utf-8") as fh:
         return json.load(fh)
 
 

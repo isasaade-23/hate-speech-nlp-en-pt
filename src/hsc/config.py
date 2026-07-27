@@ -23,7 +23,7 @@ def load_yaml(rel_or_abs: str | Path) -> dict[str, Any]:
     p = Path(rel_or_abs)
     if not p.is_absolute():
         p = project_root() / p
-    with open(p, "r", encoding="utf-8") as fh:
+    with open(p, encoding="utf-8") as fh:
         return yaml.safe_load(fh)
 
 

@@ -55,14 +55,13 @@ def _quality_rows() -> pd.DataFrame:
 
 
 def _calibration_map() -> dict:
+    # calibration_test.csv is a single combined file (both policies) written by `hsc analyze`.
     out = {}
-    for pol in ("strict", "broad"):
-        p = resolve("reports/tables") / f"calibration_test.csv"
-        if p.exists():
-            df = pd.read_csv(p)
-            for _, r in df.iterrows():
-                out[r["model_id"]] = round(float(r["ece"]), 4)
-            break
+    p = resolve("reports/tables") / "calibration_test.csv"
+    if p.exists():
+        df = pd.read_csv(p)
+        for _, r in df.iterrows():
+            out[r["model_id"]] = round(float(r["ece"]), 4)
     return out
 
 
