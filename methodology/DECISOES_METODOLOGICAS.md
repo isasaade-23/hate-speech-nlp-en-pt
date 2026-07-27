@@ -225,3 +225,42 @@ PT corretos são chaves novas (re-encodadas ~5,6k), o EN todo continua cache hit
 Splits recongelados (o conteúdo PT mudou; split_sha256 novo). Resultados da Fase 9
 recomputados sobre texto correto. Aprendizado para limitations.md: auditar encoding por
 bytes é parte do protocolo de proveniência.
+
+---
+
+## [2026-07-27] Modelo de produto por Pareto (Fase 11)
+
+**Decisão.** Selecionar o modelo servido por uma regra de Pareto multi-eixo, não pelo topo
+de macro-F1. Recomendação por perfil: XLM-R para qualidade (GPU, research-only);
+**tfidf_logreg como MVP CPU** (p95 1,6 ms, 3,6 MB, autossuficiente, F1 a ~4 pts do XLM-R);
+sbert_lgbm se o score calibrado for requisito (melhor ECE, mas +470 MB de encoder). Tabela
+em `hsc product` → reports/tables/product_selection_*.csv; racional em product_decision.md.
+
+**Motivo.** Um produto pondera qualidade contra latência, tamanho, calibração, viés e,
+decisivamente, licença. O melhor F1 (XLM-R) é neural (GPU) e research-only; o clássico
+minúsculo perde ~4 pts mas serve em CPU sem dependências pesadas.
+
+**Alternativa rejeitada.** Servir o de maior macro-F1 direto. Rejeitada por custo de
+deploy (GPU, ~1,1 GB) e pela trava de licença (corpus completo = research-only).
+
+**Impacto (2 fixes de deploy).** (1) `EmbeddingVectorizer.__getstate__` deixou de picklar o
+encoder de ~470 MB → joblib do sbert_logreg_strict caiu de 479 MB para 3 KB (recarrega sob
+demanda). (2) `inference.py` passou a escolher o melhor joblib LOCAL servível — antes
+tentava o XLM-R (melhor F1 global, pesos no Colab) e quebrava a API; default agora é
+tfidf_logreg_strict.
+
+---
+
+## [2026-07-27] Release público no GitHub
+
+**Decisão.** Publicar o repositório como público em
+github.com/isasaade-23/hate-speech-nlp-en-pt, com README de portfólio em inglês (sem
+emojis), capa SVG na identidade visual, figuras-herói versionadas em assets/, CITATION.cff
+e topics. Código sob MIT; licenças de dados restringem uso comercial (data_provenance.md).
+
+**Motivo.** Artefato de portfólio para candidaturas; recrutadores precisam ver o repo.
+Nenhum dado ou segredo é versionado (data/, .env, pesos são gitignored) → público é seguro.
+
+**Impacto.** API validada localmente por uvicorn antes do release (EN + PT com acento).
+Fase 12 (Docker) fica pendente do WSL2 (Windows 11 Home, erro Wsl/0x80070422): habilitar
+os recursos WSL + VirtualMachinePlatform e reiniciar; os arquivos de deploy já estão prontos.

@@ -140,6 +140,35 @@ por slur um pouco mais (88 vs 70 FP).
 **Ganho do fix de encoding.** BERTimbau PT strict com recall de ódio 0,796 sobre texto PT
 correto (UTF-8) — o modelo dedicado ao PT rende quando os acentos não estão corrompidos.
 
-Próximo: seleção do modelo de produto (Pareto F1×latência×tamanho×licença×viés — candidatos
-fortes: XLM-R por F1, sbert_lgbm por calibração+CPU, tfidf_logreg por tamanho/licença);
-opcional multi-seed (42/43/44) para IC nos neurais; depois Fase 12/13 (Docker, docs, DOI).
+---
+
+## Fase 11 — Produto + release (2026-07-27)
+
+Seleção do modelo de produto por Pareto (`hsc product`; detalhe em product_decision.md).
+Eixos medidos: macro-F1, recall de ódio, ECE, viés de identidade, latência p50/p95 (CPU),
+tamanho, licença. Decisão por perfil:
+- **melhor qualidade:** XLM-R (GPU, research-only);
+- **MVP CPU (recomendado):** tfidf_logreg — p95 1,6 ms, 3,6 MB, autossuficiente, F1 a ~4 pts;
+- **score calibrado:** sbert_lgbm (melhor ECE, mas +470 MB de encoder).
+Licença: todos research-only (corpus completo); comercial exige retreino só na whitelist.
+
+Dois fixes de deploy no caminho: (1) `EmbeddingVectorizer.__getstate__` não pickla o
+encoder → sbert_logreg_strict 479 MB → 3 KB; (2) `inference.py` serve o melhor joblib
+LOCAL (neurais ficam no Colab), default = tfidf_logreg_strict.
+
+**Validação da API (uvicorn local, sem Docker).** `/health` OK; `/predict` retorna schema
+completo (label, score, idioma, latência ~35 ms). Confirmado EN + PT COM ACENTO (via
+UTF-8 correto): "você é incrível" → not_hate 0,145; "seus imbecis..." → hate 0,665;
+"parabéns..." → not_hate 0,277. Produto funciona ponta a ponta.
+
+**Release.** Repo público em github.com/isasaade-23/hate-speech-nlp-en-pt (11 commits):
+README em inglês sem emojis, capa SVG na IDV, figuras-herói (assets/), CITATION.cff, topics.
+
+**Fase 12 (Docker):** arquivos prontos e revisados (Dockerfile CPU-slim non-root +
+healthcheck, requirements-serve enxuto, .dockerignore com !models). Build BLOQUEADO por
+WSL2 desativado no Windows 11 Home (erro Wsl/0x80070422); habilitar features
+Microsoft-Windows-Subsystem-Linux + VirtualMachinePlatform (admin) e reiniciar. Depois:
+`docker compose -f deploy/docker-compose.yml up --build`.
+
+Próximo: build Docker pós-reboot; opcional multi-seed neural (42/43/44) para IC; Fase 13
+(mkdocs + DOI Zenodo).
