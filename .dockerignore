@@ -1,0 +1,39 @@
+# Build context = repo root (compose uses context: ..). Keep it tiny: the images
+# only COPY src/, api/, demo/, configs/, models/, pyproject.toml, README.md.
+# Everything below would just bloat the context sent to the daemon.
+.git
+.github
+.venv
+venv
+env
+__pycache__
+*.pyc
+*.pyo
+*.egg-info
+.pytest_cache
+.ruff_cache
+.mypy_cache
+.ipynb_checkpoints
+
+# Reproducible / heavy data and outputs (not needed to serve)
+data
+logs
+mlruns
+reports
+notebooks
+assets
+docs
+tests
+site
+.cache
+hsc_neural_results.zip
+
+# Private dev journal
+_internal
+
+# Secrets
+.env
+*.local
+
+# Keep the served model bundle (joblibs are gitignored but MUST ship in the image)
+!models
