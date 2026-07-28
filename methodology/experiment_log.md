@@ -172,3 +172,37 @@ Microsoft-Windows-Subsystem-Linux + VirtualMachinePlatform (admin) e reiniciar. 
 
 Próximo: build Docker pós-reboot; opcional multi-seed neural (42/43/44) para IC; Fase 13
 (mkdocs + DOI Zenodo).
+
+---
+
+## Ablação — Remoção de stop words (EN+PT) no TF-IDF (28/07)
+
+**Hipótese testada.** Remover palavras funcionais (preposições, pronomes, artigos e
+conjunções, EN+PT; **negações preservadas** pra não inverter sentido) melhoraria os modelos
+TF-IDF. Aplicado só ao analisador **word** (o char_wb fica intacto). Lista bilíngue curada
+em `src/hsc/features/stopwords.py`; toggle `stop_words: enpt` nos configs `*_nostop.yaml`.
+Mesmo split congelado, seed 42.
+
+**Resultado (test set; baseline → sem-stop).** Lista corrigida: **"no" omitido** (é preposição
+PT mas também a negação EN — removê-la inverteria sentido em inglês).
+
+| Modelo | Política | F1 base→sem | ΔF1 | AUC base→sem | ΔAUC | recall ódio base→sem |
+|--------|----------|-------------|--------|--------------|--------|----------------------|
+| logreg | strict   | 0.709→0.714 | +0.005 | 0.841→0.840 | −0.001 | 0.463→0.544 |
+| logreg | broad    | 0.698→0.694 | −0.004 | 0.768→0.768 | −0.001 | 0.548→0.546 |
+| lgbm   | strict   | 0.707→0.701 | −0.005 | 0.820→0.818 | −0.002 | 0.558→0.540 |
+| lgbm   | broad    | 0.698→0.698 | −0.001 | 0.768→0.769 | +0.001 | 0.551→0.521 |
+| svm    | strict   | 0.672→0.664 | −0.007 | 0.772→0.773 | +0.001 | 0.497→0.521 |
+| svm    | broad    | 0.673→0.665 | −0.009 | 0.736→0.734 | −0.002 | 0.525→0.468 |
+
+**Conclusão (negativa).** Nenhum ganho de macro-F1: ΔF1 de −0.009 a +0.005 (média ≈ −0.4 pt),
+dentro do IC 95%. **A AUC — qualidade de ranqueamento, independente de limiar — é praticamente
+idêntica** (ΔAUC −0.002 a +0.001, média ≈ −0.06 pt): a capacidade discriminativa não muda. O
+recall de ódio fica **misto** (3 sobem, 3 caem) — nem o "mais recall" se sustenta.
+
+**Interpretação.** Char n-gram (char_wb 3–5) + IDF já absorvem as palavras funcionais (IDF pesa
+pouco termo frequente), então remover pronomes/preposições é **redundante e por vezes levemente
+prejudicial** — descarta dêixis útil ("those/vocês"). **Decisão: manter o pré-processamento atual**;
+modelo de produto inalterado. SBERT/transformers não testados de propósito (representação contextual
+da frase inteira; remoção quebraria a estrutura). Viz interativa (F1/AUC/recall toggle) gerada como
+artifact; toggle no código via `stop_words: enpt`.

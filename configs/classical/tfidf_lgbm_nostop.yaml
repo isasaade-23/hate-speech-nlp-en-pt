@@ -1,0 +1,30 @@
+name: tfidf_lgbm_nostop     # ablation: baseline tfidf_lgbm + bilingual stop-word removal (word part)
+family: classical
+policy: strict
+seed: 42
+text_column: text_clean
+features:
+  type: tfidf
+  word:
+    ngram_range: [1, 2]
+    min_df: 5
+    max_features: 30000
+    sublinear_tf: true
+    stop_words: enpt
+  char:
+    analyzer: char_wb
+    ngram_range: [3, 5]
+    min_df: 5
+    max_features: 30000
+    sublinear_tf: true
+model:
+  type: lgbm
+  params:
+    n_estimators: 300
+    learning_rate: 0.05
+    num_leaves: 31
+    colsample_bytree: 0.5
+    subsample: 0.8
+    subsample_freq: 1
+    class_weight: balanced
+    n_jobs: -1

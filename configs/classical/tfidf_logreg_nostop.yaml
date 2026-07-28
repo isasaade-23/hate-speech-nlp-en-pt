@@ -1,0 +1,26 @@
+name: tfidf_logreg_nostop   # ablation: baseline tfidf_logreg + bilingual stop-word removal (word part)
+family: classical
+policy: strict              # override with --policy on the CLI
+seed: 42
+text_column: text_clean
+features:
+  type: tfidf
+  word:
+    ngram_range: [1, 2]
+    min_df: 3
+    max_features: 50000
+    sublinear_tf: true
+    stop_words: enpt         # remove EN+PT articles/prepositions/pronouns/conjunctions (no negations)
+  char:
+    analyzer: char_wb        # char n-grams keep everything (stop-word removal is word-only)
+    ngram_range: [3, 5]
+    min_df: 3
+    max_features: 50000
+    sublinear_tf: true
+model:
+  type: logreg
+  params:
+    C: 1.0
+    class_weight: balanced
+    max_iter: 1000
+    solver: liblinear

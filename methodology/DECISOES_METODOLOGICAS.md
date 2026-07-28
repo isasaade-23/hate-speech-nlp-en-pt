@@ -264,3 +264,20 @@ Nenhum dado ou segredo é versionado (data/, .env, pesos são gitignored) → p�
 **Impacto.** API validada localmente por uvicorn antes do release (EN + PT com acento).
 Fase 12 (Docker) fica pendente do WSL2 (Windows 11 Home, erro Wsl/0x80070422): habilitar
 os recursos WSL + VirtualMachinePlatform e reiniciar; os arquivos de deploy já estão prontos.
+
+---
+
+## Decisão — NÃO remover stop words (28/07)
+
+**Decisão.** Manter o pré-processamento sem remoção de stop words. Suporte a `stop_words`
+(lista bilíngue EN+PT) fica no código como opção (`src/hsc/features/stopwords.py`,
+configs `*_nostop.yaml`), desligado por padrão.
+
+**Motivo.** Ablação em toda a família TF-IDF (logreg/lgbm/svm × strict/broad): ΔF1 de −0.009 a
++0.005 (média ≈ −0.4 pt) e **AUC praticamente idêntica** (ΔAUC ≈ −0.06 pt) → **não ajuda, e às
+vezes atrapalha**. Char n-grams + IDF já tratam palavras funcionais; remover pronomes/preposições
+descarta dêixis útil pra ódio. A lista omite "no" (preposição PT = negação EN). Tabela completa em
+experiment_log.md.
+
+**Impacto.** Ablação negativa documentada (justifica a escolha de pré-processamento para o
+revisor). Nenhuma mudança no modelo servido.

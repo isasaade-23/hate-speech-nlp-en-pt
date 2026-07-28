@@ -12,6 +12,8 @@ from sklearn.pipeline import FeatureUnion
 
 def _vectorizer(kind: str, spec: dict) -> TfidfVectorizer:
     if kind == "word":
+        from hsc.features.stopwords import resolve_stopwords
+
         return TfidfVectorizer(
             analyzer="word",
             ngram_range=tuple(spec.get("ngram_range", [1, 2])),
@@ -19,6 +21,7 @@ def _vectorizer(kind: str, spec: dict) -> TfidfVectorizer:
             max_features=spec.get("max_features"),
             sublinear_tf=spec.get("sublinear_tf", True),
             lowercase=spec.get("lowercase", True),
+            stop_words=resolve_stopwords(spec.get("stop_words")),  # None = keep all (baseline)
         )
     if kind == "char":
         return TfidfVectorizer(

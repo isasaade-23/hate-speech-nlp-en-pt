@@ -1,0 +1,24 @@
+name: tfidf_svm_nostop      # ablation: baseline tfidf_svm + bilingual stop-word removal (word part)
+family: classical
+policy: strict
+seed: 42
+text_column: text_clean
+features:
+  type: tfidf
+  word:
+    ngram_range: [1, 2]
+    min_df: 3
+    max_features: 50000
+    sublinear_tf: true
+    stop_words: enpt
+  char:
+    analyzer: char_wb
+    ngram_range: [3, 5]
+    min_df: 3
+    max_features: 50000
+    sublinear_tf: true
+model:
+  type: svm
+  params:
+    C: 1.0
+    class_weight: balanced
