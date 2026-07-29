@@ -154,7 +154,7 @@ restringir a {1}->1, {2,3}->0.
 
 ## [2026-07-27] Avaliação aprofundada (Fase 9): significância, calibração, transferência
 
-**Decisão 1 — Significância pareada por McNemar + correção de Holm.** Comparar modelos
+**Decisão 1: Significância pareada por McNemar + correção de Holm.** Comparar modelos
 por McNemar exato (binomial) sobre as predições por exemplo, não por diferença de
 macro-F1 pontual. As comparações são feitas SÓ dentro de uma política (strict/broad têm
 linhas e rótulos de teste diferentes; um teste pareado entre elas não tem sentido). Dentro
@@ -164,18 +164,18 @@ da política, todos os modelos usam o mesmo split congelado, então as prediçõ
 **Motivo.** Diferenças de 1-2 pontos de macro-F1 podem não ser significativas; o revisor
 vai exigir o teste. McNemar é o padrão para classificadores pareados no mesmo conjunto.
 
-**Decisão 2 — Predições por exemplo persistidas (reports/predictions/).** train.py grava
+**Decisão 2: Predições por exemplo persistidas (reports/predictions/).** train.py grava
 (id, y_true, y_score, y_pred) por split; modelos já treinados são reconstruídos do joblib
 congelado + corpus congelado, sem re-treinar. É o substrato de McNemar e da calibração.
 
-**Decisão 3 — Calibração reportada (ECE/MCE/Brier + diagrama de confiabilidade).** Scores
+**Decisão 3: Calibração reportada (ECE/MCE/Brier + diagrama de confiabilidade).** Scores
 passam por min-max antes dos bins para que o decision_function do SVM fique no mesmo eixo
 [0,1] das probabilidades (monotônico, não altera ranking/AUC). Uma figura por política.
 
 **Motivo.** O produto expõe um score; calibração diz se ele é interpretável como
 probabilidade. É requisito do "Reproducibility/Ethics statement" e da seção de produto.
 
-**Decisão 4 — Trilha SBERT (embeddings densos multilíngues).** Adicionar
+**Decisão 4: Trilha SBERT (embeddings densos multilíngues).** Adicionar
 `paraphrase-multilingual-MiniLM-L12-v2` (encoder CONGELADO, sem fine-tuning) →
 LogReg/LightGBM, como baseline clássico forte que compartilha a ideia multilíngue do
 XLM-R sem GPU. O encoder congelado torna o anti-leakage automático (nada é aprendido de
@@ -183,14 +183,14 @@ nenhum split); embeddings são cacheados por hash-de-texto (LogReg e LGBM reusam
 
 **Motivo.** (a) LightGBM rendia mal e lento sobre TF-IDF esparso de 60k dim; 384 dim
 densos são seu habitat natural. (b) TF-IDF de palavra não compartilha vocabulário entre
-idiomas — necessário para a transferência cross-lingual.
+idiomas. É necessário para a transferência cross-lingual.
 
-**Decisão 5 — Experimento de transferência cross-domínio e cross-lingual (destaque).**
+**Decisão 5: Experimento de transferência cross-domínio e cross-lingual (destaque).**
 Treinar numa fatia e testar em fatia disjunta: cross-domínio EN (tweets↔memes) e
 cross-lingual zero-shot (EN→PT e PT→EN). Protocolo idêntico ao principal: features no
 treino apenas, limiar ajustado num val da fonte de treino, teste único na fonte-alvo. Como
 treino e teste são datasets diferentes, não há leakage na fronteira. Roda com TF-IDF E
-SBERT — o contraste (TF-IDF colapsa cross-lingual, SBERT transfere) é o resultado.
+SBERT. O contraste (TF-IDF colapsa cross-lingual, SBERT transfere) é o resultado.
 
 **Alternativa rejeitada.** Reportar só números in-distribution. Rejeitada: mede o risco de
 domain shift de forma indireta; a transferência explícita é medida direta e vira a Fig. 5.
@@ -220,7 +220,7 @@ validar encoding por codepoint/byte, nunca por glifo de terminal.
 **Impacto.** (1) O TF-IDF de char aprendeu a corrupção de forma consistente, então os
 números PT in-distribution mudam pouco (F1 ~0,64-0,69). (2) O SBERT e a transferência
 cross-lingual eram os mais prejudicados (o tokenizer multilíngue via `parabÃ©ns` como
-lixo) — espera-se melhora após a correção. (3) Cache de embeddings por-texto: os textos
+lixo). Espera-se melhora após a correção. (3) Cache de embeddings por-texto: os textos
 PT corretos são chaves novas (re-encodadas ~5,6k), o EN todo continua cache hit. (4)
 Splits recongelados (o conteúdo PT mudou; split_sha256 novo). Resultados da Fase 9
 recomputados sobre texto correto. Aprendizado para limitations.md: auditar encoding por
@@ -245,7 +245,7 @@ deploy (GPU, ~1,1 GB) e pela trava de licença (corpus completo = research-only)
 
 **Impacto (2 fixes de deploy).** (1) `EmbeddingVectorizer.__getstate__` deixou de picklar o
 encoder de ~470 MB → joblib do sbert_logreg_strict caiu de 479 MB para 3 KB (recarrega sob
-demanda). (2) `inference.py` passou a escolher o melhor joblib LOCAL servível — antes
+demanda). (2) `inference.py` passou a escolher o melhor joblib LOCAL servível. Antes
 tentava o XLM-R (melhor F1 global, pesos no Colab) e quebrava a API; default agora é
 tfidf_logreg_strict.
 
@@ -267,7 +267,7 @@ os recursos WSL + VirtualMachinePlatform e reiniciar; os arquivos de deploy já 
 
 ---
 
-## Decisão — NÃO remover stop words (28/07)
+## Decisão: NÃO remover stop words (28/07)
 
 **Decisão.** Manter o pré-processamento sem remoção de stop words. Suporte a `stop_words`
 (lista bilíngue EN+PT) fica no código como opção (`src/hsc/features/stopwords.py`,

@@ -28,7 +28,7 @@ significância pareada (McNemar) e calibração (Fase 9).
 
 ---
 
-## Fase 9 — Avaliação aprofundada (2026-07-27)
+## Fase 9: Avaliação aprofundada (2026-07-27)
 
 Fonte de verdade: reports/tables/{leaderboard,mcnemar_test,calibration_test,transfer_*,
 error_*,bias_*}.csv e reports/figures/calibration_*.png. Seed 42; splits congelados.
@@ -45,26 +45,26 @@ DECISOES_METODOLOGICAS 2026-07-27); substituem a primeira passada sobre PT corro
 | sbert_logreg | strict | 0,665 | 0,487 | 0,801 |
 
 **Leitura.** In-distribution o SBERT congelado NÃO supera o TF-IDF (melhor clássico:
-tfidf_logreg strict 0,709 / tfidf_lgbm broad 0,698); fica ~1-2 pontos atrás em macro-F1,
+tfidf_logreg strict 0,709 / tfidf_lgbm broad 0,698); fica ~1 a 2 pontos atrás em macro-F1,
 com recall de ódio comparável. Sobre embeddings densos o LightGBM finalmente iguala o
 linear (habitat certo) e roda em segundos (vs ~130s no TF-IDF esparso). A vantagem real do
 SBERT aparece na transferência cross-lingual (abaixo), não in-distribution.
 
-### Significância pareada (McNemar exato, Holm α=0,05) — reports/tables/mcnemar_test.csv
+### Significância pareada (McNemar exato, Holm α=0,05): reports/tables/mcnemar_test.csv
 - Topo: em **strict tfidf_logreg > tfidf_lgbm** é significativo (p≈0); em **broad
   tfidf_lgbm ≈ tfidf_logreg** empatam (p=1,0). O melhor clássico depende da política.
 - 6/10 pares significativos em strict, 2/10 em broad (rótulos broad mais ruidosos).
 - SVM segue o mais fraco.
 
-### Calibração (ECE/MCE/Brier) — reports/tables/calibration_test.csv + figuras
+### Calibração (ECE/MCE/Brier): reports/tables/calibration_test.csv + figuras
 - **sbert_lgbm é dos mais calibrados** (strict ECE 0,032; broad 0,056), bem melhor que
   tfidf_logreg/lgbm (strict ECE ~0,16; broad ~0,09-0,10). tfidf_svm tem ECE baixo por ser
   conservador (mas MCE alto).
-- sbert_logreg strict é o pior (ECE 0,284) — probabilidades infladas.
+- sbert_logreg strict é o pior (ECE 0,284). Probabilidades infladas.
 - Implicação de produto: se o score precisa ser interpretável, sbert_lgbm é preferível
   apesar de ~2 pontos a menos de macro-F1.
 
-### Transferência cross-domínio e cross-lingual — reports/tables/transfer_{strict,broad}.csv
+### Transferência cross-domínio e cross-lingual: reports/tables/transfer_{strict,broad}.csv
 
 Resultado-título (política broad, densidades de rótulo comparáveis entre fontes):
 
@@ -75,36 +75,36 @@ Resultado-título (política broad, densidades de rótulo comparáveis entre fon
 | tweets→memes (cross-domínio EN) | 0,504 (0,148) | **0,540 (0,308)** |
 | memes→tweets (cross-domínio EN) | 0,501 (0,212) | **0,550 (0,306)** |
 
-**Leitura.** Cross-lingual: TF-IDF de palavra COLAPSA (recall de ódio ~0,01-0,08 — não
+**Leitura.** Cross-lingual: TF-IDF de palavra COLAPSA (recall de ódio ~0,01 a 0,08; não
 detecta ódio no outro idioma, por não compartilhar vocabulário); o SBERT transfere de fato
 (0,63-0,67; recall 0,37-0,66). Cross-domínio EN o SBERT também ganha, mas fica ~0,55 (meme
 segue difícil só-texto). Esta é a Fig. 5 e a medida direta do risco de domain/language
 shift. Nota: a correção do UTF-8 elevou o SBERT EN→PT de 0,583 para 0,626 (o tokenizer
 multilíngue estava engasgando no PT corrompido); confirma o impacto do bug de encoding.
 
-### Análise de erro qualitativa — reports/tables/error_{modes,rates,examples}_*.csv/md
+### Análise de erro qualitativa: reports/tables/error_{modes,rates,examples}_*.csv/md
 Melhor modelo strict (tfidf_logreg): 568 erros (313 FN / 255 FP).
-- **206 dos 313 FN são "ódio implícito"** (sem token de palavrão) — o modelo perde ódio
+- **206 dos 313 FN são "ódio implícito"** (sem token de palavrão). O modelo perde ódio
   sutil/sem slur. É a maior fatia dos falso-negativos.
-- **70 FP são "over-flag por slur"** (não-ódio com palavrão marcado como ódio) — o modelo
+- **70 FP são "over-flag por slur"** (não-ódio com palavrão marcado como ódio). O modelo
   super-confia na presença de palavrão.
 - **PT tem o maior erro (0,277), puxado por falso-positivo (0,185 vs 0,027 no EN)**: o
   modelo super-marca PT como ódio (fonte menor, fronteira ofensa/ódio mais densa).
 - Erros por texto curto (7) e por divergência de langid (7) são raros.
 - FN "confiantes" em memes são majoritariamente memes cujo ódio está na IMAGEM, não no
-  OCR (texto benigno rotulado como ódio) — reforça a limitação só-texto.
+  OCR (texto benigno rotulado como ódio). Reforça a limitação só-texto.
 
-### Sondagem de viés por termo de identidade — reports/tables/bias_identity_fpr_*.csv
+### Sondagem de viés por termo de identidade: reports/tables/bias_identity_fpr_*.csv
 FPR em linhas NÃO-ódio que citam um grupo (termos neutros), vs. FPR de fundo:
 - **orientação sexual é o grupo mais super-marcado**: broad tfidf_lgbm FPR 0,754 vs fundo
   0,165 (gap **+0,589**); citar "gay/lésbica/trans" em texto benigno dispara ódio ~75%.
 - religião, nacionalidade/imigração e gênero também mostram gaps grandes (+0,25 a +0,41).
 - **SBERT tende a gaps menores que TF-IDF** (menos gatilhado por termo isolado), mas ainda
-  positivos. Viés não-intencional clássico (Dixon et al.) — entra no Ethics statement.
+  positivos. Viés não-intencional clássico (Dixon et al.). Entra no Ethics statement.
 
 ---
 
-## Fase 8 — Resultados neurais + comparação final clássico vs neural (2026-07-27)
+## Fase 8: Resultados neurais + comparação final clássico vs neural (2026-07-27)
 
 Transformers treinados no Colab (T4, seed 42, fp16), MESMO corpus/split/limiar dos
 clássicos. Fonte de verdade: reports/tables/leaderboard.csv (16 modelos).
@@ -120,7 +120,7 @@ clássicos. Fonte de verdade: reports/tables/leaderboard.csv (16 modelos).
 
 **Resultado central (a tese do artigo).** Os transformers superam o melhor clássico nas
 duas políticas: strict 0,750 (XLM-R) vs 0,709 (tfidf_logreg); broad 0,748 (BERTweet) vs
-0,698 (tfidf_lgbm) — cerca de +0,04 macro-F1. **McNemar + Holm confirma significância**:
+0,698 (tfidf_lgbm). Cerca de +0,04 macro-F1. **McNemar + Holm confirma significância**:
 XLM-R > tfidf_logreg strict (p=0,0026); BERTweet > tfidf_lgbm broad (p≈0).
 
 **Calibração (nuance para o produto).** Os neurais NÃO calibram melhor: sbert_lgbm e
@@ -130,25 +130,25 @@ Pareto, não só por F1.
 
 **Viés (transformers ajudam).** No over-flag de identidade, os transformers de verdade têm
 os menores gaps: XLM-R/BERTweet ~0,258 em orientação sexual (broad) vs TF-IDF 0,42-0,59;
-BERTimbau 0,35; SBERT no meio. Ainda positivo em todos — o viés persiste.
+BERTimbau 0,35; SBERT no meio. Ainda positivo em todos. O viés persiste.
 
 **Análise de erro (XLM-R strict vs tfidf_logreg strict).** O transformer erra menos
 (506 vs 568), com menos falso-negativo (260 vs 313) e **menos ódio implícito perdido
-(183 vs 206)** — coerente com um modelo contextual pegar ódio sem slur. Custo: super-marca
+(183 vs 206)**, coerente com um modelo contextual pegar ódio sem slur. Custo: super-marca
 por slur um pouco mais (88 vs 70 FP).
 
 **Ganho do fix de encoding.** BERTimbau PT strict com recall de ódio 0,796 sobre texto PT
-correto (UTF-8) — o modelo dedicado ao PT rende quando os acentos não estão corrompidos.
+correto (UTF-8). O modelo dedicado ao PT rende quando os acentos não estão corrompidos.
 
 ---
 
-## Fase 11 — Produto + release (2026-07-27)
+## Fase 11: Produto + release (2026-07-27)
 
 Seleção do modelo de produto por Pareto (`hsc product`; detalhe em product_decision.md).
 Eixos medidos: macro-F1, recall de ódio, ECE, viés de identidade, latência p50/p95 (CPU),
 tamanho, licença. Decisão por perfil:
 - **melhor qualidade:** XLM-R (GPU, research-only);
-- **MVP CPU (recomendado):** tfidf_logreg — p95 1,6 ms, 3,6 MB, autossuficiente, F1 a ~4 pts;
+- **MVP CPU (recomendado):** tfidf_logreg. p95 1,6 ms, 3,6 MB, autossuficiente, F1 a ~4 pts;
 - **score calibrado:** sbert_lgbm (melhor ECE, mas +470 MB de encoder).
 Licença: todos research-only (corpus completo); comercial exige retreino só na whitelist.
 
@@ -175,7 +175,7 @@ Próximo: build Docker pós-reboot; opcional multi-seed neural (42/43/44) para I
 
 ---
 
-## Ablação — Remoção de stop words (EN+PT) no TF-IDF (28/07)
+## Ablação: remoção de stop words (EN+PT) no TF-IDF (28/07)
 
 **Hipótese testada.** Remover palavras funcionais (preposições, pronomes, artigos e
 conjunções, EN+PT; **negações preservadas** pra não inverter sentido) melhoraria os modelos
@@ -184,7 +184,7 @@ em `src/hsc/features/stopwords.py`; toggle `stop_words: enpt` nos configs `*_nos
 Mesmo split congelado, seed 42.
 
 **Resultado (test set; baseline → sem-stop).** Lista corrigida: **"no" omitido** (é preposição
-PT mas também a negação EN — removê-la inverteria sentido em inglês).
+PT mas também a negação EN. Removê-la inverteria sentido em inglês).
 
 | Modelo | Política | F1 base→sem | ΔF1 | AUC base→sem | ΔAUC | recall ódio base→sem |
 |--------|----------|-------------|--------|--------------|--------|----------------------|
@@ -196,13 +196,13 @@ PT mas também a negação EN — removê-la inverteria sentido em inglês).
 | svm    | broad    | 0.673→0.665 | −0.009 | 0.736→0.734 | −0.002 | 0.525→0.468 |
 
 **Conclusão (negativa).** Nenhum ganho de macro-F1: ΔF1 de −0.009 a +0.005 (média ≈ −0.4 pt),
-dentro do IC 95%. **A AUC — qualidade de ranqueamento, independente de limiar — é praticamente
+dentro do IC 95%. **A AUC (qualidade de ranqueamento, independente de limiar) é praticamente
 idêntica** (ΔAUC −0.002 a +0.001, média ≈ −0.06 pt): a capacidade discriminativa não muda. O
-recall de ódio fica **misto** (3 sobem, 3 caem) — nem o "mais recall" se sustenta.
+recall de ódio fica **misto** (3 sobem, 3 caem). Nem o "mais recall" se sustenta.
 
-**Interpretação.** Char n-gram (char_wb 3–5) + IDF já absorvem as palavras funcionais (IDF pesa
+**Interpretação.** Char n-gram (char_wb 3-5) + IDF já absorvem as palavras funcionais (IDF pesa
 pouco termo frequente), então remover pronomes/preposições é **redundante e por vezes levemente
-prejudicial** — descarta dêixis útil ("those/vocês"). **Decisão: manter o pré-processamento atual**;
+prejudicial**. Descarta dêixis útil ("those/vocês"). **Decisão: manter o pré-processamento atual**;
 modelo de produto inalterado. SBERT/transformers não testados de propósito (representação contextual
 da frase inteira; remoção quebraria a estrutura). Viz interativa (F1/AUC/recall toggle) gerada como
 artifact; toggle no código via `stop_words: enpt`.

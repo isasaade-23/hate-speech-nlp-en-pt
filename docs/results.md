@@ -1,6 +1,6 @@
 # Results
 
-All numbers are on the frozen test split, seed 42, reported under two label policies —
+All numbers are on the frozen test split, seed 42, reported under two label policies:
 **strict** (only explicit hate is positive) and **broad** (offensive folded into hate).
 
 ## Model comparison
@@ -11,8 +11,8 @@ All numbers are on the frozen test split, seed 42, reported under two label poli
 
 | Policy | Best transformer | Best classical | Δ | McNemar + Holm |
 |--------|------------------|----------------|----|----------------|
-| strict | XLM-R — **0.750** | tfidf_logreg — 0.709 | +0.041 | p = 0.003 |
-| broad  | BERTweet — **0.748** | tfidf_lgbm — 0.698 | +0.050 | p < 0.001 |
+| strict | XLM-R · **0.750** | tfidf_logreg · 0.709 | +0.041 | p = 0.003 |
+| broad  | BERTweet · **0.748** | tfidf_lgbm · 0.698 | +0.050 | p < 0.001 |
 
 The transformer advantage is statistically significant, not an artifact of one split.
 BERTimbau (PT) reaches recall-on-hate 0.796 in strict on correctly decoded Portuguese.
@@ -35,15 +35,15 @@ falls to near zero; multilingual embeddings place EN and PT in one space and tra
 
 The served score should be interpretable as a probability. Best-calibrated models are
 `sbert_lgbm` (ECE 0.032 strict, 0.056 broad) and the conservative `tfidf_svm`; the
-transformers win on macro-F1 but not on calibration — a trade-off carried into the
+transformers win on macro-F1 but not on calibration. This trade-off carries into the
 [product decision](api.md).
 
 ## Identity-term bias
 
 An unintended-bias probe measures the false-positive rate on non-hate text that merely
 mentions an identity group (neutral terms, bilingual). Over-flagging is real across all
-models — sexual-orientation mentions reach a false-positive rate of 0.75 vs. 0.17
-background for TF-IDF — but the transformers show the smallest gaps (~0.26).
+models. Sexual-orientation mentions reach a false-positive rate of 0.75 vs. 0.17
+background for TF-IDF. The transformers show the smallest gaps (~0.26).
 
 ## Error analysis
 

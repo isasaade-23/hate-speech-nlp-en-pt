@@ -31,7 +31,7 @@ hsc product      # product model selection (Pareto)
 
 ## Transformers (Colab GPU)
 
-Open `notebooks/colab_neural.ipynb` — a self-contained notebook that uploads the frozen
+Open `notebooks/colab_neural.ipynb`. It is a self-contained notebook that uploads the frozen
 corpus and trains XLM-R / BERTimbau / BERTweet under the same protocol (same threshold
 tuning, same metric schema). For confidence intervals, set `SEEDS = [42, 43, 44]`. Download
 `hsc_neural_results.zip`, then:

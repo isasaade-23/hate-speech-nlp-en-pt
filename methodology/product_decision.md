@@ -9,8 +9,8 @@ tamanho, com a trava de licença.
 
 | modelo | família | F1 | recall ódio | ECE | viés | latência p95 | tamanho | CPU |
 |--------|---------|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
-| xlm-roberta | neural | **0,750** | 0,554 | 0,076 | 0,064 | — | ~1,1 GB | não* |
-| bertimbau | neural | 0,747 | **0,796** | 0,148 | 0,404 | — | ~0,4 GB | não* |
+| xlm-roberta | neural | **0,750** | 0,554 | 0,076 | 0,064 | n/a | ~1,1 GB | não* |
+| bertimbau | neural | 0,747 | **0,796** | 0,148 | 0,404 | n/a | ~0,4 GB | não* |
 | **tfidf_logreg** | clássico | 0,709 | 0,463 | 0,158 | 0,066 | **1,6 ms** | **3,6 MB** | sim |
 | tfidf_lgbm | clássico | 0,707 | 0,558 | 0,159 | 0,064 | 7,2 ms | 4,1 MB | sim |
 | sbert_lgbm | clássico | 0,683 | 0,520 | **0,032** | 0,110 | 32,6 ms | 3,4 MB+enc | sim |
@@ -27,17 +27,17 @@ SBERT em produção ≈ 3,4 MB + 470 MB. O TF-IDF é autossuficiente (só o jobl
 
 Três perfis, decisão registrada com os números:
 
-1. **Melhor qualidade (pesquisa / API com GPU):** **XLM-R** — lidera macro-F1 (0,750 strict)
+1. **Melhor qualidade (pesquisa / API com GPU):** **XLM-R**. Lidera macro-F1 (0,750 strict)
    e é significativamente melhor que o melhor clássico (McNemar p=0,0026). Custo: torch +
    GPU para latência baixa, ~1,1 GB, e a licença de dados (research-only).
 
-2. **Produto CPU leve, autossuficiente (recomendado para o MVP):** **tfidf_logreg** —
+2. **Produto CPU leve, autossuficiente (recomendado para o MVP):** **tfidf_logreg**.
    p95 de 1,6 ms, 3,6 MB, sem encoder externo, F1 a ~4 pontos do XLM-R. Fraquezas:
    pior calibração (ECE 0,16) e, em broad, viés de identidade alto (gap 0,26). Mitigar com
    **temperature scaling** (calibra o score) e mitigação de viés por termo (reamostragem/
    contrafactual). É o candidato de melhor custo-benefício para servir sem GPU.
 
-3. **Se o score calibrado for requisito de produto:** **sbert_lgbm** — melhor ECE (0,032) e
+3. **Se o score calibrado for requisito de produto:** **sbert_lgbm**. Melhor ECE (0,032) e
    viés menor que o TF-IDF em strict, mas 20× mais lento (32 ms) e +470 MB de encoder.
 
 ## Trava de licença (bloqueia venda, não o artigo)
@@ -45,10 +45,10 @@ Três perfis, decisão registrada com os números:
 **Todos os modelos atuais são research-only**: foram treinados no corpus completo, que
 mistura fontes não-comerciais (memotion "só citação", tweets_ip licença incerta,
 pt_fortuna "unknown"). A `commercial_whitelist` (labels.yaml) tem só **multioff**
-(Apache-2.0, 743 linhas) — pequeno demais para um modelo sozinho.
+(Apache-2.0, 743 linhas). É pequeno demais para um modelo sozinho.
 
 **Caminho para o modelo comercial:** retreinar a pipeline (mesma config) sobre dados de
-licença permissiva apenas — multioff + dados externos a verificar (HateBR/ToLD-BR em PT,
+licença permissiva apenas: multioff + dados externos a verificar (HateBR/ToLD-BR em PT,
 fontes permissivas em EN). Sem isso, o produto fica restrito a pesquisa/demo. Ver
 `data_provenance.md`.
 

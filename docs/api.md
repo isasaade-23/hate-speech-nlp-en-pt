@@ -24,9 +24,9 @@ POST /predict
 
 Endpoints:
 
-- `GET /health` — liveness and the served model version.
-- `POST /predict` — one text.
-- `POST /predict_batch` — many texts at once.
+- `GET /health`: liveness and the served model version.
+- `POST /predict`: one text.
+- `POST /predict_batch`: many texts at once.
 
 A Gradio demo (`python demo/app.py`) is the human-facing version of the same model: a page
 where you type EN/PT text and see the prediction.
@@ -38,7 +38,7 @@ uvicorn api.main:app --reload           # http://127.0.0.1:8000  (interactive do
 ```
 
 The container images under `deploy/` package the API and demo for identical deployment on
-any host. Docker is a deployment convenience — the API runs directly from the virtual
+any host. Docker is a deployment convenience. The API runs directly from the virtual
 environment without it.
 
 ## Product model selection

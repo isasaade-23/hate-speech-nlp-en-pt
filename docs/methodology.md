@@ -40,13 +40,13 @@ analysis instead of a hidden assumption.
 One English source ships labels 1/2/3 with no legend. A probe (class distribution + a
 profanity-lexicon rate per class) supports the mapping 1 = hate, 2 = offensive, 3 = neutral,
 and opens a gate that keeps the source out of the primary corpus until the decision is
-recorded — a config change, not a code change.
+recorded. This is a config change, not a code change.
 
 ## A data-integrity bug worth documenting
 
 The Portuguese source was being decoded as **latin-1** when the file is **UTF-8**, which
 corrupted every accent. A byte-level audit caught it (`C3 A9` is UTF-8 `é`, not `Ã©`), and
-the whole pipeline was rebuilt on corrected text — which alone lifted zero-shot EN to PT
+the whole pipeline was rebuilt on corrected text. This alone lifted zero-shot EN to PT
 transfer by ~4 points. Lesson folded into the provenance protocol: validate encoding by
 bytes, never by how a terminal renders a glyph.
 
@@ -54,7 +54,7 @@ bytes, never by how a terminal renders a glyph.
 
 Primary metric is macro-F1; secondary are ROC-AUC, PR-AUC, and recall-on-hate (the
 ethically important number). The decision threshold is tuned on validation to maximize
-macro-F1 — identically for every model, classical and neural — so the comparison is fair
-under class imbalance. Significance is a paired McNemar test with Holm correction, plus
+macro-F1. It is tuned identically for every model, classical and neural, so the comparison
+is fair under class imbalance. Significance is a paired McNemar test with Holm correction, plus
 bootstrap confidence intervals. Calibration, identity-term bias, and cross-lingual /
 cross-domain transfer complete the picture.
