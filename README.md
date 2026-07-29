@@ -4,8 +4,8 @@
 
 # Bilingual Hate-Speech Detection (EN / PT)
 
-**Binary hate-speech classification for English and Portuguese social-media text —
-a reproducible study comparing classical models with transformers, plus a deployable inference API.**
+**Binary hate-speech classification for English and Portuguese social-media text.
+A reproducible study comparing classical models with transformers, plus a deployable inference API.**
 
 [![CI](https://github.com/isasaade-23/hate-speech-nlp-en-pt/actions/workflows/ci.yml/badge.svg)](https://github.com/isasaade-23/hate-speech-nlp-en-pt/actions/workflows/ci.yml)
 [![Docs](https://img.shields.io/badge/docs-online-3D5A80?style=flat-square)](https://isasaade-23.github.io/hate-speech-nlp-en-pt/)
@@ -36,21 +36,31 @@ The scientific core is a fair, leakage-safe comparison of two model families und
   sentence embeddings (SBERT) feeding Logistic Regression, Linear SVM, and LightGBM.
 - **Transformers:** XLM-RoBERTa (bilingual), BERTimbau (PT), and BERTweet (EN), fine-tuned on Colab.
 
+## Live demo
+
+The interactive demo, **Luciola**, runs the lightweight CPU model in the browser, in English or
+Portuguese, in a light or dark theme. It classifies text live and renders the stop-word ablation
+as an interactive heatmap.
+**[Open Luciola](https://hate-speech-demo-njcu6pa492futefhp8eiyb.streamlit.app/)**
+
 ## Key results
 
 - **Transformers win, significantly.** XLM-R reaches macro-F1 **0.750** (strict) and BERTweet
   **0.748** (broad), beating the best classical baseline by ~4 points. The gap is confirmed by a
-  paired **McNemar test with Holm correction** (p = 0.003 strict; p < 0.001 broad) — not a lucky split.
+  paired **McNemar test with Holm correction** (p = 0.003 strict; p < 0.001 broad). This is not a lucky split.
 - **Cross-lingual transfer is where embeddings earn their keep.** Trained on English and tested
   zero-shot on Portuguese, TF-IDF **collapses** (it shares no vocabulary across languages) while
   multilingual SBERT **transfers** (macro-F1 0.42 → 0.63 EN→PT).
 - **Leakage-safe by construction.** Exact + near-duplicate (MinHash/LSH) deduplication and a
-  group-stratified, frozen split guarantee no paraphrase crosses train/test — enforced by a CI test.
+  group-stratified, frozen split guarantee no paraphrase crosses train/test. A CI test enforces it.
 - **Beyond a single number.** The evaluation adds probability **calibration** (ECE/Brier), an
   identity-term **bias probe**, and a qualitative **error analysis** (implicit hate is the main blind spot).
 - **A data-integrity bug, found and fixed.** The Portuguese source was being decoded as latin-1
   when it is UTF-8; a byte-level audit caught it, and the whole pipeline was rebuilt on corrected
   text (this alone lifted zero-shot EN→PT transfer by ~4 points).
+- **A negative result, tested and reported.** Removing bilingual stop words (prepositions, pronouns,
+  articles) from the TF-IDF word features does not move the classical models. macro-F1 and ROC-AUC
+  stay within noise, because character n-grams and IDF already down-weight function words.
 
 <div align="center">
 
@@ -65,8 +75,8 @@ the best classical baseline is statistically significant.*
 
 | Policy | Best transformer | Best classical | Δ | Significance (McNemar + Holm) |
 |--------|------------------|----------------|----|-------------------------------|
-| strict | XLM-R — **0.750** | tfidf_logreg — 0.709 | +0.041 | p = 0.003 |
-| broad  | BERTweet — **0.748** | tfidf_lgbm — 0.698 | +0.050 | p < 0.001 |
+| strict | XLM-R · **0.750** | tfidf_logreg · 0.709 | +0.041 | p = 0.003 |
+| broad  | BERTweet · **0.748** | tfidf_lgbm · 0.698 | +0.050 | p < 0.001 |
 
 ### Cross-lingual & cross-domain transfer
 
@@ -81,9 +91,9 @@ the best classical baseline is statistically significant.*
 | EN → PT (zero-shot) | 0.418 | **0.626** |
 | PT → EN (zero-shot) | 0.445 | **0.674** |
 
-The label boundary between *offensive* and *hateful* is treated as a first-class variable: every
-result is reported under two policies — **strict** (only explicit hate is positive) and **broad**
-(offensive folded into hate) — turning label heterogeneity into a sensitivity analysis.
+The label boundary between *offensive* and *hateful* is treated as a first-class variable. Every
+result is reported under two policies, **strict** (only explicit hate is positive) and **broad**
+(offensive folded into hate). This turns label heterogeneity into a sensitivity analysis.
 
 ## Pipeline
 
@@ -127,7 +137,7 @@ hsc product                      # product model selection (Pareto)
 ```
 
 Transformer fine-tuning runs on Google Colab (GPU): open
-[`notebooks/colab_neural.ipynb`](notebooks/colab_neural.ipynb) — a self-contained notebook that
+[`notebooks/colab_neural.ipynb`](notebooks/colab_neural.ipynb). It is a self-contained notebook that
 uploads the frozen corpus and trains XLM-R / BERTimbau / BERTweet with the same protocol.
 
 ### Serve the API
@@ -156,7 +166,7 @@ research-only. A commercially clear model must be retrained on permissively lice
 ## Repository layout
 
 ```
-configs/        experiment configs (data, labels, classical, neural) — the methodology, as code
+configs/        experiment configs (data, labels, classical, neural): the methodology, as code
 src/hsc/        installable package: ingest, harmonize, clean, splits, langid,
                 features (tfidf, embeddings), models, train, evaluate, analysis,
                 transfer, bias_probe, error_analysis, product, inference
@@ -176,7 +186,7 @@ provenance with licenses, the label-mapping rationale, the experiment log, and k
 ## Responsible use
 
 This is a probabilistic research classifier, not a moderation oracle. It reflects the biases of its
-training data — the bias probe shows measurable over-flagging of some identity terms — and should
+training data. The bias probe shows measurable over-flagging of some identity terms. It should
 support, never replace, human review. Redistribution is bound by the individual dataset licenses.
 
 ## License
@@ -186,7 +196,7 @@ restrict commercial use; see `methodology/data_provenance.md`.
 
 ## Author
 
-**Isabela Venancio da Silva** — PhD candidate in Public Health (ML applied to health), University of
+**Isabela Venancio da Silva**. PhD candidate in Public Health (ML applied to health), University of
 São Paulo (FSP-USP), LABDAPS.
 [ORCID](https://orcid.org/0000-0003-0156-7837) ·
 [Lattes](http://lattes.cnpq.br/7006765766090773)
