@@ -1,0 +1,26 @@
+name: twitter_xlmr
+family: neural
+policy: strict
+seed: 42
+text_column: text_clean
+languages: [en, pt]      # multilingual tweet-domain encoder, one model for both
+
+# cardiffnlp/twitter-xlm-roberta-base: XLM-R pretrained on ~198M multilingual tweets.
+# Domain-matched to short bilingual social text, so it targets the XLM-R baseline (0.750)
+# from a tweet-pretrained starting point. Same protocol, split and seeds as the others.
+model:
+  hf_checkpoint: cardiffnlp/twitter-xlm-roberta-base
+  max_length: 128          # tweets/comments are short; 128 covers the corpus
+  problem: binary
+train:
+  epochs: 4
+  batch_size: 16
+  grad_accum: 1
+  lr: 2.0e-5
+  weight_decay: 0.01
+  warmup_ratio: 0.1
+  class_weights: balanced     # or focal (ablation)
+  fp16: true
+  seeds: [42, 43, 44]         # multi-seed for CI (report mean +/- std)
+eval:
+  primary_metric: macro_f1
