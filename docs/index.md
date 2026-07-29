@@ -28,6 +28,11 @@ A fair, leakage-safe comparison of two model families under one protocol:
   qualitative error analysis (implicit hate is the main blind spot).
 - **A data-integrity bug, found and fixed.** The Portuguese source was decoded as latin-1
   when it is UTF-8; a byte-level audit caught it and the pipeline was rebuilt on corrected text.
+- **Surface plus semantic.** Averaging the classical and transformer models holds macro-F1 and
+  lifts hate recall from 0.55 to 0.63, recovering part of the implicit false negatives.
+- **The bottleneck is representation.** A tabular foundation model (TabPFN) is the best classifier
+  on dense features yet only ties the classical baseline. The sparse lexical signal is what the
+  linear model already exploits, and dense compression drops it.
 
 See [Results](results.md) for the full comparison, [Methodology](methodology.md) for the
 decision trail, and [API and product](api.md) for the deployable interface.
