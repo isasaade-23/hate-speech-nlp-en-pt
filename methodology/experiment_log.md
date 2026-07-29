@@ -206,3 +206,75 @@ prejudicial**. Descarta dêixis útil ("those/vocês"). **Decisão: manter o pr�
 modelo de produto inalterado. SBERT/transformers não testados de propósito (representação contextual
 da frase inteira; remoção quebraria a estrutura). Viz interativa (F1/AUC/recall toggle) gerada como
 artifact; toggle no código via `stop_words: enpt`.
+
+## Diagnóstico: por que a LogReg é competitiva (29/07)
+
+**Pergunta.** O melhor clássico (tfidf_logreg, 0.709 strict) fica a ~4 pontos do melhor
+transformer. Por que um modelo linear simples chega tão perto, e por que ele bate os outros
+clássicos?
+
+**Evidência 1: os pesos são léxico explícito e bilíngue.** Os 20 n-gramas de palavra de maior
+peso positivo do tfidf_logreg strict são palavrão e ataque de identidade em EN e PT (`islam`,
+`hindus`, `traitors`, `kill`, `gorda`, `burra`, mais os slurs). 19 dos 50 maiores pesos gerais
+são char n-gramas (char_wb 3-5), que capturam variação e ortografia. Detecção de ódio neste
+corpus é, em boa parte, um problema de léxico, e TF-IDF word+char sobre modelo linear resolve
+isso perto do teto.
+
+**Evidência 2: McNemar dentro da família clássica** (reports/tables/mcnemar_test.csv).
+- strict: logreg supera lgbm com significância (221 vs 126 discordantes, p≈0, Holm). Não é empate.
+- broad: logreg e lgbm empatam exato (290 vs 290, p=1).
+- SVM é pior nas duas por **ranqueamento**, não só por limiar: AUC 0.772 vs 0.841 do logreg. A
+  hinge loss produz score que ordena pior neste espaço esparso.
+- SBERT congelado perde os tokens de superfície, então fica abaixo do TF-IDF dentro do domínio
+  (sbert_lgbm strict 0.683 vs tfidf_logreg 0.709) mas transfere entre línguas (ver Fase 9).
+
+**Conclusão.** O resultado não é anômalo. Em espaço esparso de alta dimensão (84.737 features),
+quase linearmente separável, o modelo linear é quase ótimo. Árvore (LGBM) fragmenta o sinal e no
+máximo empata; SVM ordena pior. A vantagem do transformer não vem dos casos explícitos, que o
+linear já acerta, e sim de contexto (ódio implícito) e transferência cross-lingual.
+
+## Ensemble superfície + semântica (29/07)
+
+**Método.** Combinar tfidf_logreg (superfície lexical) com o melhor transformer por política
+(semântica), por média ponderada e por stacking (regressão logística sobre os scores). Peso e
+limiar afinados no val; avaliação no test. Sem vazamento: o test só é tocado no fim. Usa as
+predições por exemplo já persistidas em reports/predictions/.
+
+| Política | melhor single | melhor ensemble (F1) | ΔF1 | recall ódio (single → ensemble ponderado) |
+|----------|---------------|----------------------|-----|-------------------------------------------|
+| strict   | xlmr 0.749    | stack 0.748          | −0.001 | 0.554 → 0.626 |
+| broad    | bertweet 0.750| stack+sbert 0.754    | +0.004 | 0.607 → 0.653 |
+
+**Conclusão.** No macro-F1 o ensemble empata (os transformers já estão no teto do dado). O valor
+está em outro lugar: a média ponderada sobe o **recall de ódio em 5 a 9 pontos** e melhora a AUC
+nas duas políticas, ao custo de fração de ponto de F1. É a métrica eticamente crítica. Entra no
+artigo como resultado "surface + semantic": o clássico pega o ódio explícito por limiar, o
+transformer pega o implícito, e a combinação recupera parte dos falsos-negativos implícitos
+(206 dos 313 FN eram ódio implícito, ver Fase 9).
+
+## TabPFN (foundation model tabular) sobre features densas (29/07)
+
+**Setup.** TabPFN v2 (pacote tabpfn 8.2) sobre duas bases densas de features, **amostra toda na
+GPU** (Colab, notebooks/colab_tabpfn.ipynb): embeddings SBERT (384 dim) e TF-IDF word+char
+reduzido por TruncatedSVD para 300 dim. Comparado, nas MESMAS features, com LightGBM e LogReg.
+Limiar afinado no val, avaliação no test.
+
+| Features | TabPFN (strict / broad) | LightGBM | LogReg |
+|----------|-------------------------|----------|--------|
+| SBERT        | **0.684 / 0.699** | 0.675 / 0.681 | 0.638 / 0.685 |
+| TF-IDF→SVD300 | **0.676 / 0.691** | 0.671 / 0.664 | 0.670 / 0.686 |
+
+Referência: TF-IDF esparso completo 0.709 / 0.698; transformers 0.750.
+
+**McNemar, TabPFN(SBERT) vs melhor clássico.** strict vs tfidf_logreg: 225 vs 253 discordantes,
+p=0.22 (empate). broad vs tfidf_lgbm: 470 vs 483, p=0.70 (empate).
+
+**Conclusão.** Duas coisas ao mesmo tempo. O TabPFN é o **melhor classificador sobre features
+densas** (bate LGBM e LogReg nas duas bases e nas duas políticas). E ele **empata
+estatisticamente com o melhor clássico**, sem passar do TF-IDF esparso nem chegar aos
+transformers. O TF-IDF→SVD não ajudou o TabPFN a superar o SBERT: a compressão densa (SBERT ou
+SVD) descarta os tokens raros de superfície que carregam o sinal. Reforça a tese central: o
+gargalo é a **representação**, não o classificador. Um run anterior em CPU com treino subamostrado
+(n=2000) deu 0.621 e enganou; a amostra toda na GPU corrige. Predições em
+reports/predictions/tabpfn_*. Não incluído no leaderboard.csv (gerado por `hsc report` a partir
+dos runs dirigidos por config); registrado aqui como experimento exploratório.
