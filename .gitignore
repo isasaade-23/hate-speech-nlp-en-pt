@@ -12,6 +12,8 @@ models/**/*.pt
 models/**/*.onnx
 models/**/*.joblib
 models/**/*.pkl
+# Stop-word ablation artifacts (secondary; kept untracked)
+models/*_nostop_*/
 
 # Logs and experiment tracking
 logs/
