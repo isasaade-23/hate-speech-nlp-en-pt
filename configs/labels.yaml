@@ -78,6 +78,26 @@ sources:
       include_in_primary: true
     confidence: { "offensive": low, "Non-offensiv": high }
 
+  hatebr:
+    language: pt
+    domain: web_comment
+    text_column: instagram_comments
+    label_column: hate_speech
+    # HateBR (Vargas et al. 2022): 7k Brazilian Instagram comments, 3 expert annotators.
+    # The loader (dataset5_hatebr) folds the `hate_speech` category code into a 3-way
+    # label {neither, offensive_nothate, hate}, so the same column drives both policies:
+    #   strict -> only true hate is 1 (702 positives)
+    #   broad  -> offensive folds to hate (== offensive_language; 3500 positives)
+    # This gives the offense-vs-hate boundary natively (not inferred like tweets_ip).
+    # Research-only license (Sinch) -> NOT in commercial_whitelist below.
+    strict:
+      map: { hate: 1, offensive_nothate: 0, neither: 0 }
+      include_in_primary: true
+    broad:
+      map: { hate: 1, offensive_nothate: 1, neither: 0 }
+      include_in_primary: true
+    confidence: { hate: high, offensive_nothate: high, neither: high }
+
 # Sources cleared for COMMERCIAL redistribution of a derived model (see
 # methodology/data_provenance.md). The product model trains only on these.
 commercial_whitelist: ["multioff"]

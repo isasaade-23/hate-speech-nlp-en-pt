@@ -35,6 +35,13 @@ sources:
       - "Dataset/Split Dataset/Validation_meme_dataset.csv"
       - "Dataset/Split Dataset/Testing_meme_dataset.csv"
     encoding: "utf-8-sig"
+  hatebr:
+    zip: "hatebr.zip"
+    member: "HateBR.csv"
+    encoding: "utf-8"          # verified UTF-8, no BOM, 0 replacement chars (unlike the
+                               # pt_fortuna latin-1 scare). Source: franciellevargas/HateBR
+                               # @2d18c5b9 (dataset/HateBR.csv), 7000 Instagram comments.
+                               # Research-only license (Sinch) -> product-excluded.
 
 # Cleaning (clean.py). Two profiles: light (transformers) and heavy (TF-IDF).
 clean:

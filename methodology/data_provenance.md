@@ -21,6 +21,7 @@ Hashes SHA-256 dos zips de origem: preenchidos por `src/hsc/ingest` na primeira 
 | tweets_ip | não recuperável localmente (sem página salva) | verificar na origem | **incerto** |
 | pt_fortuna | "Unknown" no Kaggle (corpus Fortuna et al. 2019) | sim (uso acadêmico usual) | **incerto**, verificar com autores |
 | multioff | **Apache 2.0** | sim | **sim** (permissiva) |
+| hatebr | **research-only** ("strictly for academic and research purposes... commercial use expressly prohibited without prior written consent of Sinch") | sim (uso acadêmico) | **não** (comercial vedado sem consentimento) |
 
 ### Regra do produto (dois modelos)
 - **Modelo de pesquisa:** treinado em todos os datasets. Uso research-only. Não
@@ -41,3 +42,5 @@ Hashes SHA-256 dos zips de origem: preenchidos por `src/hsc/ingest` na primeira 
 - pt_fortuna: Fortuna et al., 2019 (Portuguese hate speech dataset).
 - multioff: Suryawanshi et al., 2020 (MultiOFF / offensive memes).
 - tweets_ip: confirmar autoria/citação na origem.
+- hatebr: Vargas et al., 2022 (HateBR: expert-annotated Brazilian Instagram hate speech corpus),
+  distribuído pela Sinch; fonte `franciellevargas/HateBR`. Wrapper HF: `ruanchaves/hatebr`.

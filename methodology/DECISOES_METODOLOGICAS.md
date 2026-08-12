@@ -281,3 +281,39 @@ experiment_log.md.
 
 **Impacto.** Ablação negativa documentada (justifica a escolha de pré-processamento para o
 revisor). Nenhuma mudança no modelo servido.
+
+---
+
+## Decisão: incorporar HateBR como 5ª fonte (PT, Instagram) (11/08)
+
+**Decisão.** Adicionar o HateBR (Vargas et al. 2022) ao corpus de pesquisa como `hatebr`:
+7.000 comentários de Instagram em PT-BR, anotados por 3 especialistas. Loader
+`src/hsc/ingest/dataset5_hatebr.py`; mapeamento em `configs/labels.yaml`. Fonte research-only
+(Sinch) → **fora** do `commercial_whitelist` (produto não usa).
+
+**Motivo.** Ataca três fraquezas de uma vez: (1) PT deixa de ser fonte única — antes só
+`pt_fortuna` (5.670, comentário web), agora ganha um segundo domínio (Instagram); (2)
+desconfunde idioma×domínio no PT; (3) o HateBR traz a fronteira ofensa≠ódio **anotada na
+origem**, não inferida como no `tweets_ip`.
+
+**Mapeamento (o ponto científico).** O rótulo binário do HateBR é `offensive_language`, que é
+ofensa, não ódio. A coluna `hate_speech` é um código de categoria: `0` = não-ofensivo,
+`-1` = ofensivo mas não-ódio, e códigos 1–9 (mais frações de múltiplas categorias) = ódio real.
+O loader dobra isso numa `label_original` de 3 vias {neither, offensive_nothate, hate}, e a mesma
+coluna alimenta as duas políticas: **strict** marca 1 só em `hate` (702 positivos, ~10%);
+**broad** dobra ofensivo em ódio (= `offensive_language`, 3.500 positivos). Assim o HateBR reforça
+exatamente o eixo strict/broad em vez de poluí-lo. Confiança `high` nas 3 categorias (anotação
+especialista com concordância Kappa/Fleiss reportada pelos autores).
+
+**Domínio.** Instagram entra como `web_comment` (mesmo registro de comentário curto de usuário
+do `pt_fortuna`); as fontes seguem separáveis por `source_dataset` nas quebras. Não foi criado um
+domínio novo no schema para não fragmentar a estratificação.
+
+**Codificação.** `HateBR.csv` (franciellevargas/HateBR @2d18c5b9) é UTF-8 sem BOM, 0 caracteres de
+substituição — verificado antes de ingerir (lição do susto latin-1 do `pt_fortuna`).
+
+**Impacto.** Reabre dedup + re-congelamento do split → **todo o leaderboard v1 fica obsoleto**
+(clássicos + neurais foram treinados no corpus sem HateBR). O corpus v1 foi preservado em
+`data/processed/_pre_hatebr_v1/`. Modelos precisam ser retreinados no corpus v2 para
+comparabilidade. ToxSyn-PT (sintético) fica para experimento de robustez separado, fora do
+corpus primário e fora do test.

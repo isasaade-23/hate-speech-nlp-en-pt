@@ -12,7 +12,7 @@ INTERIM_COLUMNS = [
     "text",            # raw text before cleaning
     "label_original",  # original label value as a string (traceability)
     "language",        # asserted source language: "en" | "pt"
-    "source_dataset",  # "memotion" | "tweets_ip" | "pt_fortuna" | "multioff"
+    "source_dataset",  # "memotion" | "tweets_ip" | "pt_fortuna" | "multioff" | "hatebr"
     "domain",          # "tweet" | "web_comment" | "meme_ocr"
 ]
 
@@ -30,5 +30,5 @@ CORPUS_EXTRA_COLUMNS = [
 
 VALID_LANGUAGES = {"en", "pt"}
 VALID_DOMAINS = {"tweet", "web_comment", "meme_ocr"}
-VALID_SOURCES = {"memotion", "tweets_ip", "pt_fortuna", "multioff"}
+VALID_SOURCES = {"memotion", "tweets_ip", "pt_fortuna", "multioff", "hatebr"}
 POSITIVE_LABEL = 1  # hate

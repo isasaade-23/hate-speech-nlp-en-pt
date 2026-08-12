@@ -12,6 +12,7 @@ from hsc.ingest import (
     dataset2_tweets,
     dataset3_pt,
     dataset4_multioff,
+    dataset5_hatebr,
 )
 from hsc.ingest.base import extract_to_raw, log, validate_interim
 from hsc.utils import ensure_dir, write_json, write_parquet
@@ -21,6 +22,7 @@ REGISTRY = {
     "tweets_ip": dataset2_tweets.load,
     "pt_fortuna": dataset3_pt.load,
     "multioff": dataset4_multioff.load,
+    "hatebr": dataset5_hatebr.load,
 }
 
 

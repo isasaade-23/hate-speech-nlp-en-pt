@@ -18,6 +18,9 @@ Duas políticas: `strict` (padrão) e `broad`.
 | pt_fortuna | hatespeech_comb = 0 | 0 | 0 | alta | não é ódio |
 | multioff | offensive | (fora) | 1 | baixa | ofensividade, não ódio; sob strict fica fora do primário |
 | multioff | Non-offensiv (truncado) | 0 | 0 | alta | casar por prefixo, não igualdade |
+| hatebr | hate (código `hate_speech` 1–9) | 1 | 1 | alta | ódio anotado por especialista (as 9 categorias) |
+| hatebr | offensive_nothate (`hate_speech` = −1) | 0 | 1 | alta | ofensivo mas não-ódio na anotação (bucket próprio) |
+| hatebr | neither (`hate_speech` = 0) | 0 | 0 | alta | não-ofensivo |
 
 ## Notas
 - **strict vs broad.** strict só marca 1 quando há ódio explícito. broad dobra
@@ -28,5 +31,9 @@ Duas políticas: `strict` (padrão) e `broad`.
   vira 1 e a fonte entra no primário.
 - **tweets_ip provisório.** O mapeamento 1/2/3 é inferido. A Fase 2 (probe) confirma,
   restringe à fronteira ódio-vs-resto, ou rebaixa a fonte. Ver DECISOES_METODOLOGICAS.md.
+- **hatebr nativo.** Ao contrário do tweets_ip, a fronteira ofensa≠ódio do HateBR é
+  anotada, não inferida: o loader deriva as 3 vias do código `hate_speech` (`0`→neither,
+  `-1`→offensive_nothate, 1–9→hate). broad reproduz o `offensive_language` original; strict
+  isola os 702 casos de ódio real. Fonte research-only (Sinch), fora do produto.
 - **label_confidence.** Cada linha do corpus carrega `label_confidence` (high/low). Linhas
   low (ofensivo tratado como proxy de ódio) permitem ablação e análise de robustez.
