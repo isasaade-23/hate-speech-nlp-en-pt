@@ -224,5 +224,27 @@
     "threshold": 0.4047,
     "val_macro_f1": 0.6718143184047074,
     "test_macro_f1": 0.664692004833337
+  },
+  "twitter_xlmr_strict_s42": {
+    "path": "models/twitter_xlmr_strict_s42/hf",
+    "config": "twitter_xlmr",
+    "family": "neural",
+    "policy": "strict",
+    "seed": 42,
+    "hf_checkpoint": "cardiffnlp/twitter-xlm-roberta-base",
+    "threshold": 0.4694,
+    "val_macro_f1": 0.7278925412481441,
+    "test_macro_f1": 0.7434165148040939
+  },
+  "twitter_xlmr_broad_s42": {
+    "path": "models/twitter_xlmr_broad_s42/hf",
+    "config": "twitter_xlmr",
+    "family": "neural",
+    "policy": "broad",
+    "seed": 42,
+    "hf_checkpoint": "cardiffnlp/twitter-xlm-roberta-base",
+    "threshold": 0.7292,
+    "val_macro_f1": 0.727675711016672,
+    "test_macro_f1": 0.7248237700950624
   }
 }
