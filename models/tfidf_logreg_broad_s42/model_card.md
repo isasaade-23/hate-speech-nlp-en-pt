@@ -1,12 +1,12 @@
 # Model card — tfidf_logreg_broad_s42
 
 - Family: classical  |  Config: tfidf_logreg  |  Policy: broad
-- Seed: 42  |  git: e89602a  |  train rows: 24028
+- Seed: 42  |  git: 595e63c  |  train rows: 28868
 
 ## Test metrics
-- macro-F1: 0.6976 (95% CI [0.6833, 0.7111])
-- recall (hate): 0.5475  |  precision (hate): 0.6257
-- ROC-AUC: 0.7684  |  PR-AUC: 0.6460
+- macro-F1: 0.7459 (95% CI [0.7343, 0.7571])
+- recall (hate): 0.6558  |  precision (hate): 0.6865
+- ROC-AUC: 0.8199  |  PR-AUC: 0.7473
 
 ## Intended use & limitations
 Research classifier for EN/PT social-media hate speech. Probabilistic; not a

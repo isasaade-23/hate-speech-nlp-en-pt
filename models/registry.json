@@ -4,100 +4,100 @@
     "config": "tfidf_logreg",
     "policy": "strict",
     "seed": 42,
-    "git_sha": "e89602a",
-    "threshold": 0.665,
-    "val_macro_f1": 0.7083460697309975,
-    "test_macro_f1": 0.709432431067481
+    "git_sha": "595e63c",
+    "threshold": 0.6357,
+    "val_macro_f1": 0.7023031976047356,
+    "test_macro_f1": 0.729307183095788
   },
   "tfidf_svm_strict_s42": {
     "path": "models/tfidf_svm_strict_s42/model.joblib",
     "config": "tfidf_svm",
     "policy": "strict",
     "seed": 42,
-    "git_sha": "e89602a",
-    "threshold": 0.1476,
-    "val_macro_f1": 0.6754259338465926,
-    "test_macro_f1": 0.671576711294966
+    "git_sha": "595e63c",
+    "threshold": 0.1665,
+    "val_macro_f1": 0.6741515537381692,
+    "test_macro_f1": 0.6967491851809204
   },
   "tfidf_lgbm_strict_s42": {
     "path": "models/tfidf_lgbm_strict_s42/model.joblib",
     "config": "tfidf_lgbm",
     "policy": "strict",
     "seed": 42,
-    "git_sha": "e89602a",
-    "threshold": 0.5742,
-    "val_macro_f1": 0.6911644570069724,
-    "test_macro_f1": 0.7065330373769416
+    "git_sha": "595e63c",
+    "threshold": 0.6232,
+    "val_macro_f1": 0.6993623061061638,
+    "test_macro_f1": 0.7114299524937003
   },
   "tfidf_logreg_broad_s42": {
     "path": "models/tfidf_logreg_broad_s42/model.joblib",
     "config": "tfidf_logreg",
     "policy": "broad",
     "seed": 42,
-    "git_sha": "e89602a",
-    "threshold": 0.557,
-    "val_macro_f1": 0.7040863231449299,
-    "test_macro_f1": 0.6976261343012704
+    "git_sha": "595e63c",
+    "threshold": 0.5312,
+    "val_macro_f1": 0.737670559964556,
+    "test_macro_f1": 0.745888962471833
   },
   "tfidf_svm_broad_s42": {
     "path": "models/tfidf_svm_broad_s42/model.joblib",
     "config": "tfidf_svm",
     "policy": "broad",
     "seed": 42,
-    "git_sha": "e89602a",
-    "threshold": 0.3903,
-    "val_macro_f1": 0.6739239685498906,
-    "test_macro_f1": 0.6733948225372497
+    "git_sha": "595e63c",
+    "threshold": 0.3789,
+    "val_macro_f1": 0.7304417574110049,
+    "test_macro_f1": 0.7287728106278734
   },
   "tfidf_lgbm_broad_s42": {
     "path": "models/tfidf_lgbm_broad_s42/model.joblib",
     "config": "tfidf_lgbm",
     "policy": "broad",
     "seed": 42,
-    "git_sha": "e89602a",
-    "threshold": 0.5602,
-    "val_macro_f1": 0.7050565319215039,
-    "test_macro_f1": 0.6982832307135096
+    "git_sha": "595e63c",
+    "threshold": 0.5695,
+    "val_macro_f1": 0.736049726134874,
+    "test_macro_f1": 0.7245852316159609
   },
   "sbert_logreg_strict_s42": {
     "path": "models/sbert_logreg_strict_s42/model.joblib",
     "config": "sbert_logreg",
     "policy": "strict",
     "seed": 42,
-    "git_sha": "450ee3c",
-    "threshold": 0.6803,
-    "val_macro_f1": 0.6544856715141146,
-    "test_macro_f1": 0.6645022006208239
+    "git_sha": "595e63c",
+    "threshold": 0.6534,
+    "val_macro_f1": 0.643922973039059,
+    "test_macro_f1": 0.6618240864743403
   },
   "sbert_lgbm_strict_s42": {
     "path": "models/sbert_lgbm_strict_s42/model.joblib",
     "config": "sbert_lgbm",
     "policy": "strict",
     "seed": 42,
-    "git_sha": "450ee3c",
-    "threshold": 0.2425,
-    "val_macro_f1": 0.6710633791939931,
-    "test_macro_f1": 0.6834401530801104
+    "git_sha": "595e63c",
+    "threshold": 0.3224,
+    "val_macro_f1": 0.668512643666889,
+    "test_macro_f1": 0.6778366234193575
   },
   "sbert_logreg_broad_s42": {
     "path": "models/sbert_logreg_broad_s42/model.joblib",
     "config": "sbert_logreg",
     "policy": "broad",
     "seed": 42,
-    "git_sha": "450ee3c",
-    "threshold": 0.5847,
-    "val_macro_f1": 0.6962451955195396,
-    "test_macro_f1": 0.6854049247046687
+    "git_sha": "595e63c",
+    "threshold": 0.553,
+    "val_macro_f1": 0.7192674397041323,
+    "test_macro_f1": 0.7192262540565173
   },
   "sbert_lgbm_broad_s42": {
     "path": "models/sbert_lgbm_broad_s42/model.joblib",
     "config": "sbert_lgbm",
     "policy": "broad",
     "seed": 42,
-    "git_sha": "450ee3c",
-    "threshold": 0.5234,
-    "val_macro_f1": 0.698493678288399,
-    "test_macro_f1": 0.6897572311784738
+    "git_sha": "595e63c",
+    "threshold": 0.4403,
+    "val_macro_f1": 0.7172635603022213,
+    "test_macro_f1": 0.7209930804285598
   },
   "xlmr_multilingual_strict_s42": {
     "path": "models/xlmr_multilingual_strict_s42/hf",
@@ -106,9 +106,9 @@
     "policy": "strict",
     "seed": 42,
     "hf_checkpoint": "FacebookAI/xlm-roberta-base",
-    "threshold": 0.5711,
-    "val_macro_f1": 0.7310967587205128,
-    "test_macro_f1": 0.7497078416316414
+    "threshold": 0.8428,
+    "val_macro_f1": 0.7265343326834199,
+    "test_macro_f1": 0.742468910896682
   },
   "xlmr_multilingual_broad_s42": {
     "path": "models/xlmr_multilingual_broad_s42/hf",
@@ -117,9 +117,9 @@
     "policy": "broad",
     "seed": 42,
     "hf_checkpoint": "FacebookAI/xlm-roberta-base",
-    "threshold": 0.5456,
-    "val_macro_f1": 0.7356181083835849,
-    "test_macro_f1": 0.7323018765295868
+    "threshold": 0.6542,
+    "val_macro_f1": 0.7701688478029016,
+    "test_macro_f1": 0.7635238278207437
   },
   "bertimbau_pt_strict_s42": {
     "path": "models/bertimbau_pt_strict_s42/hf",
@@ -128,9 +128,9 @@
     "policy": "strict",
     "seed": 42,
     "hf_checkpoint": "neuralmind/bert-base-portuguese-cased",
-    "threshold": 0.104,
-    "val_macro_f1": 0.7377659866252425,
-    "test_macro_f1": 0.7466806171620566
+    "threshold": 0.5235,
+    "val_macro_f1": 0.7659438005404176,
+    "test_macro_f1": 0.7840894261015134
   },
   "bertimbau_pt_broad_s42": {
     "path": "models/bertimbau_pt_broad_s42/hf",
@@ -139,9 +139,9 @@
     "policy": "broad",
     "seed": 42,
     "hf_checkpoint": "neuralmind/bert-base-portuguese-cased",
-    "threshold": 0.5617,
-    "val_macro_f1": 0.7636023610542926,
-    "test_macro_f1": 0.7116958925562964
+    "threshold": 0.347,
+    "val_macro_f1": 0.8425972584188273,
+    "test_macro_f1": 0.8349916344243438
   },
   "bertweet_en_strict_s42": {
     "path": "models/bertweet_en_strict_s42/hf",
@@ -150,9 +150,9 @@
     "policy": "strict",
     "seed": 42,
     "hf_checkpoint": "vinai/bertweet-base",
-    "threshold": 0.1381,
-    "val_macro_f1": 0.6973503125161841,
-    "test_macro_f1": 0.7071971455802928
+    "threshold": 0.3007,
+    "val_macro_f1": 0.7361038165266107,
+    "test_macro_f1": 0.707675785262487
   },
   "bertweet_en_broad_s42": {
     "path": "models/bertweet_en_broad_s42/hf",
@@ -161,69 +161,69 @@
     "policy": "broad",
     "seed": 42,
     "hf_checkpoint": "vinai/bertweet-base",
-    "threshold": 0.608,
-    "val_macro_f1": 0.7505320449030186,
-    "test_macro_f1": 0.7481211856218339
+    "threshold": 0.8651,
+    "val_macro_f1": 0.7430160921621438,
+    "test_macro_f1": 0.7528567539493959
   },
   "tfidf_logreg_nostop_strict_s42": {
     "path": "models/tfidf_logreg_nostop_strict_s42/model.joblib",
     "config": "tfidf_logreg_nostop",
     "policy": "strict",
     "seed": 42,
-    "git_sha": "f67338c",
-    "threshold": 0.5976,
-    "val_macro_f1": 0.7068366745504151,
-    "test_macro_f1": 0.7139340337606884
+    "git_sha": "595e63c",
+    "threshold": 0.6002,
+    "val_macro_f1": 0.7031516626761813,
+    "test_macro_f1": 0.7246529653166593
   },
   "tfidf_logreg_nostop_broad_s42": {
     "path": "models/tfidf_logreg_nostop_broad_s42/model.joblib",
     "config": "tfidf_logreg_nostop",
     "policy": "broad",
     "seed": 42,
-    "git_sha": "f67338c",
-    "threshold": 0.5579,
-    "val_macro_f1": 0.698750174873773,
-    "test_macro_f1": 0.6935585837376471
+    "git_sha": "595e63c",
+    "threshold": 0.541,
+    "val_macro_f1": 0.7370445419250804,
+    "test_macro_f1": 0.7467519968328069
   },
   "tfidf_lgbm_nostop_strict_s42": {
     "path": "models/tfidf_lgbm_nostop_strict_s42/model.joblib",
     "config": "tfidf_lgbm_nostop",
     "policy": "strict",
     "seed": 42,
-    "git_sha": "f67338c",
-    "threshold": 0.5908,
-    "val_macro_f1": 0.6901374977842996,
-    "test_macro_f1": 0.7012030277104899
+    "git_sha": "595e63c",
+    "threshold": 0.625,
+    "val_macro_f1": 0.7018641454450861,
+    "test_macro_f1": 0.7056916720445661
   },
   "tfidf_lgbm_nostop_broad_s42": {
     "path": "models/tfidf_lgbm_nostop_broad_s42/model.joblib",
     "config": "tfidf_lgbm_nostop",
     "policy": "broad",
     "seed": 42,
-    "git_sha": "f67338c",
-    "threshold": 0.5786,
-    "val_macro_f1": 0.7070532141053181,
-    "test_macro_f1": 0.6977541420777411
+    "git_sha": "595e63c",
+    "threshold": 0.5216,
+    "val_macro_f1": 0.7365291700876795,
+    "test_macro_f1": 0.7299857814350451
   },
   "tfidf_svm_nostop_strict_s42": {
     "path": "models/tfidf_svm_nostop_strict_s42/model.joblib",
     "config": "tfidf_svm_nostop",
     "policy": "strict",
     "seed": 42,
-    "git_sha": "f67338c",
-    "threshold": 0.14,
-    "val_macro_f1": 0.6750401417904555,
-    "test_macro_f1": 0.6640880631319135
+    "git_sha": "595e63c",
+    "threshold": 0.1711,
+    "val_macro_f1": 0.679347591394785,
+    "test_macro_f1": 0.6928183803023701
   },
   "tfidf_svm_nostop_broad_s42": {
     "path": "models/tfidf_svm_nostop_broad_s42/model.joblib",
     "config": "tfidf_svm_nostop",
     "policy": "broad",
     "seed": 42,
-    "git_sha": "f67338c",
-    "threshold": 0.4047,
-    "val_macro_f1": 0.6718143184047074,
-    "test_macro_f1": 0.664692004833337
+    "git_sha": "595e63c",
+    "threshold": 0.3711,
+    "val_macro_f1": 0.7228870269183819,
+    "test_macro_f1": 0.7215608547474047
   },
   "twitter_xlmr_strict_s42": {
     "path": "models/twitter_xlmr_strict_s42/hf",
@@ -232,9 +232,9 @@
     "policy": "strict",
     "seed": 42,
     "hf_checkpoint": "cardiffnlp/twitter-xlm-roberta-base",
-    "threshold": 0.4694,
-    "val_macro_f1": 0.7278925412481441,
-    "test_macro_f1": 0.7434165148040939
+    "threshold": 0.6771,
+    "val_macro_f1": 0.7395152979041436,
+    "test_macro_f1": 0.7487334104268832
   },
   "twitter_xlmr_broad_s42": {
     "path": "models/twitter_xlmr_broad_s42/hf",
@@ -243,8 +243,8 @@
     "policy": "broad",
     "seed": 42,
     "hf_checkpoint": "cardiffnlp/twitter-xlm-roberta-base",
-    "threshold": 0.7292,
-    "val_macro_f1": 0.727675711016672,
-    "test_macro_f1": 0.7248237700950624
+    "threshold": 0.6973,
+    "val_macro_f1": 0.772888743095175,
+    "test_macro_f1": 0.7657782013143098
   }
 }
