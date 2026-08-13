@@ -1,0 +1,3 @@
+config,val_macro_f1,test_macro_f1,threshold
+baseline,0.7023,0.7293,0.6357
+tuned,0.7119,0.7186,0.3107
