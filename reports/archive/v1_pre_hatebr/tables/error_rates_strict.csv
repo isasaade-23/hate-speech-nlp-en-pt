@@ -1,0 +1,6 @@
+model_id,slice_kind,slice,n,error_rate,fn_rate,fp_rate
+xlmr_multilingual_strict_s42,source_dataset,memotion,991,0.0424,0.0313,0.0111
+xlmr_multilingual_strict_s42,source_dataset,pt_fortuna,810,0.2222,0.0914,0.1309
+xlmr_multilingual_strict_s42,source_dataset,tweets_ip,2899,0.098,0.0535,0.0445
+xlmr_multilingual_strict_s42,language,en,3890,0.0838,0.0478,0.036
+xlmr_multilingual_strict_s42,language,pt,810,0.2222,0.0914,0.1309

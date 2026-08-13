@@ -1,0 +1,144 @@
+{
+  "model_id": "twitter_xlmr_strict_s42",
+  "config": "twitter_xlmr",
+  "family": "neural",
+  "policy": "strict",
+  "seed": 42,
+  "hf_checkpoint": "cardiffnlp/twitter-xlm-roberta-base",
+  "n_train": 23499,
+  "threshold": 0.4694,
+  "splits": {
+    "val": {
+      "n": 4700,
+      "n_hate": 584,
+      "macro_f1": 0.7278925412481441,
+      "accuracy": 0.8874468085106383,
+      "precision_hate": 0.5531914893617021,
+      "recall_hate": 0.4897260273972603,
+      "f1_hate": 0.51952770208901,
+      "precision_nothate": 0.9287592636863495,
+      "recall_nothate": 0.9438775510204082,
+      "roc_auc": 0.8136084791059282,
+      "pr_auc": 0.48902190690615877,
+      "macro_f1_ci95": [
+        0.7072,
+        0.7469
+      ],
+      "confusion": [
+        [
+          3885,
+          231
+        ],
+        [
+          298,
+          286
+        ]
+      ],
+      "by_language": [
+        {
+          "language": "en",
+          "n": 3891,
+          "n_hate": 329,
+          "macro_f1": 0.6891,
+          "recall_hate": 0.3799
+        },
+        {
+          "language": "pt",
+          "n": 809,
+          "n_hate": 255,
+          "macro_f1": 0.7274,
+          "recall_hate": 0.6314
+        }
+      ],
+      "by_source": [
+        {
+          "source_dataset": "memotion",
+          "n": 990,
+          "n_hate": 31,
+          "macro_f1": 0.4894,
+          "recall_hate": 0.0
+        },
+        {
+          "source_dataset": "pt_fortuna",
+          "n": 809,
+          "n_hate": 255,
+          "macro_f1": 0.7274,
+          "recall_hate": 0.6314
+        },
+        {
+          "source_dataset": "tweets_ip",
+          "n": 2901,
+          "n_hate": 298,
+          "macro_f1": 0.7003,
+          "recall_hate": 0.4195
+        }
+      ]
+    },
+    "test": {
+      "n": 4700,
+      "n_hate": 583,
+      "macro_f1": 0.7434165148040939,
+      "accuracy": 0.8917021276595745,
+      "precision_hate": 0.5680147058823529,
+      "recall_hate": 0.5300171526586621,
+      "f1_hate": 0.5483584738243124,
+      "precision_nothate": 0.9340712223291626,
+      "recall_nothate": 0.9429196016516881,
+      "roc_auc": 0.8346874503949862,
+      "pr_auc": 0.5013865621848961,
+      "macro_f1_ci95": [
+        0.724,
+        0.7648
+      ],
+      "confusion": [
+        [
+          3882,
+          235
+        ],
+        [
+          274,
+          309
+        ]
+      ],
+      "by_language": [
+        {
+          "language": "en",
+          "n": 3890,
+          "n_hate": 328,
+          "macro_f1": 0.6933,
+          "recall_hate": 0.3902
+        },
+        {
+          "language": "pt",
+          "n": 810,
+          "n_hate": 255,
+          "macro_f1": 0.7574,
+          "recall_hate": 0.7098
+        }
+      ],
+      "by_source": [
+        {
+          "source_dataset": "memotion",
+          "n": 991,
+          "n_hate": 31,
+          "macro_f1": 0.4879,
+          "recall_hate": 0.0
+        },
+        {
+          "source_dataset": "pt_fortuna",
+          "n": 810,
+          "n_hate": 255,
+          "macro_f1": 0.7574,
+          "recall_hate": 0.7098
+        },
+        {
+          "source_dataset": "tweets_ip",
+          "n": 2899,
+          "n_hate": 297,
+          "macro_f1": 0.7079,
+          "recall_hate": 0.431
+        }
+      ]
+    }
+  }
+}

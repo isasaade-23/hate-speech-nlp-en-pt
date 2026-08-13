@@ -20,11 +20,10 @@ logs/
 !logs/.gitkeep
 mlruns/
 
-# Reports: keep code-generated figures/tables out of git until release
+# Reports: figures are regenerable PNGs and stay out of git. Metrics, per-example
+# predictions and derived tables ARE tracked: the neural runs come from Colab zips
+# and cannot be regenerated locally without GPU (see reports/archive/ for v1).
 reports/figures/*
-reports/tables/*
-reports/metrics/*
-reports/predictions/*
 !reports/**/.gitkeep
 
 # Python

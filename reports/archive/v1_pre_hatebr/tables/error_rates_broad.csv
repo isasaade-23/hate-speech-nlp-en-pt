@@ -1,0 +1,7 @@
+model_id,slice_kind,slice,n,error_rate,fn_rate,fp_rate
+tfidf_lgbm_broad_s42,source_dataset,memotion,991,0.2987,0.2119,0.0868
+tfidf_lgbm_broad_s42,source_dataset,multioff,105,0.381,0.2095,0.1714
+tfidf_lgbm_broad_s42,source_dataset,pt_fortuna,810,0.2691,0.1667,0.1025
+tfidf_lgbm_broad_s42,source_dataset,tweets_ip,2900,0.2393,0.121,0.1183
+tfidf_lgbm_broad_s42,language,en,3996,0.2578,0.1459,0.1119
+tfidf_lgbm_broad_s42,language,pt,810,0.2691,0.1667,0.1025

@@ -1,0 +1,2 @@
+model_id,policy,n_errors,false_negatives,false_positives,implicit_hate_FN,slur_overflag_FP,short_text_errors,langid_mismatch_errors
+tfidf_lgbm_broad_s42,broad,1248,718,530,589,208,19,7

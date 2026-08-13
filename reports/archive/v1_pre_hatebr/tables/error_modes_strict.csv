@@ -1,0 +1,2 @@
+model_id,policy,n_errors,false_negatives,false_positives,implicit_hate_FN,slur_overflag_FP,short_text_errors,langid_mismatch_errors
+xlmr_multilingual_strict_s42,strict,506,260,246,183,88,4,6

@@ -1,0 +1,9 @@
+model_id,family,policy,test_macro_f1,recall_hate,ece,bias_gap,size_mb,latency_p50_ms,latency_p95_ms,deployable_cpu,data_license
+bertweet_en_broad_s42,neural,broad,0.7481,0.6134,0.1597,0.0912,,,,False,research-only
+xlmr_multilingual_broad_s42,neural,broad,0.7323,0.585,0.1149,0.1654,,,,False,research-only
+bertimbau_pt_broad_s42,neural,broad,0.7117,0.5608,0.1768,0.0965,,,,False,research-only
+tfidf_lgbm_broad_s42,classical,broad,0.6983,0.5513,0.0994,0.2613,4.11,6.5,7.5,True,research-only
+tfidf_logreg_broad_s42,classical,broad,0.6976,0.5475,0.0908,0.2568,3.6,1.5,1.7,True,research-only
+sbert_lgbm_broad_s42,classical,broad,0.6898,0.5288,0.0558,0.23,3.38,30.3,34.0,True,research-only
+sbert_logreg_broad_s42,classical,broad,0.6854,0.5675,0.1222,0.2236,0.0,20.0,22.4,True,research-only
+tfidf_svm_broad_s42,classical,broad,0.6734,0.525,0.0415,0.1901,4.91,3.5,4.8,True,research-only

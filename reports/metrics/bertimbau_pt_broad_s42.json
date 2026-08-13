@@ -1,0 +1,116 @@
+{
+  "model_id": "bertimbau_pt_broad_s42",
+  "config": "bertimbau_pt",
+  "family": "neural",
+  "policy": "broad",
+  "seed": 42,
+  "hf_checkpoint": "neuralmind/bert-base-portuguese-cased",
+  "n_train": 8886,
+  "threshold": 0.347,
+  "splits": {
+    "val": {
+      "n": 1777,
+      "n_hate": 735,
+      "macro_f1": 0.8425972584188273,
+      "accuracy": 0.8480585256049522,
+      "precision_hate": 0.8270042194092827,
+      "recall_hate": 0.8,
+      "f1_hate": 0.8132780082987552,
+      "precision_nothate": 0.8621013133208255,
+      "recall_nothate": 0.8819577735124761,
+      "roc_auc": 0.9225802029064984,
+      "pr_auc": 0.9059139037186685,
+      "macro_f1_ci95": [
+        0.8251,
+        0.8598
+      ],
+      "confusion": [
+        [
+          919,
+          123
+        ],
+        [
+          147,
+          588
+        ]
+      ],
+      "by_language": [
+        {
+          "language": "pt",
+          "n": 1777,
+          "n_hate": 735,
+          "macro_f1": 0.8426,
+          "recall_hate": 0.8
+        }
+      ],
+      "by_source": [
+        {
+          "source_dataset": "hatebr",
+          "n": 968,
+          "n_hate": 480,
+          "macro_f1": 0.91,
+          "recall_hate": 0.8792
+        },
+        {
+          "source_dataset": "pt_fortuna",
+          "n": 809,
+          "n_hate": 255,
+          "macro_f1": 0.7394,
+          "recall_hate": 0.651
+        }
+      ]
+    },
+    "test": {
+      "n": 1778,
+      "n_hate": 736,
+      "macro_f1": 0.8349916344243438,
+      "accuracy": 0.8402699662542182,
+      "precision_hate": 0.8121546961325967,
+      "recall_hate": 0.7989130434782609,
+      "f1_hate": 0.8054794520547945,
+      "precision_nothate": 0.8595825426944972,
+      "recall_nothate": 0.8694817658349329,
+      "roc_auc": 0.9144152132187265,
+      "pr_auc": 0.8982100814491049,
+      "macro_f1_ci95": [
+        0.8171,
+        0.851
+      ],
+      "confusion": [
+        [
+          906,
+          136
+        ],
+        [
+          148,
+          588
+        ]
+      ],
+      "by_language": [
+        {
+          "language": "pt",
+          "n": 1778,
+          "n_hate": 736,
+          "macro_f1": 0.835,
+          "recall_hate": 0.7989
+        }
+      ],
+      "by_source": [
+        {
+          "source_dataset": "hatebr",
+          "n": 969,
+          "n_hate": 481,
+          "macro_f1": 0.905,
+          "recall_hate": 0.8794
+        },
+        {
+          "source_dataset": "pt_fortuna",
+          "n": 809,
+          "n_hate": 255,
+          "macro_f1": 0.7285,
+          "recall_hate": 0.6471
+        }
+      ]
+    }
+  }
+}

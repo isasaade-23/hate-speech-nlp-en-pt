@@ -1,0 +1,172 @@
+{
+  "model_id": "twitter_xlmr_broad_s42",
+  "config": "twitter_xlmr",
+  "family": "neural",
+  "policy": "broad",
+  "seed": 42,
+  "hf_checkpoint": "cardiffnlp/twitter-xlm-roberta-base",
+  "n_train": 28868,
+  "threshold": 0.6973,
+  "splits": {
+    "val": {
+      "n": 5775,
+      "n_hate": 2081,
+      "macro_f1": 0.772888743095175,
+      "accuracy": 0.7975757575757576,
+      "precision_hate": 0.7547486033519553,
+      "recall_hate": 0.6492071119654013,
+      "f1_hate": 0.6980108499095841,
+      "precision_nothate": 0.8168130489335006,
+      "recall_nothate": 0.8811586356253384,
+      "roc_auc": 0.8540605217963231,
+      "pr_auc": 0.8024973179726854,
+      "macro_f1_ci95": [
+        0.7608,
+        0.785
+      ],
+      "confusion": [
+        [
+          3255,
+          439
+        ],
+        [
+          730,
+          1351
+        ]
+      ],
+      "by_language": [
+        {
+          "language": "en",
+          "n": 3998,
+          "n_hate": 1346,
+          "macro_f1": 0.7369,
+          "recall_hate": 0.5736
+        },
+        {
+          "language": "pt",
+          "n": 1777,
+          "n_hate": 735,
+          "macro_f1": 0.8376,
+          "recall_hate": 0.7878
+        }
+      ],
+      "by_source": [
+        {
+          "source_dataset": "hatebr",
+          "n": 968,
+          "n_hate": 480,
+          "macro_f1": 0.8976,
+          "recall_hate": 0.8729
+        },
+        {
+          "source_dataset": "memotion",
+          "n": 992,
+          "n_hate": 238,
+          "macro_f1": 0.5077,
+          "recall_hate": 0.1555
+        },
+        {
+          "source_dataset": "multioff",
+          "n": 106,
+          "n_hate": 43,
+          "macro_f1": 0.5583,
+          "recall_hate": 0.3488
+        },
+        {
+          "source_dataset": "pt_fortuna",
+          "n": 809,
+          "n_hate": 255,
+          "macro_f1": 0.7407,
+          "recall_hate": 0.6275
+        },
+        {
+          "source_dataset": "tweets_ip",
+          "n": 2900,
+          "n_hate": 1065,
+          "macro_f1": 0.789,
+          "recall_hate": 0.6761
+        }
+      ]
+    },
+    "test": {
+      "n": 5774,
+      "n_hate": 2080,
+      "macro_f1": 0.7657782013143098,
+      "accuracy": 0.79026671285071,
+      "precision_hate": 0.7378215654077723,
+      "recall_hate": 0.6480769230769231,
+      "f1_hate": 0.690043511645764,
+      "precision_nothate": 0.8145426906511274,
+      "recall_nothate": 0.8703302652950731,
+      "roc_auc": 0.8553449460663862,
+      "pr_auc": 0.8009754711688283,
+      "macro_f1_ci95": [
+        0.7546,
+        0.7769
+      ],
+      "confusion": [
+        [
+          3215,
+          479
+        ],
+        [
+          732,
+          1348
+        ]
+      ],
+      "by_language": [
+        {
+          "language": "en",
+          "n": 3996,
+          "n_hate": 1344,
+          "macro_f1": 0.7315,
+          "recall_hate": 0.5759
+        },
+        {
+          "language": "pt",
+          "n": 1778,
+          "n_hate": 736,
+          "macro_f1": 0.8274,
+          "recall_hate": 0.7799
+        }
+      ],
+      "by_source": [
+        {
+          "source_dataset": "hatebr",
+          "n": 969,
+          "n_hate": 481,
+          "macro_f1": 0.8988,
+          "recall_hate": 0.8836
+        },
+        {
+          "source_dataset": "memotion",
+          "n": 991,
+          "n_hate": 237,
+          "macro_f1": 0.5197,
+          "recall_hate": 0.1941
+        },
+        {
+          "source_dataset": "multioff",
+          "n": 106,
+          "n_hate": 43,
+          "macro_f1": 0.4905,
+          "recall_hate": 0.3488
+        },
+        {
+          "source_dataset": "pt_fortuna",
+          "n": 809,
+          "n_hate": 255,
+          "macro_f1": 0.7122,
+          "recall_hate": 0.5843
+        },
+        {
+          "source_dataset": "tweets_ip",
+          "n": 2899,
+          "n_hate": 1064,
+          "macro_f1": 0.7859,
+          "recall_hate": 0.6701
+        }
+      ]
+    }
+  }
+}

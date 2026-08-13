@@ -1,0 +1,5 @@
+source_dataset,language,n,hate,hate_rate
+memotion,en,6938,1663,0.24
+multioff,en,741,302,0.408
+pt_fortuna,pt,5664,1785,0.315
+tweets_ip,en,20297,7454,0.367

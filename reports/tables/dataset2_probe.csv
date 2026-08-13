@@ -1,0 +1,4 @@
+label_original,n,share,mean_chars,mean_tokens,profanity_rate,allcaps_word_rate,exclaim_rate,mention_rate
+1,2139.0,0.102,151.4,27.4,0.553,0.191,0.097,0.012
+2,5504.0,0.262,145.4,26.2,0.454,0.193,0.096,0.005
+3,13366.0,0.636,134.0,24.3,0.209,0.191,0.088,0.011

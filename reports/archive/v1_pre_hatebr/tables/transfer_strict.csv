@@ -1,0 +1,9 @@
+experiment,kind,features,n_train,n_test,test_hate_rate,macro_f1,recall_hate,precision_hate,roc_auc,threshold,policy
+EN_tweets->EN_memes,cross-domain,tfidf,14497,991,0.0313,0.5119,0.0323,0.0769,0.6109,0.6103,strict
+EN_memes->EN_tweets,cross-domain,tfidf,4957,2899,0.1024,0.5297,0.1515,0.1568,0.5534,0.388,strict
+EN_all->PT (zero-shot),cross-lingual,tfidf,19454,810,0.3148,0.4066,0.0,0.0,0.4822,0.7104,strict
+PT->EN_tweets (zero-shot),cross-lingual,tfidf,4045,2899,0.1024,0.507,0.0606,0.1452,0.5301,0.502,strict
+EN_tweets->EN_memes,cross-domain,sbert,14497,991,0.0313,0.5131,0.0968,0.0536,0.579,0.7047,strict
+EN_memes->EN_tweets,cross-domain,sbert,4957,2899,0.1024,0.5309,0.202,0.1523,0.5793,0.7203,strict
+EN_all->PT (zero-shot),cross-lingual,sbert,19454,810,0.3148,0.4665,0.0627,0.7273,0.7232,0.7892,strict
+PT->EN_tweets (zero-shot),cross-lingual,sbert,4045,2899,0.1024,0.4809,0.7071,0.1561,0.7008,0.562,strict

@@ -1,0 +1,116 @@
+{
+  "model_id": "bertweet_en_strict_s42",
+  "config": "bertweet_en",
+  "family": "neural",
+  "policy": "strict",
+  "seed": 42,
+  "hf_checkpoint": "vinai/bertweet-base",
+  "n_train": 19454,
+  "threshold": 0.1381,
+  "splits": {
+    "val": {
+      "n": 3891,
+      "n_hate": 329,
+      "macro_f1": 0.6973503125161841,
+      "accuracy": 0.8984836802878438,
+      "precision_hate": 0.4153846153846154,
+      "recall_hate": 0.49240121580547114,
+      "f1_hate": 0.4506258692628651,
+      "precision_nothate": 0.9522993430448443,
+      "recall_nothate": 0.9359910162829871,
+      "roc_auc": 0.8005517545042315,
+      "pr_auc": 0.3778706230122881,
+      "macro_f1_ci95": [
+        0.6737,
+        0.721
+      ],
+      "confusion": [
+        [
+          3334,
+          228
+        ],
+        [
+          167,
+          162
+        ]
+      ],
+      "by_language": [
+        {
+          "language": "en",
+          "n": 3891,
+          "n_hate": 329,
+          "macro_f1": 0.6974,
+          "recall_hate": 0.4924
+        }
+      ],
+      "by_source": [
+        {
+          "source_dataset": "memotion",
+          "n": 990,
+          "n_hate": 31,
+          "macro_f1": 0.4841,
+          "recall_hate": 0.0
+        },
+        {
+          "source_dataset": "tweets_ip",
+          "n": 2901,
+          "n_hate": 298,
+          "macro_f1": 0.7137,
+          "recall_hate": 0.5436
+        }
+      ]
+    },
+    "test": {
+      "n": 3890,
+      "n_hate": 328,
+      "macro_f1": 0.7071971455802928,
+      "accuracy": 0.9010282776349614,
+      "precision_hate": 0.4282115869017632,
+      "recall_hate": 0.5182926829268293,
+      "f1_hate": 0.4689655172413793,
+      "precision_nothate": 0.954766676209562,
+      "recall_nothate": 0.9362717574396406,
+      "roc_auc": 0.8169841552430123,
+      "pr_auc": 0.4370998224080551,
+      "macro_f1_ci95": [
+        0.6805,
+        0.7306
+      ],
+      "confusion": [
+        [
+          3335,
+          227
+        ],
+        [
+          158,
+          170
+        ]
+      ],
+      "by_language": [
+        {
+          "language": "en",
+          "n": 3890,
+          "n_hate": 328,
+          "macro_f1": 0.7072,
+          "recall_hate": 0.5183
+        }
+      ],
+      "by_source": [
+        {
+          "source_dataset": "memotion",
+          "n": 991,
+          "n_hate": 31,
+          "macro_f1": 0.5156,
+          "recall_hate": 0.0645
+        },
+        {
+          "source_dataset": "tweets_ip",
+          "n": 2899,
+          "n_hate": 297,
+          "macro_f1": 0.7225,
+          "recall_hate": 0.5657
+        }
+      ]
+    }
+  }
+}

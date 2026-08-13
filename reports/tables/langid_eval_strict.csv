@@ -1,0 +1,6 @@
+source_dataset,n,accuracy,pct_other
+ALL,39676.0,0.9632,0.0203
+hatebr,6777.0,0.8622,0.054
+memotion,6938.0,0.9821,0.0127
+pt_fortuna,5664.0,0.9792,0.0175
+tweets_ip,20297.0,0.9859,0.0124

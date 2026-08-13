@@ -1,0 +1,130 @@
+{
+  "model_id": "bertweet_en_broad_s42",
+  "config": "bertweet_en",
+  "family": "neural",
+  "policy": "broad",
+  "seed": 42,
+  "hf_checkpoint": "vinai/bertweet-base",
+  "n_train": 19982,
+  "threshold": 0.8651,
+  "splits": {
+    "val": {
+      "n": 3998,
+      "n_hate": 1346,
+      "macro_f1": 0.7430160921621438,
+      "accuracy": 0.7868934467233617,
+      "precision_hate": 0.747,
+      "recall_hate": 0.5549777117384844,
+      "f1_hate": 0.6368286445012787,
+      "precision_nothate": 0.8002001334222815,
+      "recall_nothate": 0.9046003016591252,
+      "roc_auc": 0.8225455458214833,
+      "pr_auc": 0.7427138959903712,
+      "macro_f1_ci95": [
+        0.7283,
+        0.7574
+      ],
+      "confusion": [
+        [
+          2399,
+          253
+        ],
+        [
+          599,
+          747
+        ]
+      ],
+      "by_language": [
+        {
+          "language": "en",
+          "n": 3998,
+          "n_hate": 1346,
+          "macro_f1": 0.743,
+          "recall_hate": 0.555
+        }
+      ],
+      "by_source": [
+        {
+          "source_dataset": "memotion",
+          "n": 992,
+          "n_hate": 238,
+          "macro_f1": 0.495,
+          "recall_hate": 0.0924
+        },
+        {
+          "source_dataset": "multioff",
+          "n": 106,
+          "n_hate": 43,
+          "macro_f1": 0.5971,
+          "recall_hate": 0.3256
+        },
+        {
+          "source_dataset": "tweets_ip",
+          "n": 2900,
+          "n_hate": 1065,
+          "macro_f1": 0.7867,
+          "recall_hate": 0.6676
+        }
+      ]
+    },
+    "test": {
+      "n": 3996,
+      "n_hate": 1344,
+      "macro_f1": 0.7528567539493959,
+      "accuracy": 0.795045045045045,
+      "precision_hate": 0.7622377622377622,
+      "recall_hate": 0.5677083333333334,
+      "f1_hate": 0.6507462686567164,
+      "precision_nothate": 0.8060100166944908,
+      "recall_nothate": 0.9102564102564102,
+      "roc_auc": 0.8362734717284349,
+      "pr_auc": 0.7561420635385678,
+      "macro_f1_ci95": [
+        0.7383,
+        0.7666
+      ],
+      "confusion": [
+        [
+          2414,
+          238
+        ],
+        [
+          581,
+          763
+        ]
+      ],
+      "by_language": [
+        {
+          "language": "en",
+          "n": 3996,
+          "n_hate": 1344,
+          "macro_f1": 0.7529,
+          "recall_hate": 0.5677
+        }
+      ],
+      "by_source": [
+        {
+          "source_dataset": "memotion",
+          "n": 991,
+          "n_hate": 237,
+          "macro_f1": 0.5006,
+          "recall_hate": 0.1097
+        },
+        {
+          "source_dataset": "multioff",
+          "n": 106,
+          "n_hate": 43,
+          "macro_f1": 0.6117,
+          "recall_hate": 0.3488
+        },
+        {
+          "source_dataset": "tweets_ip",
+          "n": 2899,
+          "n_hate": 1064,
+          "macro_f1": 0.8011,
+          "recall_hate": 0.6786
+        }
+      ]
+    }
+  }
+}

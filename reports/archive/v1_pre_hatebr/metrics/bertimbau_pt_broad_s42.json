@@ -1,0 +1,102 @@
+{
+  "model_id": "bertimbau_pt_broad_s42",
+  "config": "bertimbau_pt",
+  "family": "neural",
+  "policy": "broad",
+  "seed": 42,
+  "hf_checkpoint": "neuralmind/bert-base-portuguese-cased",
+  "n_train": 4045,
+  "threshold": 0.5617,
+  "splits": {
+    "val": {
+      "n": 809,
+      "n_hate": 255,
+      "macro_f1": 0.7636023610542926,
+      "accuracy": 0.8022249690976514,
+      "precision_hate": 0.7092511013215859,
+      "recall_hate": 0.6313725490196078,
+      "f1_hate": 0.6680497925311203,
+      "precision_nothate": 0.8384879725085911,
+      "recall_nothate": 0.8808664259927798,
+      "roc_auc": 0.8370071494301692,
+      "pr_auc": 0.6956295791935928,
+      "macro_f1_ci95": [
+        0.7287,
+        0.7945
+      ],
+      "confusion": [
+        [
+          488,
+          66
+        ],
+        [
+          94,
+          161
+        ]
+      ],
+      "by_language": [
+        {
+          "language": "pt",
+          "n": 809,
+          "n_hate": 255,
+          "macro_f1": 0.7636,
+          "recall_hate": 0.6314
+        }
+      ],
+      "by_source": [
+        {
+          "source_dataset": "pt_fortuna",
+          "n": 809,
+          "n_hate": 255,
+          "macro_f1": 0.7636,
+          "recall_hate": 0.6314
+        }
+      ]
+    },
+    "test": {
+      "n": 810,
+      "n_hate": 255,
+      "macro_f1": 0.7116958925562964,
+      "accuracy": 0.7592592592592593,
+      "precision_hate": 0.6327433628318584,
+      "recall_hate": 0.5607843137254902,
+      "f1_hate": 0.5945945945945946,
+      "precision_nothate": 0.8082191780821918,
+      "recall_nothate": 0.8504504504504504,
+      "roc_auc": 0.8337007595831125,
+      "pr_auc": 0.6924916110176946,
+      "macro_f1_ci95": [
+        0.676,
+        0.7431
+      ],
+      "confusion": [
+        [
+          472,
+          83
+        ],
+        [
+          112,
+          143
+        ]
+      ],
+      "by_language": [
+        {
+          "language": "pt",
+          "n": 810,
+          "n_hate": 255,
+          "macro_f1": 0.7117,
+          "recall_hate": 0.5608
+        }
+      ],
+      "by_source": [
+        {
+          "source_dataset": "pt_fortuna",
+          "n": 810,
+          "n_hate": 255,
+          "macro_f1": 0.7117,
+          "recall_hate": 0.5608
+        }
+      ]
+    }
+  }
+}
