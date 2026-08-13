@@ -9,13 +9,13 @@ A reproducible study comparing classical models with transformers, plus a deploy
 
 [![CI](https://github.com/isasaade-23/hate-speech-nlp-en-pt/actions/workflows/ci.yml/badge.svg)](https://github.com/isasaade-23/hate-speech-nlp-en-pt/actions/workflows/ci.yml)
 [![Docs](https://img.shields.io/badge/docs-online-3D5A80?style=flat-square)](https://isasaade-23.github.io/hate-speech-nlp-en-pt/)
-[![Live demo](https://img.shields.io/badge/demo-live-EE6C4D?style=flat-square)](https://hate-speech-demo-njcu6pa492futefhp8eiyb.streamlit.app/)
+[![Live demo](https://img.shields.io/badge/demo-live-EE6C4D?style=flat-square)](https://luciola-hatecheck.streamlit.app/)
 ![Python](https://img.shields.io/badge/python-3.12-3D5A80?style=flat-square)
 ![License](https://img.shields.io/badge/license-MIT-3D5A80?style=flat-square)
 ![Style](https://img.shields.io/badge/lint-ruff%20%2B%20black-3D5A80?style=flat-square)
 ![Models](https://img.shields.io/badge/models-16%20compared-EE6C4D?style=flat-square)
 
-**[Try the live demo](https://hate-speech-demo-njcu6pa492futefhp8eiyb.streamlit.app/)** ·
+**[Try the live demo](https://luciola-hatecheck.streamlit.app/)** ·
 **[Documentation](https://isasaade-23.github.io/hate-speech-nlp-en-pt/)** ·
 **[Code](https://github.com/isasaade-23/hate-speech-nlp-en-pt)**
 
@@ -41,7 +41,7 @@ The scientific core is a fair, leakage-safe comparison of two model families und
 The interactive demo, **Luciola**, runs the lightweight CPU model in the browser, in English or
 Portuguese, in a light or dark theme. It classifies text live and renders the stop-word ablation
 as an interactive heatmap.
-**[Open Luciola](https://hate-speech-demo-njcu6pa492futefhp8eiyb.streamlit.app/)**
+**[Open Luciola](https://luciola-hatecheck.streamlit.app/)**
 
 ## Key results
 

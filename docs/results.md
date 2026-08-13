@@ -71,7 +71,7 @@ word features and retraining does not move the classical models. macro-F1 shifts
 +0.005 across six model-by-policy runs, inside the confidence interval, and ROC-AUC is essentially
 unchanged. Character n-grams and IDF already down-weight function words, so removing them is
 redundant. The preprocessing was left unchanged. The
-[live demo](https://hate-speech-demo-njcu6pa492futefhp8eiyb.streamlit.app/) shows this as an
+[live demo](https://luciola-hatecheck.streamlit.app/) shows this as an
 interactive heatmap.
 
 ## Surface plus semantic ensemble
