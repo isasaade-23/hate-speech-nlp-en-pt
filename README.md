@@ -43,42 +43,75 @@ Portuguese, in a light or dark theme. It classifies text live and renders the st
 as an interactive heatmap.
 **[Open Luciola](https://luciola-hatecheck.streamlit.app/)**
 
-## Key results
+## Key results (Beta 2.0, corpus v4)
 
-- **Transformers win, significantly.** XLM-R reaches macro-F1 **0.750** (strict) and BERTweet
-  **0.748** (broad), beating the best classical baseline by ~4 points. The gap is confirmed by a
-  paired **McNemar test with Holm correction** (p = 0.003 strict; p < 0.001 broad). This is not a lucky split.
-- **Cross-lingual transfer is where embeddings earn their keep.** Trained on English and tested
-  zero-shot on Portuguese, TF-IDF **collapses** (it shares no vocabulary across languages) while
-  multilingual SBERT **transfers** (macro-F1 0.42 → 0.63 EN→PT).
+Beta 2.0 follows the roadmap in Gandhi et al. (2024), *Hate speech detection: A comprehensive
+review of recent works*, Expert Systems ([doi:10.1111/exsy.13562](https://doi.org/10.1111/exsy.13562)):
+stacked ensembles and affective-lexicon features are the levers with documented gains, and
+text-only models collapse on meme OCR.
+
+- **The served model is a calibrated stacked ensemble.** A meta logistic regression over the
+  three TF-IDF models (LogReg, SVM, LightGBM), with the meta weights, decision threshold and
+  Platt calibration all fit on validation only. Test (strict): **ROC-AUC 0.877, macro-F1 0.711,
+  ECE 0.044**, 15 MB, ~34 ms per text on CPU. Adding the two SBERT members reaches AUC 0.886
+  but requires a 470 MB encoder; documented as a trade-off.
+- **Meme OCR was demoted to an external test set.** Its per-source ROC-AUC was 0.547 (random):
+  the meme's hate lives in the image + text jointly, which the survey confirms for text-only
+  models (0.48-0.53). The primary corpus (v4) is social-media text: 53,540 rows after
+  deduplication, five sources, three of them Portuguese (per-source AUC: HateBR 0.91,
+  ToLD-Br 0.91, EN tweets 0.83, Fortuna 0.75).
+- **Growing the Portuguese side paid off twice.** HateBR (7k Instagram comments) and ToLD-Br
+  (21k tweets) raised the PT share to ~55% of the corpus and made PT the model's strongest
+  language.
+- **Honest probabilities.** The served score is Platt-calibrated on validation: test ECE
+  dropped from 0.16 (raw) to 0.03-0.04 at zero cost in macro-F1.
 - **Leakage-safe by construction.** Exact + near-duplicate (MinHash/LSH) deduplication and a
   group-stratified, frozen split guarantee no paraphrase crosses train/test. A CI test enforces it.
-- **Beyond a single number.** The evaluation adds probability **calibration** (ECE/Brier), an
-  identity-term **bias probe**, and a qualitative **error analysis** (implicit hate is the main blind spot).
-- **A data-integrity bug, found and fixed.** The Portuguese source was being decoded as latin-1
-  when it is UTF-8; a byte-level audit caught it, and the whole pipeline was rebuilt on corrected
-  text (this alone lifted zero-shot EN→PT transfer by ~4 points).
-- **A negative result, tested and reported.** Removing bilingual stop words (prepositions, pronouns,
-  articles) from the TF-IDF word features does not move the classical models. macro-F1 and ROC-AUC
-  stay within noise, because character n-grams and IDF already down-weight function words.
+- **Negative results, tested and reported.** Bayesian HPO over the TF-IDF family, per-language
+  thresholds, stop-word removal and frozen 230M-encoder embeddings all measured at or below the
+  baseline; each is documented in the decision log instead of silently dropped.
+
+### Archived: v1 study results (original 4-dataset corpus)
+
+The classical-vs-transformer comparison below was run on the original corpus (before HateBR,
+ToLD-Br and the meme-OCR demotion). The transformers have not yet been re-run on corpus v4
+(they need Colab GPU), so these numbers describe that earlier corpus, not the current one.
+
+- **Transformers won, significantly**: XLM-R macro-F1 0.750 (strict), BERTweet 0.748 (broad),
+  ~4 points over the best classical baseline (paired McNemar with Holm, p = 0.003 / p < 0.001).
+- **Cross-lingual transfer is where embeddings earn their keep**: TF-IDF collapses EN→PT
+  zero-shot (0.42) while multilingual SBERT transfers (0.63).
+- **A data-integrity bug, found and fixed**: the Portuguese source was decoded as latin-1 when
+  it is UTF-8; the byte-level audit and rebuild lifted EN→PT transfer by ~4 points.
 
 <div align="center">
 
 ![Classical vs. transformer leaderboard](assets/leaderboard.png)
 
-*Test macro-F1 by model and label policy. Transformers (coral) top both policies; the gap over
-the best classical baseline is statistically significant.*
+*v1 study figure: test macro-F1 by model and label policy on the original corpus. Transformers
+(coral) topped both policies; the gap over the best classical baseline was statistically
+significant.*
 
 </div>
 
-### Final comparison (test macro-F1)
+### Beta 2.0 comparison (corpus v4, test)
+
+| Model (strict) | ROC-AUC | macro-F1 | Recall on hate |
+|----------------|---------|----------|----------------|
+| **Stacked ensemble (served)** | **0.877** | **0.711** | 0.548 |
+| tfidf_logreg | 0.873 | 0.702 | 0.481 |
+| tfidf_lgbm | 0.860 | 0.707 | 0.497 |
+| tfidf_svm | 0.855 | 0.695 | 0.521 |
+| Stack + SBERT members (not served) | 0.886 | 0.715 | 0.511 |
+
+### v1 study: final comparison (test macro-F1, original corpus)
 
 | Policy | Best transformer | Best classical | Δ | Significance (McNemar + Holm) |
 |--------|------------------|----------------|----|-------------------------------|
 | strict | XLM-R · **0.750** | tfidf_logreg · 0.709 | +0.041 | p = 0.003 |
 | broad  | BERTweet · **0.748** | tfidf_lgbm · 0.698 | +0.050 | p < 0.001 |
 
-### Cross-lingual & cross-domain transfer
+### v1 study: cross-lingual & cross-domain transfer
 
 <div align="center">
 
@@ -99,7 +132,7 @@ result is reported under two policies, **strict** (only explicit hate is positiv
 
 ```mermaid
 flowchart LR
-    A[4 Kaggle datasets<br/>EN tweets · EN memes OCR · PT comments] --> B[Ingest<br/>common schema]
+    A[6 sources<br/>EN tweets · PT tweets · PT comments<br/>EN memes OCR as external test] --> B[Ingest<br/>common schema]
     B --> C[Harmonize<br/>strict / broad policies]
     C --> D[Dedup + leakage-safe split<br/>MinHash/LSH · grouped · frozen]
     D --> E[Language ID<br/>lingua]
@@ -154,9 +187,9 @@ Choosing the served model is a Pareto trade-off, not just the top macro-F1
 
 | Profile | Model | Why |
 |---------|-------|-----|
-| Best quality | XLM-R | Highest macro-F1; needs a GPU for low latency |
-| **Lightweight CPU MVP** | **tfidf_logreg** | p95 **1.6 ms**, **3.6 MB**, self-contained, within ~4 pts of XLM-R |
-| Calibrated scores | sbert_lgbm | Best ECE, at the cost of a 470 MB encoder |
+| **Served (Beta 2.0)** | **stacked ensemble (3 TF-IDF models)** | AUC 0.877, Platt-calibrated (ECE 0.04), 15 MB, ~34 ms/text on CPU |
+| Best AUC measured | stack + SBERT members | AUC 0.886, but needs the 470 MB SBERT encoder |
+| v1 study best quality | XLM-R | Highest macro-F1 on the original corpus; needs a GPU |
 
 **License gate:** all current models are trained on the full corpus and are therefore
 research-only. A commercially clear model must be retrained on permissively licensed data

@@ -373,3 +373,43 @@ SBERT congelado). Platt refitado na validação v3: ECE de teste 0.155 → 0.026
 0.5765 → 0.2173 calibrado, F1 intacto. No demo, o exemplo PT de misoginia subiu de p=0.38
 (raspando o limiar v2) para p=0.68 — o efeito direto dos 21k tweets PT. Transformers ainda
 são v2: precisam de re-run no Colab antes de qualquer comparação clássico×neural em v3.
+
+## Beta 2.0: memotion vira teste externo + ensemble empilhado servido (14/08)
+
+**Motivação.** Meta da usuária: AUC ≥ 0.9 no servido, sem vazamento. Guia: o survey
+Gandhi et al. 2024 (Expert Systems, DOI 10.1111/exsy.13562), que aponta ensembles e
+features de léxico afetivo como as alavancas com ganho documentado, e não inventaria
+nenhum corpus PT (nossos 3 corpora PT estão fora do radar da revisão).
+
+**Diagnóstico que redefiniu o escopo.** Quebra por fonte da AUC do servido no teste v3:
+hatebr 0.90, toldbr 0.88, tweets_ip 0.84, pt_fortuna 0.74 e **memotion 0.547 — aleatório**.
+O texto OCR de meme sozinho não carrega o ódio (o survey mede o mesmo colapso, 0.48-0.53,
+em modelos text-only sobre memes). Decisão da usuária: memotion sai do corpus primário
+(`include_in_primary: false`, 2 políticas) e fica guardado como teste externo.
+
+**Corpus v4.** strict: 54.679 brutas → 53.540 após dedup, splits 38.241/7.650/7.649,
+hash 1657bf97bb5f. broad: 54.281, hash 1144ef915567. Portão de leakage verde.
+
+**Ensemble (scripts/build_stack.py).** Meta-LogReg sobre os scores dos clássicos; meta,
+limiar e Platt fitados APENAS na validação; teste tocado 1× por composição.
+
+| Composição (strict, teste v4) | ROC-AUC | macro-F1 | recall-ódio | ECE |
+|---|---|---|---|---|
+| tfidf_logreg solo | 0.8728 | 0.7022 | 0.481 | — |
+| stack 3×TF-IDF (SERVIDO) | 0.8772 | 0.7105 | 0.548 | 0.044 |
+| stack 5 (+2 SBERT) | 0.8864 | 0.7153 | 0.511 | 0.043 |
+
+Servimos o 3×TF-IDF (15 MB, 34 ms/texto em CPU); o de 5 ganha +0.009 AUC mas exige o
+encoder SBERT de 470 MB, inviável no 1 GB do Streamlit free. Registrado como trade-off,
+não descartado. Por fonte (stack servido): hatebr 0.912, toldbr 0.906, tweets_ip 0.829,
+pt_fortuna 0.746 — o gargalo agora é o EN de tweets_ip e a subjetividade do pt_fortuna.
+
+**Suporte de inferência.** `HateClassifier` aceita bundle `kind='stack'` (membros inline,
+coeficientes do meta, Platt); o membro linear vira a superfície de explicação do demo,
+então a atribuição por termos segue exata para essa parcela do score.
+
+**Rumo ao 0.9.** Faltam ~0.02 de AUC. Próximas alavancas (fase seguinte da Beta 2.0):
+HurtLex/features afetivas nos modelos-base (ganho documentado no survey), datasets
+Vidgen "Dynamically Generated" (41k, >54% ódio) e HateXplain, e o destilado ONNX int8
+treinado no Colab como quarto membro. Números v4 NÃO são comparáveis a v1/v2/v3 (teste
+mudou); transformers seguem reportados como estudo anterior até re-run no Colab.

@@ -24,12 +24,18 @@ sources:
     text_column: text_corrected
     text_fallback: text_ocr        # use OCR when corrected is empty
     label_column: offensive
+    # Beta 2.0 (14/08/2026): demoted to auxiliary/external test. Meme OCR is another
+    # modality: per-source ROC-AUC on the v3 test was 0.547 (random) while every
+    # social-media-text source sat between 0.74 and 0.90. The survey guiding Beta 2.0
+    # (Gandhi et al. 2024) reports the same collapse for text-only models on memes
+    # (0.48-0.53). The deploy target is social-media text; memotion stays in interim
+    # and remains recoverable via include_auxiliary.
     strict:
       map: { hateful_offensive: 1, very_offensive: 0, slight: 0, not_offensive: 0 }
-      include_in_primary: true
+      include_in_primary: false
     broad:
       map: { hateful_offensive: 1, very_offensive: 1, slight: 0, not_offensive: 0 }
-      include_in_primary: true
+      include_in_primary: false
     confidence: { hateful_offensive: high, very_offensive: low, slight: high, not_offensive: high }
 
   tweets_ip:

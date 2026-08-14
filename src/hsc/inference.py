@@ -51,8 +51,21 @@ class HateClassifier:
 
         self.model_id = _resolve_model_id(model_id)
         bundle = joblib.load(resolve("models") / self.model_id / "model.joblib")
-        self.vectorizer = bundle["vectorizer"]
-        self.estimator = bundle["estimator"]
+        self._stack = None
+        if bundle.get("kind") == "stack":
+            mb = bundle["member_bundles"]
+            self._stack = {
+                "members": [(m, mb[m]["vectorizer"], mb[m]["estimator"]) for m in bundle["members"]],
+                "coef": np.asarray(bundle["meta_coef"], dtype=float),
+                "intercept": float(bundle["meta_intercept"]),
+            }
+            # the linear member doubles as the explanation surface (term attribution)
+            first = bundle["members"][0]
+            self.vectorizer = mb[first]["vectorizer"]
+            self.estimator = mb[first]["estimator"]
+        else:
+            self.vectorizer = bundle["vectorizer"]
+            self.estimator = bundle["estimator"]
         self.threshold = float(bundle.get("threshold", 0.5))
         self.config = bundle.get("config", {})
         # optional Platt calibration (fit on val): served scores become probabilities
@@ -67,8 +80,14 @@ class HateClassifier:
 
     def predict_batch(self, texts: list[str]) -> list[dict]:
         cleaned = [clean_text(t, self._profile) for t in texts]
-        X = self.vectorizer.transform(cleaned)
-        scores = np.asarray(_score(self.estimator, X))
+        if self._stack is not None:
+            z = np.full(len(cleaned), self._stack["intercept"])
+            for (name, vec, est), w in zip(self._stack["members"], self._stack["coef"]):
+                z += w * np.asarray(_score(est, vec.transform(cleaned)))
+            scores = 1.0 / (1.0 + np.exp(-z))
+        else:
+            X = self.vectorizer.transform(cleaned)
+            scores = np.asarray(_score(self.estimator, X))
         if self._cal is not None:
             a, b = self._cal
             scores = 1.0 / (1.0 + np.exp(-(a * scores + b)))

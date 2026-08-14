@@ -10,8 +10,15 @@ Hashes SHA-256 dos zips de origem: preenchidos por `src/hsc/ingest` na primeira 
 |----|---------|--------|---------|-----|----------------|-----------|-------------|
 | memotion | Memotion Dataset 7k | EN | meme (OCR) | dataset1.zip | memotion_dataset_7k/labels.csv | ~6.992 | utf-8-sig |
 | tweets_ip | Hate and offensive speech detection | EN | tweet | dataset2.zip | Hate and offensive speech detection.csv | ~21.009 | utf-8 |
-| pt_fortuna | Portuguese Hate Speech (Fortuna 2019) | PT | comentário web | dataset3.zip | 2019-05-28_portuguese_hate_speech_binary_classification.csv | ~5.670 | latin-1 |
+| pt_fortuna | Portuguese Hate Speech (Fortuna 2019) | PT | comentário web | dataset3.zip | 2019-05-28_portuguese_hate_speech_binary_classification.csv | ~5.670 | utf-8 (corrigido 27/07; era lido como latin-1) |
 | multioff | MultiOFF / Hate Speech Detection Dataset | EN | meme (OCR) | dataset4.zip | Dataset/Split Dataset/{Training,Validation,Testing}_meme_dataset.csv | 445/149/149 | utf-8-sig |
+| hatebr | HateBR (Vargas et al. 2022) | PT | comentário web (Instagram) | hatebr.zip | HateBR.csv | 7.000 | utf-8 |
+| toldbr | ToLD-Br (Leite et al. 2020) | PT | tweet | toldbr.zip | ToLD-BR.csv | 21.000 | utf-8 (109 U+FFFD nativos) |
+
+**Beta 2.0 (14/08/2026):** `memotion` rebaixado a conjunto auxiliar/teste externo
+(`include_in_primary: false` nas duas políticas). Motivo: AUC por fonte de 0.547 no teste
+v3 (aleatório) porque o texto OCR sozinho não carrega o ódio do meme; o alvo de deploy é
+texto de rede social. O dataset segue ingerido e recuperável.
 
 ## Licenças (crítico para o produto comercial)
 
@@ -22,6 +29,7 @@ Hashes SHA-256 dos zips de origem: preenchidos por `src/hsc/ingest` na primeira 
 | pt_fortuna | "Unknown" no Kaggle (corpus Fortuna et al. 2019) | sim (uso acadêmico usual) | **incerto**, verificar com autores |
 | multioff | **Apache 2.0** | sim | **sim** (permissiva) |
 | hatebr | **research-only** ("strictly for academic and research purposes... commercial use expressly prohibited without prior written consent of Sinch") | sim (uso acadêmico) | **não** (comercial vedado sem consentimento) |
+| toldbr | **CC BY-SA 4.0** (dados; código MIT) | sim, com atribuição | **cinza**: share-alike sobre pesos derivados é juridicamente não testado; mantido fora da whitelist |
 
 ### Regra do produto (dois modelos)
 - **Modelo de pesquisa:** treinado em todos os datasets. Uso research-only. Não

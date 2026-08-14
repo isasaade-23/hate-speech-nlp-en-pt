@@ -4,50 +4,50 @@
   "family": "classical",
   "policy": "broad",
   "seed": 42,
-  "git_sha": "df71154",
-  "n_train": 43724,
-  "threshold": 0.3805,
+  "git_sha": "cac1065",
+  "n_train": 38772,
+  "threshold": 0.397,
   "splits": {
     "val": {
-      "n": 8745,
-      "n_hate": 2655,
-      "macro_f1": 0.7185021892554806,
-      "accuracy": 0.7627215551743853,
-      "precision_hate": 0.6105182926829268,
-      "recall_hate": 0.6033898305084746,
-      "f1_hate": 0.6069331312748627,
-      "precision_nothate": 0.8279692860643686,
-      "recall_nothate": 0.832183908045977,
-      "roc_auc": 0.7986040528296519,
-      "pr_auc": 0.6669058956182479,
+      "n": 7755,
+      "n_hate": 2418,
+      "macro_f1": 0.738433877977523,
+      "accuracy": 0.7886524822695036,
+      "precision_hate": 0.7008767405879319,
+      "recall_hate": 0.5620347394540943,
+      "f1_hate": 0.6238237319256369,
+      "precision_nothate": 0.8179160935350757,
+      "recall_nothate": 0.891324714258947,
+      "roc_auc": 0.8206954260509176,
+      "pr_auc": 0.7106651118665493,
       "macro_f1_ci95": [
-        0.7078,
-        0.7279
+        0.7271,
+        0.7489
       ],
       "confusion": [
         [
-          5068,
-          1022
+          4757,
+          580
         ],
         [
-          1053,
-          1602
+          1059,
+          1359
         ]
       ],
       "by_language": [
         {
           "language": "en",
-          "n": 3997,
-          "n_hate": 1345,
-          "macro_f1": 0.6862,
-          "recall_hate": 0.623
+          "n": 3006,
+          "n_hate": 1108,
+          "macro_f1": 0.7329,
+          "recall_hate": 0.6534
         },
         {
           "language": "pt",
-          "n": 4748,
+          "n": 4749,
           "n_hate": 1310,
-          "macro_f1": 0.745,
-          "recall_hate": 0.5832
+          "macro_f1": 0.7323,
+          "recall_hate": 0.4847
         }
       ],
       "by_source": [
@@ -56,85 +56,78 @@
           "n": 968,
           "n_hate": 480,
           "macro_f1": 0.8275,
-          "recall_hate": 0.7583
-        },
-        {
-          "source_dataset": "memotion",
-          "n": 991,
-          "n_hate": 237,
-          "macro_f1": 0.5343,
-          "recall_hate": 0.2658
+          "recall_hate": 0.7271
         },
         {
           "source_dataset": "multioff",
           "n": 106,
           "n_hate": 43,
-          "macro_f1": 0.5475,
-          "recall_hate": 0.5116
+          "macro_f1": 0.5411,
+          "recall_hate": 0.3721
         },
         {
           "source_dataset": "pt_fortuna",
-          "n": 809,
+          "n": 810,
           "n_hate": 255,
-          "macro_f1": 0.7154,
-          "recall_hate": 0.5569
+          "macro_f1": 0.6911,
+          "recall_hate": 0.4549
         },
         {
           "source_dataset": "toldbr",
           "n": 2971,
           "n_hate": 575,
-          "macro_f1": 0.6782,
-          "recall_hate": 0.4487
+          "macro_f1": 0.6412,
+          "recall_hate": 0.2957
         },
         {
           "source_dataset": "tweets_ip",
           "n": 2900,
           "n_hate": 1065,
-          "macro_f1": 0.72,
-          "recall_hate": 0.707
+          "macro_f1": 0.7399,
+          "recall_hate": 0.6648
         }
       ]
     },
     "test": {
-      "n": 8745,
-      "n_hate": 2656,
-      "macro_f1": 0.7168957035426915,
-      "accuracy": 0.7638650657518582,
-      "precision_hate": 0.6169370795409577,
-      "recall_hate": 0.5869728915662651,
-      "f1_hate": 0.6015820953115956,
-      "precision_nothate": 0.8235767127693793,
-      "recall_nothate": 0.8410247988175398,
-      "roc_auc": 0.7933093228555542,
-      "pr_auc": 0.6630100028350555,
+      "n": 7754,
+      "n_hate": 2419,
+      "macro_f1": 0.7268997094303074,
+      "accuracy": 0.7771472788238328,
+      "precision_hate": 0.6719761075161772,
+      "recall_hate": 0.5580818520049607,
+      "f1_hate": 0.6097560975609756,
+      "precision_nothate": 0.8139251523063533,
+      "recall_nothate": 0.8764761012183693,
+      "roc_auc": 0.8202845483254445,
+      "pr_auc": 0.7022200153689452,
       "macro_f1_ci95": [
-        0.7067,
-        0.7268
+        0.7164,
+        0.7381
       ],
       "confusion": [
         [
-          5121,
-          968
+          4676,
+          659
         ],
         [
-          1097,
-          1559
+          1069,
+          1350
         ]
       ],
       "by_language": [
         {
           "language": "en",
-          "n": 3996,
-          "n_hate": 1345,
-          "macro_f1": 0.6844,
-          "recall_hate": 0.597
+          "n": 3005,
+          "n_hate": 1108,
+          "macro_f1": 0.7104,
+          "recall_hate": 0.639
         },
         {
           "language": "pt",
           "n": 4749,
           "n_hate": 1311,
-          "macro_f1": 0.7441,
-          "recall_hate": 0.5767
+          "macro_f1": 0.7291,
+          "recall_hate": 0.4897
         }
       ],
       "by_source": [
@@ -142,43 +135,36 @@
           "source_dataset": "hatebr",
           "n": 969,
           "n_hate": 481,
-          "macro_f1": 0.8297,
-          "recall_hate": 0.7588
-        },
-        {
-          "source_dataset": "memotion",
-          "n": 991,
-          "n_hate": 237,
-          "macro_f1": 0.4981,
-          "recall_hate": 0.1941
+          "macro_f1": 0.8017,
+          "recall_hate": 0.6819
         },
         {
           "source_dataset": "multioff",
           "n": 105,
           "n_hate": 43,
-          "macro_f1": 0.6479,
-          "recall_hate": 0.6047
+          "macro_f1": 0.5485,
+          "recall_hate": 0.3488
         },
         {
           "source_dataset": "pt_fortuna",
           "n": 809,
           "n_hate": 255,
-          "macro_f1": 0.6761,
-          "recall_hate": 0.498
+          "macro_f1": 0.6725,
+          "recall_hate": 0.4431
         },
         {
           "source_dataset": "toldbr",
           "n": 2971,
           "n_hate": 575,
-          "macro_f1": 0.689,
-          "recall_hate": 0.4591
+          "macro_f1": 0.6666,
+          "recall_hate": 0.3496
         },
         {
           "source_dataset": "tweets_ip",
           "n": 2900,
           "n_hate": 1065,
-          "macro_f1": 0.7218,
-          "recall_hate": 0.6864
+          "macro_f1": 0.7161,
+          "recall_hate": 0.6507
         }
       ]
     }

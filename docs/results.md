@@ -3,7 +3,42 @@
 All numbers are on the frozen test split, seed 42, reported under two label policies:
 **strict** (only explicit hate is positive) and **broad** (offensive folded into hate).
 
-## Model comparison
+## Beta 2.0 (corpus v4, current)
+
+Beta 2.0 follows Gandhi et al. (2024), *Expert Systems*
+([doi:10.1111/exsy.13562](https://doi.org/10.1111/exsy.13562)): stacked ensembles and
+affective-lexicon features carry documented gains, and text-only models collapse on meme OCR.
+Corpus v4 = v3 (six sources) with the meme-OCR source demoted to an external test set after
+its per-source ROC-AUC measured 0.547 (random). 53,540 rows strict after deduplication,
+frozen split 38,241 / 7,650 / 7,649, leakage gate green.
+
+| Model (strict, test) | ROC-AUC | macro-F1 | Recall on hate | ECE |
+|----------------------|---------|----------|----------------|-----|
+| **Stacked ensemble (served)** | **0.877** | **0.711** | 0.548 | 0.044 |
+| tfidf_logreg | 0.873 | 0.702 | 0.481 | — |
+| tfidf_lgbm | 0.860 | 0.707 | 0.497 | — |
+| tfidf_svm | 0.855 | 0.695 | 0.521 | — |
+| Stack + SBERT members (not served) | 0.886 | 0.715 | 0.511 | 0.043 |
+
+The served stack is a meta logistic regression over the three TF-IDF models; meta weights,
+decision threshold and Platt calibration are all fit on validation only, and the test split
+is touched once per composition. 15 MB, ~34 ms per text on CPU. The five-member stack adds
+0.009 AUC but requires the 470 MB SBERT encoder, which does not fit the deployment budget.
+
+Per-source ROC-AUC of the served stack: HateBR 0.912, ToLD-Br 0.906, EN tweets 0.829,
+Fortuna 0.746. Portuguese is now the model's strongest language; the remaining AUC is lost
+on the EN tweets source and on Fortuna's subjective label boundary.
+
+Broad policy: served stack macro-F1 0.758, ROC-AUC 0.848 (best classical single:
+tfidf_logreg 0.758 / 0.845).
+
+## v1 study (original corpus, archived)
+
+Everything below was measured on the original 4-dataset corpus, before HateBR, ToLD-Br and
+the meme-OCR demotion. The transformers have not been re-run on corpus v4 (Colab GPU
+pending), so these numbers describe that corpus, not the current one.
+
+### Model comparison
 
 ![Leaderboard](img/leaderboard.png){ width="100%" }
 
@@ -17,7 +52,7 @@ All numbers are on the frozen test split, seed 42, reported under two label poli
 The transformer advantage is statistically significant, not an artifact of one split.
 BERTimbau (PT) reaches recall-on-hate 0.796 in strict on correctly decoded Portuguese.
 
-## Cross-lingual and cross-domain transfer
+### Cross-lingual and cross-domain transfer
 
 ![Transfer](img/transfer.png){ width="100%" }
 
@@ -31,33 +66,28 @@ BERTimbau (PT) reaches recall-on-hate 0.796 in strict on correctly decoded Portu
 TF-IDF word features share no vocabulary across languages, so cross-lingual recall on hate
 falls to near zero; multilingual embeddings place EN and PT in one space and transfer.
 
-## Calibration
+### Calibration
 
 The served score should be interpretable as a probability. Best-calibrated models are
 `sbert_lgbm` (ECE 0.032 strict, 0.056 broad) and the conservative `tfidf_svm`; the
 transformers win on macro-F1 but not on calibration. This trade-off carries into the
 [product decision](api.md).
 
-The served demo model ships Platt scaling fit on the validation split. It turns the raw
-score into an honest probability (test ECE 0.156 to 0.030, Brier 0.111 to 0.077) at zero
-cost in macro-F1, because the sigmoid is strictly monotone and the decision threshold is
-mapped through it exactly.
-
-## Identity-term bias
+### Identity-term bias
 
 An unintended-bias probe measures the false-positive rate on non-hate text that merely
 mentions an identity group (neutral terms, bilingual). Over-flagging is real across all
 models. Sexual-orientation mentions reach a false-positive rate of 0.75 vs. 0.17
 background for TF-IDF. The transformers show the smallest gaps (~0.26).
 
-## Error analysis
+### Error analysis
 
 For the best model, **implicit hate** (hateful text with no profanity token) is the largest
 false-negative bucket. XLM-R reduces it (183 vs. 206 for the best classical), consistent
 with a contextual model catching subtler hate; it over-flags slur-bearing non-hate slightly
 more. Portuguese is over-flagged relative to English (a higher false-positive rate).
 
-## Why the linear model is competitive
+### Why the linear model is competitive
 
 The best classical model (`tfidf_logreg`, 0.709 strict) sits about four points below the best
 transformer, which is close for a bag-of-words model. Hate detection in this corpus is largely
@@ -69,7 +99,7 @@ worse (AUC 0.772 vs. 0.841). A linear model over sparse word and character featu
 ceiling for this signal. The transformer edge comes from context and cross-lingual transfer, not
 from the explicit cases the linear model already gets.
 
-## Stop-word ablation
+### Stop-word ablation
 
 Removing bilingual stop words (prepositions, pronouns, articles; negations kept) from the TF-IDF
 word features and retraining does not move the classical models. macro-F1 shifts by −0.009 to
@@ -79,7 +109,7 @@ redundant. The preprocessing was left unchanged. The
 [live demo](https://luciola-hatecheck.streamlit.app/) shows this as an
 interactive heatmap.
 
-## Surface plus semantic ensemble
+### Surface plus semantic ensemble
 
 Averaging the classical model (surface, lexical) with the best transformer (semantic) does not
 raise macro-F1, which is already at the data ceiling. It raises the number that matters ethically.
@@ -92,7 +122,7 @@ raise macro-F1, which is already at the data ceiling. It raises the number that 
 The classical model catches explicit hate by threshold, the transformer catches implicit hate, and
 the combination recovers part of the implicit false negatives, with higher AUC on both policies.
 
-## Tabular foundation model (TabPFN)
+### Tabular foundation model (TabPFN)
 
 TabPFN was run over dense features, on the full training sample on GPU, against LightGBM and LogReg
 on the same features. The dense features are multilingual SBERT and TF-IDF reduced to 300 dimensions
