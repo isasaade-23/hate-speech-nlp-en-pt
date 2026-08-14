@@ -365,3 +365,11 @@ fonte, mantido; auditado como no susto latin-1).
 splits 43.195/8.639/8.639, hash 229603f7dd5f; broad 61.214, hash 6a41ef621c40. **Leaderboard v2
 obsoleto** (clássicos retreinados localmente; neurais precisam de re-run no Colab). v2 preservado
 em `data/processed/_pre_toldbr_v2/`. Números v3 NÃO são comparáveis aos v2: o teste mudou.
+
+**Resultado do retreino clássico v3 (14/08, 16 runs, log `_v3_classical_retrain.log`).**
+`tfidf_logreg` segue o melhor clássico nas duas políticas: strict 0.7061 (recall-ódio 0.529),
+broad 0.7311 (recall-ódio 0.618). Ordem da família preservada (logreg > lgbm > svm; TF-IDF >
+SBERT congelado). Platt refitado na validação v3: ECE de teste 0.155 → 0.026, limiar
+0.5765 → 0.2173 calibrado, F1 intacto. No demo, o exemplo PT de misoginia subiu de p=0.38
+(raspando o limiar v2) para p=0.68 — o efeito direto dos 21k tweets PT. Transformers ainda
+são v2: precisam de re-run no Colab antes de qualquer comparação clássico×neural em v3.

@@ -1,12 +1,12 @@
 # Model card — tfidf_lgbm_strict_s42
 
 - Family: classical  |  Config: tfidf_lgbm  |  Policy: strict
-- Seed: 42  |  git: 595e63c  |  train rows: 28340
+- Seed: 42  |  git: df71154  |  train rows: 43195
 
 ## Test metrics
-- macro-F1: 0.7114 (95% CI [0.693, 0.7292])
-- recall (hate): 0.4956  |  precision (hate): 0.4899
-- ROC-AUC: 0.8380  |  PR-AUC: 0.4967
+- macro-F1: 0.6950 (95% CI [0.6798, 0.7119])
+- recall (hate): 0.4973  |  precision (hate): 0.4071
+- ROC-AUC: 0.8443  |  PR-AUC: 0.4172
 
 ## Intended use & limitations
 Research classifier for EN/PT social-media hate speech. Probabilistic; not a

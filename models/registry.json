@@ -4,100 +4,100 @@
     "config": "tfidf_logreg",
     "policy": "strict",
     "seed": 42,
-    "git_sha": "595e63c",
-    "threshold": 0.6357,
-    "val_macro_f1": 0.7023031976047356,
-    "test_macro_f1": 0.729307183095788
+    "git_sha": "df71154",
+    "threshold": 0.5765,
+    "val_macro_f1": 0.7020923148213309,
+    "test_macro_f1": 0.7061006993783817
   },
   "tfidf_svm_strict_s42": {
     "path": "models/tfidf_svm_strict_s42/model.joblib",
     "config": "tfidf_svm",
     "policy": "strict",
     "seed": 42,
-    "git_sha": "595e63c",
-    "threshold": 0.1665,
-    "val_macro_f1": 0.6741515537381692,
-    "test_macro_f1": 0.6967491851809204
+    "git_sha": "df71154",
+    "threshold": 0.1442,
+    "val_macro_f1": 0.6894307448337215,
+    "test_macro_f1": 0.6816439995601065
   },
   "tfidf_lgbm_strict_s42": {
     "path": "models/tfidf_lgbm_strict_s42/model.joblib",
     "config": "tfidf_lgbm",
     "policy": "strict",
     "seed": 42,
-    "git_sha": "595e63c",
-    "threshold": 0.6232,
-    "val_macro_f1": 0.6993623061061638,
-    "test_macro_f1": 0.7114299524937003
+    "git_sha": "df71154",
+    "threshold": 0.6131,
+    "val_macro_f1": 0.6983127631075392,
+    "test_macro_f1": 0.6949904608973032
   },
   "tfidf_logreg_broad_s42": {
     "path": "models/tfidf_logreg_broad_s42/model.joblib",
     "config": "tfidf_logreg",
     "policy": "broad",
     "seed": 42,
-    "git_sha": "595e63c",
-    "threshold": 0.5312,
-    "val_macro_f1": 0.737670559964556,
-    "test_macro_f1": 0.745888962471833
+    "git_sha": "df71154",
+    "threshold": 0.5422,
+    "val_macro_f1": 0.7354618501106653,
+    "test_macro_f1": 0.7311104651343545
   },
   "tfidf_svm_broad_s42": {
     "path": "models/tfidf_svm_broad_s42/model.joblib",
     "config": "tfidf_svm",
     "policy": "broad",
     "seed": 42,
-    "git_sha": "595e63c",
-    "threshold": 0.3789,
-    "val_macro_f1": 0.7304417574110049,
-    "test_macro_f1": 0.7287728106278734
+    "git_sha": "df71154",
+    "threshold": 0.3805,
+    "val_macro_f1": 0.7185021892554806,
+    "test_macro_f1": 0.7168957035426915
   },
   "tfidf_lgbm_broad_s42": {
     "path": "models/tfidf_lgbm_broad_s42/model.joblib",
     "config": "tfidf_lgbm",
     "policy": "broad",
     "seed": 42,
-    "git_sha": "595e63c",
-    "threshold": 0.5695,
-    "val_macro_f1": 0.736049726134874,
-    "test_macro_f1": 0.7245852316159609
+    "git_sha": "df71154",
+    "threshold": 0.5541,
+    "val_macro_f1": 0.7302976692806535,
+    "test_macro_f1": 0.7294131926776517
   },
   "sbert_logreg_strict_s42": {
     "path": "models/sbert_logreg_strict_s42/model.joblib",
     "config": "sbert_logreg",
     "policy": "strict",
     "seed": 42,
-    "git_sha": "595e63c",
-    "threshold": 0.6534,
-    "val_macro_f1": 0.643922973039059,
-    "test_macro_f1": 0.6618240864743403
+    "git_sha": "df71154",
+    "threshold": 0.7166,
+    "val_macro_f1": 0.6245771949732981,
+    "test_macro_f1": 0.6364616699797486
   },
   "sbert_lgbm_strict_s42": {
     "path": "models/sbert_lgbm_strict_s42/model.joblib",
     "config": "sbert_lgbm",
     "policy": "strict",
     "seed": 42,
-    "git_sha": "595e63c",
-    "threshold": 0.3224,
-    "val_macro_f1": 0.668512643666889,
-    "test_macro_f1": 0.6778366234193575
+    "git_sha": "df71154",
+    "threshold": 0.3108,
+    "val_macro_f1": 0.6442844288329674,
+    "test_macro_f1": 0.6486539222558649
   },
   "sbert_logreg_broad_s42": {
     "path": "models/sbert_logreg_broad_s42/model.joblib",
     "config": "sbert_logreg",
     "policy": "broad",
     "seed": 42,
-    "git_sha": "595e63c",
-    "threshold": 0.553,
-    "val_macro_f1": 0.7192674397041323,
-    "test_macro_f1": 0.7192262540565173
+    "git_sha": "df71154",
+    "threshold": 0.5948,
+    "val_macro_f1": 0.690827223765417,
+    "test_macro_f1": 0.692834904825602
   },
   "sbert_lgbm_broad_s42": {
     "path": "models/sbert_lgbm_broad_s42/model.joblib",
     "config": "sbert_lgbm",
     "policy": "broad",
     "seed": 42,
-    "git_sha": "595e63c",
-    "threshold": 0.4403,
-    "val_macro_f1": 0.7172635603022213,
-    "test_macro_f1": 0.7209930804285598
+    "git_sha": "df71154",
+    "threshold": 0.4974,
+    "val_macro_f1": 0.7013192230416151,
+    "test_macro_f1": 0.7043925634906332
   },
   "xlmr_multilingual_strict_s42": {
     "path": "models/xlmr_multilingual_strict_s42/hf",
@@ -170,60 +170,60 @@
     "config": "tfidf_logreg_nostop",
     "policy": "strict",
     "seed": 42,
-    "git_sha": "595e63c",
-    "threshold": 0.6002,
-    "val_macro_f1": 0.7031516626761813,
-    "test_macro_f1": 0.7246529653166593
+    "git_sha": "df71154",
+    "threshold": 0.61,
+    "val_macro_f1": 0.6996903303992856,
+    "test_macro_f1": 0.6993924503180551
   },
   "tfidf_logreg_nostop_broad_s42": {
     "path": "models/tfidf_logreg_nostop_broad_s42/model.joblib",
     "config": "tfidf_logreg_nostop",
     "policy": "broad",
     "seed": 42,
-    "git_sha": "595e63c",
-    "threshold": 0.541,
-    "val_macro_f1": 0.7370445419250804,
-    "test_macro_f1": 0.7467519968328069
+    "git_sha": "df71154",
+    "threshold": 0.5673,
+    "val_macro_f1": 0.7352287428743034,
+    "test_macro_f1": 0.7309780835795093
   },
   "tfidf_lgbm_nostop_strict_s42": {
     "path": "models/tfidf_lgbm_nostop_strict_s42/model.joblib",
     "config": "tfidf_lgbm_nostop",
     "policy": "strict",
     "seed": 42,
-    "git_sha": "595e63c",
-    "threshold": 0.625,
-    "val_macro_f1": 0.7018641454450861,
-    "test_macro_f1": 0.7056916720445661
+    "git_sha": "df71154",
+    "threshold": 0.6664,
+    "val_macro_f1": 0.6952272321962948,
+    "test_macro_f1": 0.6903067358912289
   },
   "tfidf_lgbm_nostop_broad_s42": {
     "path": "models/tfidf_lgbm_nostop_broad_s42/model.joblib",
     "config": "tfidf_lgbm_nostop",
     "policy": "broad",
     "seed": 42,
-    "git_sha": "595e63c",
-    "threshold": 0.5216,
-    "val_macro_f1": 0.7365291700876795,
-    "test_macro_f1": 0.7299857814350451
+    "git_sha": "df71154",
+    "threshold": 0.543,
+    "val_macro_f1": 0.7296264400897219,
+    "test_macro_f1": 0.7249203366356305
   },
   "tfidf_svm_nostop_strict_s42": {
     "path": "models/tfidf_svm_nostop_strict_s42/model.joblib",
     "config": "tfidf_svm_nostop",
     "policy": "strict",
     "seed": 42,
-    "git_sha": "595e63c",
-    "threshold": 0.1711,
-    "val_macro_f1": 0.679347591394785,
-    "test_macro_f1": 0.6928183803023701
+    "git_sha": "df71154",
+    "threshold": 0.147,
+    "val_macro_f1": 0.6814674305986886,
+    "test_macro_f1": 0.678698057075771
   },
   "tfidf_svm_nostop_broad_s42": {
     "path": "models/tfidf_svm_nostop_broad_s42/model.joblib",
     "config": "tfidf_svm_nostop",
     "policy": "broad",
     "seed": 42,
-    "git_sha": "595e63c",
-    "threshold": 0.3711,
-    "val_macro_f1": 0.7228870269183819,
-    "test_macro_f1": 0.7215608547474047
+    "git_sha": "df71154",
+    "threshold": 0.3743,
+    "val_macro_f1": 0.7171807584516463,
+    "test_macro_f1": 0.7183320949233482
   },
   "twitter_xlmr_strict_s42": {
     "path": "models/twitter_xlmr_strict_s42/hf",
