@@ -55,6 +55,11 @@ class HateClassifier:
         self.estimator = bundle["estimator"]
         self.threshold = float(bundle.get("threshold", 0.5))
         self.config = bundle.get("config", {})
+        # optional Platt calibration (fit on val): served scores become probabilities
+        cal = bundle.get("calibration")
+        self._cal = (float(cal["coef"]), float(cal["intercept"])) if cal else None
+        if cal:
+            self.threshold = float(cal["threshold"])
         self._profile = data_config()["clean"]["profiles"]["light"]
 
     def predict(self, text: str) -> dict:
@@ -64,6 +69,9 @@ class HateClassifier:
         cleaned = [clean_text(t, self._profile) for t in texts]
         X = self.vectorizer.transform(cleaned)
         scores = np.asarray(_score(self.estimator, X))
+        if self._cal is not None:
+            a, b = self._cal
+            scores = 1.0 / (1.0 + np.exp(-(a * scores + b)))
         out = []
         for text, s in zip(texts, scores):
             code, conf = detect_lang(text)

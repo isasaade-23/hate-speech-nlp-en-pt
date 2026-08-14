@@ -317,3 +317,26 @@ substituição — verificado antes de ingerir (lição do susto latin-1 do `pt_
 `data/processed/_pre_hatebr_v1/`. Modelos precisam ser retreinados no corpus v2 para
 comparabilidade. ToxSyn-PT (sintético) fica para experimento de robustez separado, fora do
 corpus primário e fora do test.
+
+## Decisão: calibrar o score servido com Platt scaling (14/08)
+
+**Contexto.** O demo exibe o score do `tfidf_logreg_strict_s42` rotulado como "hate
+probability", mas o score cru não era uma probabilidade honesta: ECE 0.156 no teste (um texto
+mostrado com "90%" acertava bem menos que 90% das vezes).
+
+**Experimento (`scripts/calibrate_demo.py`).** Platt (sigmoide sobre o score) e regressão
+isotônica, ambos com fit APENAS na validação; teste tocado uma vez por método.
+Resultado (`reports/tables/calibration_demo.csv`): ECE 0.156 → 0.030 (Platt) / 0.021
+(isotônica); Brier 0.111 → 0.077; macro-F1 do Platt idêntico (0.7293) porque a sigmoide é
+estritamente monótona e o limiar é mapeado exatamente (0.6357 → 0.3168). A isotônica marcou
+0.7332 por colapsar empates na fronteira — ganho frágil, dentro do ruído.
+
+**Decisão.** Platt no bundle servido: `bundle["calibration"] = {coef, intercept, threshold}`,
+aplicado por `HateClassifier` quando presente (`scripts/fit_platt_demo.py`). Escolhido sobre a
+isotônica por ser suave (a barra de confiança do demo não salta em degraus), preservar o F1
+exatamente e caber em dois números. O score cru, o limiar cru e o registry ficam intocados, então
+toda análise existente (McNemar, predições salvas) permanece reproduzível.
+
+**Alternativa rejeitada.** `CalibratedClassifierCV` do sklearn: refitaria o estimador em folds
+internos, mudando o modelo comparado no leaderboard. Aqui o modelo é o mesmo; só a escala do
+score muda.

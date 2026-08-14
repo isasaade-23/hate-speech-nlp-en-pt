@@ -38,6 +38,11 @@ The served score should be interpretable as a probability. Best-calibrated model
 transformers win on macro-F1 but not on calibration. This trade-off carries into the
 [product decision](api.md).
 
+The served demo model ships Platt scaling fit on the validation split. It turns the raw
+score into an honest probability (test ECE 0.156 to 0.030, Brier 0.111 to 0.077) at zero
+cost in macro-F1, because the sigmoid is strictly monotone and the decision threshold is
+mapped through it exactly.
+
 ## Identity-term bias
 
 An unintended-bias probe measures the false-positive rate on non-hate text that merely
