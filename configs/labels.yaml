@@ -98,6 +98,27 @@ sources:
       include_in_primary: true
     confidence: { hate: high, offensive_nothate: high, neither: high }
 
+  toldbr:
+    language: pt
+    domain: tweet
+    text_column: text
+    label_column: label_original
+    # ToLD-Br (Leite et al. 2020): 21k PT tweets, 3 crowd annotators x 6 categories.
+    # The loader (dataset6_toldbr) applies majority vote (>=2 of 3) and folds the
+    # categories into the same 3-way label as hatebr: identity-directed categories
+    # (homophobia, racism, misogyny, xenophobia) -> hate (376); obscene/insult ->
+    # offensive_nothate (3687); else neither (16937). First PT tweets in the corpus,
+    # deconfounding language from domain. Crowd annotation (not expert): minority
+    # votes fold down, hence medium confidence outside hate.
+    # Data CC BY-SA 4.0 -> NOT in commercial_whitelist (share-alike on weights untested).
+    strict:
+      map: { hate: 1, offensive_nothate: 0, neither: 0 }
+      include_in_primary: true
+    broad:
+      map: { hate: 1, offensive_nothate: 1, neither: 0 }
+      include_in_primary: true
+    confidence: { hate: high, offensive_nothate: medium, neither: medium }
+
 # Sources cleared for COMMERCIAL redistribution of a derived model (see
 # methodology/data_provenance.md). The product model trains only on these.
 commercial_whitelist: ["multioff"]

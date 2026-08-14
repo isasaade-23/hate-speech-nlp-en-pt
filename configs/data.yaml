@@ -42,6 +42,14 @@ sources:
                                # pt_fortuna latin-1 scare). Source: franciellevargas/HateBR
                                # @2d18c5b9 (dataset/HateBR.csv), 7000 Instagram comments.
                                # Research-only license (Sinch) -> product-excluded.
+  toldbr:
+    zip: "toldbr.zip"
+    member: "ToLD-BR.csv"
+    encoding: "utf-8"          # 109 baked-in U+FFFD in 21k rows (source artifact, kept).
+                               # Source: JAugusto97/ToLD-Br (ToLD-BR.csv), 21000 PT tweets,
+                               # 3 crowd annotators x 6 categories (counts 0..3).
+                               # Data CC BY-SA 4.0 -> share-alike, kept off the commercial
+                               # whitelist (untested for derived model weights).
 
 # Cleaning (clean.py). Two profiles: light (transformers) and heavy (TF-IDF).
 clean:

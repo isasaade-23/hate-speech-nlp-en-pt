@@ -340,3 +340,28 @@ toda análise existente (McNemar, predições salvas) permanece reproduzível.
 **Alternativa rejeitada.** `CalibratedClassifierCV` do sklearn: refitaria o estimador em folds
 internos, mudando o modelo comparado no leaderboard. Aqui o modelo é o mesmo; só a escala do
 score muda.
+
+## Decisão: incorporar ToLD-Br como 6ª fonte (PT, Twitter) → corpus v3 (14/08)
+
+**Por quê.** Depois de três manobras medidas com efeito zero (HPO bayesiano, limiar por idioma,
+ablação de normalização) e uma negativa (embeddings congelados do LFM2.5-Encoder: teste 0.6698 vs
+0.7293 do TF-IDF), mais dados PT é a alavanca restante de maior expectativa. ToLD-Br (Leite et
+al. 2020): 21.000 tweets PT, 3 anotadores leigos × 6 categorias (contagens 0..3).
+
+**Mapeamento (o ponto científico).** Voto majoritário (≥2 de 3) dobrado no MESMO 3-way do
+HateBR: categorias dirigidas a identidade (homofobia, racismo, misoginia, xenofobia) → `hate`
+(376, 1.8%); obsceno/insulto → `offensive_nothate` (3.687); resto → `neither` (16.937). strict
+marca 1 só em `hate`; broad dobra ofensivo. Voto minoritário (1 de 3) desce de balde — anotação
+leiga com concordância moderada, daí confiança `medium` fora de `hate`.
+
+**Desconfusão idioma×domínio.** Primeiro tweet em PT do corpus: até aqui PT era só web_comment
+(pt_fortuna, hatebr) e tweet era só EN. As quebras por fonte agora separam os dois eixos no PT.
+
+**Licença.** Dados CC BY-SA 4.0 (código MIT). Fora da `commercial_whitelist`: share-alike sobre
+pesos derivados é terreno jurídico não testado. 109 U+FFFD nativos em 21k linhas (artefato da
+fonte, mantido; auditado como no susto latin-1).
+
+**Impacto.** Corpus v3: strict 61.671 linhas brutas → 60.473 após dedup (hate=5.226 pré-dedup),
+splits 43.195/8.639/8.639, hash 229603f7dd5f; broad 61.214, hash 6a41ef621c40. **Leaderboard v2
+obsoleto** (clássicos retreinados localmente; neurais precisam de re-run no Colab). v2 preservado
+em `data/processed/_pre_toldbr_v2/`. Números v3 NÃO são comparáveis aos v2: o teste mudou.
