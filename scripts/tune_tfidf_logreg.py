@@ -29,13 +29,13 @@ import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import f1_score
 from sklearn.pipeline import FeatureUnion
 
 from hsc.clean import clean_series
 from hsc.config import resolve
 from hsc.evaluate import best_threshold
 from hsc.utils import get_logger
-from sklearn.metrics import f1_score
 
 log = get_logger("hsc.tune")
 
