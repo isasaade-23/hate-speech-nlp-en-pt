@@ -43,6 +43,11 @@ Portuguese, in a light or dark theme. It classifies text live and renders the st
 as an interactive heatmap.
 **[Open Luciola](https://luciola-hatecheck.streamlit.app/)**
 
+There is also a **browser extension** that runs the linear member of the served ensemble
+fully inside the browser, with no network access and no server:
+**[luciola-extension](https://github.com/isasaade-23/luciola-extension)** (parity with the
+Python model verified to 5e-9 on a golden set).
+
 ## Key results (Beta 2.0, corpus v4)
 
 Beta 2.0 follows the roadmap in Gandhi et al. (2024), *Hate speech detection: A comprehensive
