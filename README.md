@@ -45,8 +45,8 @@ as an interactive heatmap.
 
 There is also a **browser extension** that runs the linear member of the served ensemble
 fully inside the browser, with no network access and no server:
-**[luciola-extension](https://github.com/isasaade-23/luciola-extension)** (parity with the
-Python model verified to 5e-9 on a golden set).
+**[luciola-extension](https://github.com/isasaade-23/luciola-extension)** (v0.2.0 serves the
+corpus v5 linear member; parity with the Python model verified below 1e-8 on a golden set).
 
 ## Key results (Beta 2.0 phase 2, corpus v5)
 
@@ -56,8 +56,16 @@ HateXplain (20k Twitter+Gab posts, MIT). The corpus doubled to 113,826 rows stri
 prevalence rose from 8% to 28.8%. On the (much harder, 36% adversarial) v5 test the stacked
 ensemble scores **ROC-AUC 0.8875, macro-F1 0.791, recall on hate 0.736** — recall on hate
 jumped from 0.55 to 0.74, the most product-visible effect. Full v5 tables, the per-source
-breakdown and the open PT-balance decision are in [docs/results.md](docs/results.md);
-numbers below describe corpus v4 and are not comparable (the test split changed).
+breakdown and the language-balance analysis are in [docs/results.md](docs/results.md).
+
+| Model (strict, test v5) | ROC-AUC | macro-F1 | Recall on hate |
+|----------------|---------|----------|----------------|
+| **Stacked ensemble (served)** | **0.8875** | **0.7906** | **0.7359** |
+| tfidf_logreg | 0.884 | 0.788 | 0.707 |
+| tfidf_lgbm | 0.870 | 0.773 | 0.715 |
+| tfidf_svm | 0.855 | 0.768 | 0.679 |
+
+Numbers below describe corpus v4 and are not comparable (the test split changed).
 
 ## Beta 2.0 (corpus v4)
 
@@ -66,10 +74,11 @@ review of recent works*, Expert Systems ([doi:10.1111/exsy.13562](https://doi.or
 stacked ensembles and affective-lexicon features are the levers with documented gains, and
 text-only models collapse on meme OCR.
 
-- **The served model is a calibrated stacked ensemble.** A meta logistic regression over the
+- **The Beta 2.0 model was a calibrated stacked ensemble.** A meta logistic regression over the
   three TF-IDF models (LogReg, SVM, LightGBM), with the meta weights, decision threshold and
-  Platt calibration all fit on validation only. Test (strict): **ROC-AUC 0.877, macro-F1 0.711,
-  ECE 0.044**, 15 MB, ~34 ms per text on CPU. Adding the two SBERT members reaches AUC 0.886
+  Platt calibration all fit on validation only. Test (strict, v4): ROC-AUC 0.877, macro-F1 0.711,
+  ECE 0.044, 15 MB, ~34 ms per text on CPU. The same architecture, retrained on corpus v5, is
+  what the demo serves today. Adding the two SBERT members reaches AUC 0.886
   but requires a 470 MB encoder; documented as a trade-off.
 - **Meme OCR was demoted to an external test set.** Its per-source ROC-AUC was 0.547 (random):
   the meme's hate lives in the image + text jointly, which the survey confirms for text-only
@@ -114,7 +123,7 @@ significant.*
 
 | Model (strict) | ROC-AUC | macro-F1 | Recall on hate |
 |----------------|---------|----------|----------------|
-| **Stacked ensemble (served)** | **0.877** | **0.711** | 0.548 |
+| **Stacked ensemble (then served)** | **0.877** | **0.711** | 0.548 |
 | tfidf_logreg | 0.873 | 0.702 | 0.481 |
 | tfidf_lgbm | 0.860 | 0.707 | 0.497 |
 | tfidf_svm | 0.855 | 0.695 | 0.521 |
@@ -203,13 +212,14 @@ Choosing the served model is a Pareto trade-off, not just the top macro-F1
 
 | Profile | Model | Why |
 |---------|-------|-----|
-| **Served (Beta 2.0)** | **stacked ensemble (3 TF-IDF models)** | AUC 0.877, Platt-calibrated (ECE 0.04), 15 MB, ~34 ms/text on CPU |
-| Best AUC measured | stack + SBERT members | AUC 0.886, but needs the 470 MB SBERT encoder |
+| **Served (Beta 2.0 phase 2, corpus v5)** | **stacked ensemble (3 TF-IDF models)** | AUC 0.8875, recall on hate 0.736, Platt-calibrated, 32 MB, ~30 ms/text on CPU |
+| Best AUC measured (v4) | stack + SBERT members | AUC 0.886 on v4; awaiting a v5 re-run on Colab |
 | v1 study best quality | XLM-R | Highest macro-F1 on the original corpus; needs a GPU |
 
 **License gate:** all current models are trained on the full corpus and are therefore
-research-only. A commercially clear model must be retrained on permissively licensed data
-(the whitelist currently holds only the Apache-2.0 source). See
+research-only. A commercially clear model must be retrained on permissively licensed data.
+Since corpus v5 the whitelist holds three sources (MultiOFF Apache-2.0, Vidgen CC BY 4.0,
+HateXplain MIT), so a real-text product model is now possible. See
 [`methodology/data_provenance.md`](methodology/data_provenance.md).
 
 ## Repository layout
