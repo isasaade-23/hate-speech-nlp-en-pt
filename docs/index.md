@@ -17,7 +17,12 @@ A fair, leakage-safe comparison of two model families under one protocol:
 
 ## Headline findings
 
-- **Transformers win, significantly.** XLM-R reaches macro-F1 0.750 (strict) and BERTweet
+- **Beta 2.0 phase 2 (corpus v5, current).** The demo serves a calibrated stacked ensemble
+  of three TF-IDF models: test ROC-AUC 0.8875, macro-F1 0.791, recall on hate 0.736 (up
+  from 0.55). The corpus doubled to 113,826 rows across eight sources, including 41k
+  adversarial synthetic examples (CC BY 4.0) and HateXplain (MIT) — both commercially
+  licensed. Full tables in [Results](results.md).
+- **Transformers win, significantly (v1 study).** XLM-R reaches macro-F1 0.750 (strict) and BERTweet
   0.748 (broad), ~4 points over the best classical baseline, confirmed by a paired McNemar
   test with Holm correction (p = 0.003 strict; p < 0.001 broad).
 - **Cross-lingual transfer.** Trained on English and tested zero-shot on Portuguese,
