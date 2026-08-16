@@ -2,7 +2,7 @@
 
 Writes two artifacts into the extension repo:
 
-  model/luciola_linear_v4.json
+  model/luciola_linear_v5.json
       word + char_wb vocabularies (gram -> index), per-block idf, dense coef,
       intercept, Platt calibration, threshold, the emoji -> :name: map used by
       the light cleaning profile, and provenance metadata.
@@ -115,7 +115,7 @@ def main() -> None:
         ["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True
     ).stdout.strip()
     model = {
-        "model": "luciola_linear_v4",
+        "model": "luciola_linear_v5",
         "source_model_id": MODEL_ID,
         "git_sha": sha,
         "policy": "strict",
@@ -128,7 +128,7 @@ def main() -> None:
     }
     (OUT_ROOT / "model").mkdir(parents=True, exist_ok=True)
     (OUT_ROOT / "test").mkdir(parents=True, exist_ok=True)
-    mp = OUT_ROOT / "model" / "luciola_linear_v4.json"
+    mp = OUT_ROOT / "model" / "luciola_linear_v5.json"
     mp.write_text(json.dumps(model, ensure_ascii=False), encoding="utf-8")
     print(f"model json: {mp} ({mp.stat().st_size/1e6:.1f} MB, emoji map {len(model['emoji'])})")
 
