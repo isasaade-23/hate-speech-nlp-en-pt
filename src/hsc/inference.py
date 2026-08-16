@@ -82,7 +82,7 @@ class HateClassifier:
         cleaned = [clean_text(t, self._profile) for t in texts]
         if self._stack is not None:
             z = np.full(len(cleaned), self._stack["intercept"])
-            for (name, vec, est), w in zip(self._stack["members"], self._stack["coef"]):
+            for (_name, vec, est), w in zip(self._stack["members"], self._stack["coef"]):
                 z += w * np.asarray(_score(est, vec.transform(cleaned)))
             scores = 1.0 / (1.0 + np.exp(-z))
         else:

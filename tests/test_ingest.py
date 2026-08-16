@@ -42,6 +42,16 @@ def test_validate_interim_stats():
 
 
 def test_schema_vocabularies_consistent():
-    assert VALID_SOURCES == {"memotion", "tweets_ip", "pt_fortuna", "multioff", "hatebr"}
+    assert VALID_SOURCES == {
+        "memotion",
+        "tweets_ip",
+        "pt_fortuna",
+        "multioff",
+        "hatebr",
+        "toldbr",
+        "vidgen",
+        "hatexplain",
+    }
     assert VALID_LANGUAGES == {"en", "pt"}
     assert "meme_ocr" in VALID_DOMAINS
+    assert "synthetic" in VALID_DOMAINS
