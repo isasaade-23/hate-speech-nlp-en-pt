@@ -4,30 +4,30 @@
     "config": "tfidf_logreg",
     "policy": "strict",
     "seed": 42,
-    "git_sha": "cac1065",
-    "threshold": 0.6132,
-    "val_macro_f1": 0.7145699052410527,
-    "test_macro_f1": 0.7021699105002308
+    "git_sha": "20932f6",
+    "threshold": 0.5687,
+    "val_macro_f1": 0.7873891916464628,
+    "test_macro_f1": 0.7872610040379339
   },
   "tfidf_svm_strict_s42": {
     "path": "models/tfidf_svm_strict_s42/model.joblib",
     "config": "tfidf_svm",
     "policy": "strict",
     "seed": 42,
-    "git_sha": "cac1065",
-    "threshold": 0.1454,
-    "val_macro_f1": 0.7058463858155742,
-    "test_macro_f1": 0.6948718305904557
+    "git_sha": "20932f6",
+    "threshold": 0.316,
+    "val_macro_f1": 0.7642664776168933,
+    "test_macro_f1": 0.7644497485893479
   },
   "tfidf_lgbm_strict_s42": {
     "path": "models/tfidf_lgbm_strict_s42/model.joblib",
     "config": "tfidf_lgbm",
     "policy": "strict",
     "seed": 42,
-    "git_sha": "cac1065",
-    "threshold": 0.6243,
-    "val_macro_f1": 0.6987753545429292,
-    "test_macro_f1": 0.7064887602867111
+    "git_sha": "20932f6",
+    "threshold": 0.581,
+    "val_macro_f1": 0.7702998187455272,
+    "test_macro_f1": 0.773160366514335
   },
   "tfidf_logreg_broad_s42": {
     "path": "models/tfidf_logreg_broad_s42/model.joblib",
@@ -252,11 +252,11 @@
     "config": "stack_tfidf3",
     "policy": "strict",
     "seed": 42,
-    "git_sha": "cac1065",
-    "threshold": 0.13141616456670072,
-    "val_macro_f1": 0.7145,
-    "test_macro_f1": 0.7105,
-    "test_roc_auc": 0.8772
+    "git_sha": "20932f6",
+    "threshold": 0.33875759664275434,
+    "val_macro_f1": 0.7892,
+    "test_macro_f1": 0.788,
+    "test_roc_auc": 0.8867
   },
   "stack_broad_s42": {
     "path": "models/stack_broad_s42/model.joblib",
@@ -268,5 +268,15 @@
     "val_macro_f1": 0.7654,
     "test_macro_f1": 0.7584,
     "test_roc_auc": 0.8482
+  },
+  "tfidf_logreg_hurtlex_strict_s42": {
+    "path": "models/tfidf_logreg_hurtlex_strict_s42/model.joblib",
+    "config": "tfidf_logreg_hurtlex",
+    "policy": "strict",
+    "seed": 42,
+    "git_sha": "20932f6",
+    "threshold": 0.5681,
+    "val_macro_f1": 0.7872427654699108,
+    "test_macro_f1": 0.7859143939521913
   }
 }

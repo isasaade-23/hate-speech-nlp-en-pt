@@ -100,6 +100,57 @@ def near_dup_cluster_ids(texts, threshold: float = 0.90, num_perm: int = 64, k: 
     return np.array([remap[r] for r in roots], dtype=int)
 
 
+def _merge_vidgen_pair_clusters(df: pd.DataFrame) -> pd.DataFrame:
+    """Vidgen rounds 2-4 ship original/perturbation PAIRS (acl.id.matched): small
+    edits, usually label-flipping, that char-3gram cosine at 0.90 mostly misses
+    (measured 2026-08-16: only ~1.1k of ~15k pairs clustered). The dataset's own
+    links are ground truth for 'these are paraphrases', so union each pair's
+    clusters before the group split — pairs then never straddle splits."""
+    mask = df["id"].astype(str).str.startswith("vidgen_")
+    if not mask.any():
+        return df
+    raw_csv = resolve("data/raw") / "vidgen" / "dghs.csv"
+    if not raw_csv.exists():
+        log.warning("vidgen pairs: raw csv missing, skipping pair-cluster merge")
+        return df
+    import csv as _csv
+
+    with open(raw_csv, encoding="utf-8") as f:
+        rows = list(_csv.DictReader(f))
+    # loader ids are row-order: vidgen_<i>
+    acl_to_corpusid = {}
+    matched = {}
+    for i, r in enumerate(rows):
+        acl_to_corpusid[r["acl.id"]] = f"vidgen_{i}"
+        if r["acl.id.matched"] not in ("NA", ""):
+            matched[r["acl.id"]] = r["acl.id.matched"]
+
+    id_to_cluster = dict(zip(df["id"], df["dup_cluster_id"]))
+    parent = {}
+
+    def find(x):
+        parent.setdefault(x, x)
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    n_linked = 0
+    for a, b in matched.items():
+        ca = id_to_cluster.get(acl_to_corpusid.get(a))
+        cb = id_to_cluster.get(acl_to_corpusid.get(b))
+        if ca is None or cb is None:
+            continue  # one side dropped by exact dedup
+        ra, rb = find(ca), find(cb)
+        if ra != rb:
+            parent[ra] = rb
+            n_linked += 1
+    df = df.copy()
+    df["dup_cluster_id"] = [find(c) if c in parent else c for c in df["dup_cluster_id"]]
+    log.info("vidgen pairs: merged %d cluster links from acl.id.matched", n_linked)
+    return df
+
+
 def assign_splits(df: pd.DataFrame, ratios: dict, seed: int) -> np.ndarray:
     y = (
         df["language"].astype(str)
@@ -138,6 +189,7 @@ def make_splits(df: pd.DataFrame, ratios: dict, seed: int, near_threshold: float
     log.info("exact dedup: removed %d of %d rows", n_exact, len(df0))
     df1 = df1.copy()
     df1["dup_cluster_id"] = near_dup_cluster_ids(df1["text_clean"].values, threshold=near_threshold)
+    df1 = _merge_vidgen_pair_clusters(df1)
     n_clusters = int(df1["dup_cluster_id"].nunique())
     n_near = len(df1) - n_clusters
     log.info("near-dup: %d rows -> %d clusters (%d rows share a cluster)", len(df1), n_clusters, n_near)

@@ -18,6 +18,20 @@ from hsc.utils import ensure_dir, get_logger, sha256_file
 log = get_logger("hsc.ingest")
 
 
+def _prior_zip_sha(source_id: str, raw_root: Path) -> str:
+    """Carry the zip sha256 recorded in the previous PROVENANCE.json forward when
+    the zip itself is gone; the raw members are what the pipeline actually reads."""
+    import json
+
+    prov_path = raw_root / "PROVENANCE.json"
+    if prov_path.exists():
+        with open(prov_path, encoding="utf-8") as f:
+            for s in json.load(f).get("sources", []):
+                if s.get("source_id") == source_id and s.get("zip_sha256"):
+                    return s["zip_sha256"] + " (recorded before zip loss)"
+    return "unknown (zip lost before hashing could be repeated)"
+
+
 def _members(cfg_source: dict) -> list[str]:
     if "members" in cfg_source:
         return list(cfg_source["members"])
@@ -28,9 +42,30 @@ def extract_to_raw(source_id: str, cfg_source: dict, source_dir: Path, raw_root:
     """Copy this source's tabular member(s) out of its zip into data/raw/<source_id>/.
     Returns provenance: zip name, sha256, and the extracted file paths."""
     zip_path = source_dir / cfg_source["zip"]
-    if not zip_path.exists():
-        raise FileNotFoundError(f"source zip not found: {zip_path}")
     out_dir = ensure_dir(raw_root / source_id)
+    if not zip_path.exists():
+        # The original source zips for datasets 1-4 were lost from the source dir
+        # (verified 2026-08-16: not on any local drive). The extracted members in
+        # data/raw survive with their provenance recorded; reuse them and say so
+        # explicitly instead of pretending the zip was re-read.
+        members = _members(cfg_source)
+        extracted = [out_dir / Path(m).name for m in members]
+        missing = [p for p in extracted if not p.exists()]
+        if missing:
+            raise FileNotFoundError(
+                f"source zip not found: {zip_path} and raw members missing: {missing}"
+            )
+        log.warning("%s: source zip absent, reusing previously extracted raw files", source_id)
+        prior = _prior_zip_sha(source_id, raw_root)
+        return {
+            "source_id": source_id,
+            "zip": cfg_source["zip"],
+            "zip_sha256": prior,
+            "zip_absent_reused_raw": True,
+            "members": members,
+            "encoding": cfg_source["encoding"],
+            "extracted": [str(p.relative_to(raw_root.parent)) for p in extracted],
+        }
     extracted = []
     with zipfile.ZipFile(zip_path) as zf:
         for member in _members(cfg_source):

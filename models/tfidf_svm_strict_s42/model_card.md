@@ -1,12 +1,12 @@
 # Model card — tfidf_svm_strict_s42
 
 - Family: classical  |  Config: tfidf_svm  |  Policy: strict
-- Seed: 42  |  git: cac1065  |  train rows: 38241
+- Seed: 42  |  git: 20932f6  |  train rows: 81304
 
 ## Test metrics
-- macro-F1: 0.6949 (95% CI [0.6782, 0.7098])
-- recall (hate): 0.5206  |  precision (hate): 0.4029
-- ROC-AUC: 0.8549  |  PR-AUC: 0.4300
+- macro-F1: 0.7644 (95% CI [0.757, 0.7718])
+- recall (hate): 0.6628  |  precision (hate): 0.6673
+- ROC-AUC: 0.8548  |  PR-AUC: 0.6992
 
 ## Intended use & limitations
 Research classifier for EN/PT social-media hate speech. Probabilistic; not a

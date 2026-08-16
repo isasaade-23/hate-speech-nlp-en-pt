@@ -93,15 +93,21 @@ def main() -> None:
     policy = args.policy
 
     res3, meta3, platt3, thr3, data3 = fit_eval(TFIDF3, policy)
-    res5, *_ = fit_eval(ALL5, policy)
-    for r in (res3, res5):
+    try:
+        res5, *_ = fit_eval(ALL5, policy)
+    except (FileNotFoundError, AssertionError, KeyError) as e:
+        # SBERT members not (re)trained on the current corpus: their prediction
+        # files are missing or align to older split ids. Compare tfidf3 alone.
+        print(f"all5 skipped ({type(e).__name__}: SBERT predictions absent/stale on this corpus)")
+        res5 = None
+    for r in (res3, res5) if res5 else (res3,):
         print(
             f"{'+'.join(m.split('_')[0] for m in r['members']):24s}"
             f" n={len(r['members'])} test AUC={r['test_auc']} F1={r['test_macro_f1']}"
             f" rec_hate={r['test_recall_hate']} ECE={r['test_ece']}"
         )
 
-    if res5["test_auc"] - res3["test_auc"] >= MIN_GAIN:
+    if res5 and res5["test_auc"] - res3["test_auc"] >= MIN_GAIN:
         print(
             f"NOTE: all5 beats tfidf3 by {res5['test_auc'] - res3['test_auc']:.4f} AUC "
             "(>= MIN_GAIN) but needs the 470 MB SBERT encoder; serving tfidf3 anyway "
@@ -160,7 +166,7 @@ def main() -> None:
         pred["y_pred"] = (scores >= thr).astype(int)
         save_predictions(model_id, split, pred[PRED_COLS])
 
-    pd.DataFrame([res3, res5]).to_csv(
+    pd.DataFrame([r for r in (res3, res5) if r]).to_csv(
         resolve("reports/tables") / f"stack_{policy}.csv", index=False
     )
     print(f"saved {model_id}: threshold {thr:.4f}, registry + predictions + table written")
