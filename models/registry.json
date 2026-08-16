@@ -4,27 +4,27 @@
     "config": "tfidf_logreg",
     "policy": "strict",
     "seed": 42,
-    "git_sha": "20932f6",
-    "threshold": 0.5687,
-    "val_macro_f1": 0.7873891916464628,
-    "test_macro_f1": 0.7872610040379339
+    "git_sha": "c182003",
+    "threshold": 0.5787,
+    "val_macro_f1": 0.7883447530869965,
+    "test_macro_f1": 0.7878131630282545
   },
   "tfidf_svm_strict_s42": {
     "path": "models/tfidf_svm_strict_s42/model.joblib",
     "config": "tfidf_svm",
     "policy": "strict",
     "seed": 42,
-    "git_sha": "20932f6",
-    "threshold": 0.316,
-    "val_macro_f1": 0.7642664776168933,
-    "test_macro_f1": 0.7644497485893479
+    "git_sha": "c182003",
+    "threshold": 0.3149,
+    "val_macro_f1": 0.7687679087054438,
+    "test_macro_f1": 0.7681313681143557
   },
   "tfidf_lgbm_strict_s42": {
     "path": "models/tfidf_lgbm_strict_s42/model.joblib",
     "config": "tfidf_lgbm",
     "policy": "strict",
     "seed": 42,
-    "git_sha": "20932f6",
+    "git_sha": "c182003",
     "threshold": 0.581,
     "val_macro_f1": 0.7702998187455272,
     "test_macro_f1": 0.773160366514335
@@ -252,11 +252,11 @@
     "config": "stack_tfidf3",
     "policy": "strict",
     "seed": 42,
-    "git_sha": "20932f6",
-    "threshold": 0.33875759664275434,
-    "val_macro_f1": 0.7892,
-    "test_macro_f1": 0.788,
-    "test_roc_auc": 0.8867
+    "git_sha": "c182003",
+    "threshold": 0.3371778039000763,
+    "val_macro_f1": 0.7911,
+    "test_macro_f1": 0.7906,
+    "test_roc_auc": 0.8875
   },
   "stack_broad_s42": {
     "path": "models/stack_broad_s42/model.joblib",

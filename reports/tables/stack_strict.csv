@@ -1,2 +1,2 @@
 members,val_auc,test_auc,val_macro_f1,test_macro_f1,test_recall_hate,test_ece,test_brier,threshold
-"['tfidf_logreg', 'tfidf_svm', 'tfidf_lgbm']",0.8852,0.8867,0.7892,0.788,0.7323,0.0617,0.1216,0.3388
+"['tfidf_logreg', 'tfidf_svm', 'tfidf_lgbm']",0.8861,0.8875,0.7911,0.7906,0.7359,0.0625,0.1214,0.3372

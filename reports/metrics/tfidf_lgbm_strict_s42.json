@@ -4,7 +4,7 @@
   "family": "classical",
   "policy": "strict",
   "seed": 42,
-  "git_sha": "20932f6",
+  "git_sha": "c182003",
   "n_train": 81304,
   "threshold": 0.581,
   "splits": {

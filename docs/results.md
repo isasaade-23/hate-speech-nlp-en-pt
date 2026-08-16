@@ -3,7 +3,40 @@
 All numbers are on the frozen test split, seed 42, reported under two label policies:
 **strict** (only explicit hate is positive) and **broad** (offensive folded into hate).
 
-## Beta 2.0 (corpus v4, current)
+## Beta 2.0 phase 2 (corpus v5, current)
+
+Corpus v5 adds two English sources: Vidgen et al. 2021 *Dynamically Generated* (41,144
+synthetic adversarial entries, 54% hate, CC BY 4.0) and HateXplain (20,148 Twitter+Gab
+posts with a native 3-way label, MIT; 919 three-way ties dropped). Both are commercially
+licensed. 113,826 rows strict after deduplication, frozen split 81,304 / 16,261 / 16,261
+(hash `9bfda377058d`); hate prevalence rose from 8% to 28.8%. The dataset's own
+original/perturbation links (`acl.id.matched`) are merged into the duplicate clusters
+before the group split, so no pair straddles splits. Feature ceiling raised to 150k per
+block after a validation-only capacity sweep (the corpus doubled).
+
+**v5 test numbers are not comparable to v4**: the v5 test contains 5,871 adversarial
+synthetic examples (36% of the split) written specifically to fool classifiers.
+
+| Model (strict, test v5) | ROC-AUC | macro-F1 | Recall on hate | ECE |
+|----------------------|---------|----------|----------------|-----|
+| **Stacked ensemble (3x TF-IDF)** | **0.8875** | **0.7906** | **0.7359** | 0.0625 |
+| tfidf_logreg | 0.884 | 0.788 | 0.707 | — |
+| tfidf_lgbm | 0.870 | 0.773 | 0.715 | — |
+| tfidf_svm | 0.855 | 0.768 | 0.679 | — |
+
+Recall on hate jumped from 0.55 to 0.74, the most product-visible effect of v5. On the
+real-text portion of the test (excluding the synthetic source) the stack scores 0.8705.
+Per-source: HateXplain 0.880, ToLD-Br 0.869, HateBR 0.863, Vidgen 0.810, Fortuna 0.762,
+EN tweets 0.730. The 60k new EN rows diluted Portuguese relative to v4; a
+language-balanced training variant recovers PT (HateBR val 0.872 -> 0.895) at the cost
+of 0.006 global AUC — an open product decision, recorded in the methodology log.
+
+Negative results this phase: a HurtLex affective-lexicon block (36 dims, EN+PT) adds
+nothing, either stacked into the features or as a fourth ensemble member; HurtLex is
+CC BY-NC-SA (non-commercial), so it stays out of any product model regardless.
+SBERT members have not been re-trained on v5 (Colab pending); on v4 they added 0.009 AUC.
+
+## Beta 2.0 (corpus v4, archived)
 
 Beta 2.0 follows Gandhi et al. (2024), *Expert Systems*
 ([doi:10.1111/exsy.13562](https://doi.org/10.1111/exsy.13562)): stacked ensembles and

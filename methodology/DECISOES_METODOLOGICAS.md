@@ -413,3 +413,62 @@ HurtLex/features afetivas nos modelos-base (ganho documentado no survey), datase
 Vidgen "Dynamically Generated" (41k, >54% ódio) e HateXplain, e o destilado ONNX int8
 treinado no Colab como quarto membro. Números v4 NÃO são comparáveis a v1/v2/v3 (teste
 mudou); transformers seguem reportados como estudo anterior até re-run no Colab.
+
+---
+
+## 2026-08-16 — Corpus v5 (Beta 2.0, fase 2): Vidgen + HateXplain + HurtLex
+
+**Novas fontes.** Vidgen et al. 2021 "Dynamically Generated" (41.144 entradas EN
+sintéticas adversariais, 54% ódio, CC BY 4.0) e HateXplain (20.148 posts EN
+Twitter+Gab, 3 anotadores com rótulo 3-way nativo, MIT; 919 empates 3-way
+descartados). As duas entram na whitelist comercial — primeiras fontes de texto
+com licença permissiva além do multioff.
+
+**Perda dos zips-fonte 1–4.** Verificado em 16/08: os zips originais dos datasets
+1–4 não existem mais em nenhum disco local. Os arquivos extraídos em data/raw
+sobrevivem com proveniência registrada; o ingest agora os reutiliza com a flag
+explícita `zip_absent_reused_raw` carregando o sha256 gravado antes da perda.
+
+**Anti-leakage reforçado no split.** O near-dup por char-3gram (0,90) capturou só
+~1,1k dos ~15k pares original/perturbação do Vidgen. Os links `acl.id.matched` do
+próprio dataset agora são unidos aos clusters antes do split por grupo: 14.443
+links fundidos, ZERO pares cruzando splits (antes eram 6.554 — dos quais 6.545
+com rótulos opostos, ou seja, risco de inflação ~nulo, mas a regra é regra).
+
+**Corpus v5 strict:** 115.052 linhas → 113.826 pós-dedup; splits 81.304/16.261/
+16.261, hash `9bfda377058d`. Broad: 114.567, hash `0921bb2ce617`. Ódio no strict:
+28,8% (era 8% no v4) — desbalanço resolvido pelo Vidgen.
+
+**Capacidade.** Com o corpus 2×, o teto de 50k features/bloco estava limitando:
+sweep no val deu 150k = vocabulário inteiro (256.921 dims), val AUC 0,8827→0,8843.
+Teto elevado para 150k nos 3 membros (min_df=2 não ajudou).
+
+**Resultados (strict, teste v5 — NÃO comparável ao v4: o teste agora contém 5.871
+exemplos adversariais do Vidgen, 36% do total):**
+
+| Modelo (teste v5) | ROC-AUC | macro-F1 | recall-ódio | ECE |
+|---|---|---|---|---|
+| tfidf_logreg solo (150k) | 0.884 | 0.788 | 0.707 | — |
+| stack 3×TF-IDF (150k) | **0.8875** | **0.7906** | **0.7359** | 0.0625 |
+| — só texto real (sem vidgen) | 0.8705 | — | — | — |
+
+Por fonte (stack): hatexplain 0.880, toldbr 0.869, hatebr 0.863, vidgen 0.810,
+pt_fortuna 0.762, tweets_ip 0.730. Recall de ódio saltou 0,55→0,74 — o efeito
+produto mais visível do v5.
+
+**Regressão PT e a variante lang_bal.** As fontes PT caíram vs v4 (hatebr
+0,912→0,863; toldbr 0,906→0,869): os ~60k textos EN novos diluíram o PT.
+Experimento no val: pesos amostrais balanceando idioma×classe recuperam o PT
+(hatebr 0,872→0,895; toldbr 0,855→0,870 no val) ao custo de −0,006 no AUC global
+e −0,004 no EN. DECISÃO EM ABERTO (produto): servir o baseline (métrica global,
+meta 0,9) ou a variante PT-first (identidade da Luciola). Registrado, não decidido.
+
+**Negativos novos (não repetir).** (1) Bloco HurtLex (36 dims, léxico EN+PT
+CC BY-NC-SA — NonCommercial, nunca no modelo de produto): val AUC 0,8827→0,8829,
+nada; como 4º membro do stack: AUC idêntico. Transformer fica no repo como
+registro. (2) min_df=2: nada.
+
+**Rumo ao 0.9.** No teste v5 (adversarial-heavy) faltam 0,0125. Alavancas que
+restam: membros SBERT/destilado re-treinados no Colab (no v4 os 2 SBERT davam
++0,009), e o re-run dos transformers. O número 0,9 precisa ser lido contra o
+teste que o contém: o v5 é substancialmente mais difícil que o v4.

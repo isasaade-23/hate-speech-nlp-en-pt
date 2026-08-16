@@ -48,7 +48,18 @@ fully inside the browser, with no network access and no server:
 **[luciola-extension](https://github.com/isasaade-23/luciola-extension)** (parity with the
 Python model verified to 5e-9 on a golden set).
 
-## Key results (Beta 2.0, corpus v4)
+## Key results (Beta 2.0 phase 2, corpus v5)
+
+Corpus v5 (2026-08-16) adds two commercially-licensed English sources: Vidgen et al. 2021
+*Dynamically Generated* (41k synthetic adversarial entries, 54% hate, CC BY 4.0) and
+HateXplain (20k Twitter+Gab posts, MIT). The corpus doubled to 113,826 rows strict and hate
+prevalence rose from 8% to 28.8%. On the (much harder, 36% adversarial) v5 test the stacked
+ensemble scores **ROC-AUC 0.8875, macro-F1 0.791, recall on hate 0.736** — recall on hate
+jumped from 0.55 to 0.74, the most product-visible effect. Full v5 tables, the per-source
+breakdown and the open PT-balance decision are in [docs/results.md](docs/results.md);
+numbers below describe corpus v4 and are not comparable (the test split changed).
+
+## Beta 2.0 (corpus v4)
 
 Beta 2.0 follows the roadmap in Gandhi et al. (2024), *Hate speech detection: A comprehensive
 review of recent works*, Expert Systems ([doi:10.1111/exsy.13562](https://doi.org/10.1111/exsy.13562)):

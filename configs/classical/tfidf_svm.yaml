@@ -8,13 +8,13 @@ features:
   word:
     ngram_range: [1, 2]
     min_df: 3
-    max_features: 50000
+    max_features: 150000
     sublinear_tf: true
   char:
     analyzer: char_wb
     ngram_range: [3, 5]
     min_df: 3
-    max_features: 50000
+    max_features: 150000
     sublinear_tf: true
 model:
   type: svm          # LinearSVC wrapped in CalibratedClassifierCV for probabilities
