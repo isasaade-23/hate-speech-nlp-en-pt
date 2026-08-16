@@ -50,6 +50,19 @@ sources:
                                # 3 crowd annotators x 6 categories (counts 0..3).
                                # Data CC BY-SA 4.0 -> share-alike, kept off the commercial
                                # whitelist (untested for derived model weights).
+  vidgen:
+    zip: "vidgen.zip"
+    member: "dghs.csv"
+    encoding: "utf-8"          # Vidgen et al. 2021 ACL, Dynamically Generated Hate Speech
+                               # Dataset v0.2.3 (dedup'd), 41,144 synthetic EN entries,
+                               # 54% hate. Source: bvidgen/Dynamically-Generated-Hate-
+                               # Speech-Dataset (downloaded 2026-08-16). CC BY 4.0.
+  hatexplain:
+    zip: "hatexplain.zip"
+    member: "dataset.json"     # JSON, not CSV: loader reads it directly.
+    encoding: "utf-8"          # Mathew et al. 2021 AAAI, 20,148 EN Twitter+Gab posts,
+                               # 3 annotators x 3-way label. Source: hate-alert/HateXplain
+                               # (downloaded 2026-08-16). MIT.
 
 # Cleaning (clean.py). Two profiles: light (transformers) and heavy (TF-IDF).
 clean:

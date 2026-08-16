@@ -29,6 +29,6 @@ CORPUS_EXTRA_COLUMNS = [
 ]
 
 VALID_LANGUAGES = {"en", "pt"}
-VALID_DOMAINS = {"tweet", "web_comment", "meme_ocr"}
-VALID_SOURCES = {"memotion", "tweets_ip", "pt_fortuna", "multioff", "hatebr", "toldbr"}
+VALID_DOMAINS = {"tweet", "web_comment", "meme_ocr", "synthetic"}
+VALID_SOURCES = {"memotion", "tweets_ip", "pt_fortuna", "multioff", "hatebr", "toldbr", "vidgen", "hatexplain"}
 POSITIVE_LABEL = 1  # hate

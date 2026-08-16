@@ -14,6 +14,8 @@ from hsc.ingest import (
     dataset4_multioff,
     dataset5_hatebr,
     dataset6_toldbr,
+    dataset7_vidgen,
+    dataset8_hatexplain,
 )
 from hsc.ingest.base import extract_to_raw, log, validate_interim
 from hsc.utils import ensure_dir, write_json, write_parquet
@@ -25,6 +27,8 @@ REGISTRY = {
     "multioff": dataset4_multioff.load,
     "hatebr": dataset5_hatebr.load,
     "toldbr": dataset6_toldbr.load,
+    "vidgen": dataset7_vidgen.load,
+    "hatexplain": dataset8_hatexplain.load,
 }
 
 

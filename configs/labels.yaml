@@ -125,6 +125,46 @@ sources:
       include_in_primary: true
     confidence: { hate: high, offensive_nothate: medium, neither: medium }
 
+  vidgen:
+    language: en
+    domain: synthetic
+    text_column: text
+    label_column: label_original
+    # Vidgen et al. 2021 (Dynamically Generated Hate Speech Dataset v0.2.3): 41,144
+    # synthetic EN entries written adversarially against a model-in-the-loop. Enters in
+    # Beta 2.0 phase 2 to fix the corpus' 8% hate imbalance (this source is 54% hate)
+    # and to feed exactly the implicit/perturbed hate our error analysis flags as the
+    # main false-negative bucket. Binary source: nothate has no offensive tier, so both
+    # policies coincide. Original/perturbation pairs stay in one split via near-dup
+    # clustering + the frozen group split. CC BY 4.0 -> commercial_whitelist.
+    strict:
+      map: { hate: 1, neither: 0 }
+      include_in_primary: true
+    broad:
+      map: { hate: 1, neither: 0 }
+      include_in_primary: true
+    confidence: { hate: high, neither: high }
+
+  hatexplain:
+    language: en
+    domain: web_comment
+    text_column: text
+    label_column: label_original
+    # HateXplain (Mathew et al. 2021): 20,148 EN Twitter+Gab posts, 3 crowd annotators
+    # with a NATIVE 3-way label (hatespeech/offensive/normal) that maps one-to-one to
+    # our scheme. Majority vote >=2/3 (same rule as toldbr); 919 three-way ties dropped.
+    # Ships pre-tokenized and lowercased (URLs/users scrubbed by the authors), which the
+    # heavy profile does anyway. MIT -> commercial_whitelist.
+    strict:
+      map: { hate: 1, offensive_nothate: 0, neither: 0 }
+      include_in_primary: true
+    broad:
+      map: { hate: 1, offensive_nothate: 1, neither: 0 }
+      include_in_primary: true
+    confidence: { hate: high, offensive_nothate: medium, neither: medium }
+
 # Sources cleared for COMMERCIAL redistribution of a derived model (see
 # methodology/data_provenance.md). The product model trains only on these.
-commercial_whitelist: ["multioff"]
+# Beta 2.0 phase 2 (2026-08-16): vidgen (CC BY 4.0, attribution) and hatexplain (MIT)
+# join multioff -> the product corpus stops being meme-OCR-only.
+commercial_whitelist: ["multioff", "vidgen", "hatexplain"]

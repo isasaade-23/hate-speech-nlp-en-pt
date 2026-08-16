@@ -42,6 +42,11 @@ def build_tfidf(cfg_features: dict) -> FeatureUnion:
         parts.append(("word", _vectorizer("word", cfg_features["word"])))
     if "char" in cfg_features:
         parts.append(("char", _vectorizer("char", cfg_features["char"])))
+    if "hurtlex" in cfg_features:
+        from hsc.features.hurtlex import HurtLexFeatures
+
+        spec = cfg_features["hurtlex"] or {}
+        parts.append(("hurtlex", HurtLexFeatures(**spec)))
     if not parts:
         raise ValueError("tfidf features need at least one of: word, char")
     return FeatureUnion(parts)

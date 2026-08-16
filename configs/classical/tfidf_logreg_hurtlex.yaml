@@ -1,0 +1,32 @@
+# Beta 2.0 phase 2: tfidf_logreg + HurtLex lexicon block (Gandhi et al. 2024
+# report large gains from affective-lexicon features stacked on surface features).
+# Identical to tfidf_logreg except for the extra 36-dim hurtlex block; keeps the
+# comparison clean. Serve only if val gain >= MIN_GAIN (0.005), same rule as the stack.
+# LICENSE GUARD: HurtLex is CC BY-NC-SA (NonCommercial). This model is research/demo
+# only and must NEVER be the product model (see methodology/data_provenance.md).
+name: tfidf_logreg_hurtlex
+family: classical
+policy: strict
+seed: 42
+text_column: text_clean
+features:
+  type: tfidf
+  word:
+    ngram_range: [1, 2]
+    min_df: 3
+    max_features: 50000
+    sublinear_tf: true
+  char:
+    analyzer: char_wb
+    ngram_range: [3, 5]
+    min_df: 3
+    max_features: 50000
+    sublinear_tf: true
+  hurtlex: {}
+model:
+  type: logreg
+  params:
+    C: 1.0
+    class_weight: balanced
+    max_iter: 1000
+    solver: liblinear

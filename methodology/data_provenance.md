@@ -14,6 +14,8 @@ Hashes SHA-256 dos zips de origem: preenchidos por `src/hsc/ingest` na primeira 
 | multioff | MultiOFF / Hate Speech Detection Dataset | EN | meme (OCR) | dataset4.zip | Dataset/Split Dataset/{Training,Validation,Testing}_meme_dataset.csv | 445/149/149 | utf-8-sig |
 | hatebr | HateBR (Vargas et al. 2022) | PT | comentário web (Instagram) | hatebr.zip | HateBR.csv | 7.000 | utf-8 |
 | toldbr | ToLD-Br (Leite et al. 2020) | PT | tweet | toldbr.zip | ToLD-BR.csv | 21.000 | utf-8 (109 U+FFFD nativos) |
+| vidgen | Dynamically Generated Hate Speech v0.2.3 (Vidgen et al. 2021, ACL) | EN | sintético (adversarial, Dynabench) | vidgen.zip | dghs.csv | 41.144 | utf-8 |
+| hatexplain | HateXplain (Mathew et al. 2021, AAAI) | EN | comentário web (Twitter+Gab, pré-tokenizado) | hatexplain.zip | dataset.json | 20.148 (919 empates 3-way descartados) | utf-8 |
 
 **Beta 2.0 (14/08/2026):** `memotion` rebaixado a conjunto auxiliar/teste externo
 (`include_in_primary: false` nas duas políticas). Motivo: AUC por fonte de 0.547 no teste
@@ -30,6 +32,9 @@ texto de rede social. O dataset segue ingerido e recuperável.
 | multioff | **Apache 2.0** | sim | **sim** (permissiva) |
 | hatebr | **research-only** ("strictly for academic and research purposes... commercial use expressly prohibited without prior written consent of Sinch") | sim (uso acadêmico) | **não** (comercial vedado sem consentimento) |
 | toldbr | **CC BY-SA 4.0** (dados; código MIT) | sim, com atribuição | **cinza**: share-alike sobre pesos derivados é juridicamente não testado; mantido fora da whitelist |
+| vidgen | **CC BY 4.0** (README do repo, conferido 16/08/2026) | sim, com citação | **sim** (atribuição basta; sem share-alike). Conteúdo 100% sintético: sem texto real de usuário, sem PII |
+| hatexplain | **MIT** (LICENSE do repo, conferido 16/08/2026) | sim | **sim** (permissiva) |
+| hurtlex (léxico, não é corpus) | **CC BY-NC-SA 4.0** (conferido 16/08/2026) | sim, com atribuição | **não** (NonCommercial): modelos com o bloco hurtlex ficam fora de qualquer uso comercial; o modelo de produto não pode incluir essas features |
 
 ### Regra do produto (dois modelos)
 - **Modelo de pesquisa:** treinado em todos os datasets. Uso research-only. Não
