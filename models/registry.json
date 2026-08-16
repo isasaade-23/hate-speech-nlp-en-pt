@@ -34,30 +34,30 @@
     "config": "tfidf_logreg",
     "policy": "broad",
     "seed": 42,
-    "git_sha": "cac1065",
-    "threshold": 0.5183,
-    "val_macro_f1": 0.7590188006384481,
-    "test_macro_f1": 0.7576970452679137
+    "git_sha": "f854e84",
+    "threshold": 0.5125,
+    "val_macro_f1": 0.7585738648694887,
+    "test_macro_f1": 0.7521088936943742
   },
   "tfidf_svm_broad_s42": {
     "path": "models/tfidf_svm_broad_s42/model.joblib",
     "config": "tfidf_svm",
     "policy": "broad",
     "seed": 42,
-    "git_sha": "cac1065",
-    "threshold": 0.397,
-    "val_macro_f1": 0.738433877977523,
-    "test_macro_f1": 0.7268997094303074
+    "git_sha": "f854e84",
+    "threshold": 0.4157,
+    "val_macro_f1": 0.6576981889015392,
+    "test_macro_f1": 0.6511530291441835
   },
   "tfidf_lgbm_broad_s42": {
     "path": "models/tfidf_lgbm_broad_s42/model.joblib",
     "config": "tfidf_lgbm",
     "policy": "broad",
     "seed": 42,
-    "git_sha": "cac1065",
-    "threshold": 0.5225,
-    "val_macro_f1": 0.7574558079593761,
-    "test_macro_f1": 0.7463458982664041
+    "git_sha": "f854e84",
+    "threshold": 0.5056,
+    "val_macro_f1": 0.7430770396095814,
+    "test_macro_f1": 0.7438269041412552
   },
   "sbert_logreg_strict_s42": {
     "path": "models/sbert_logreg_strict_s42/model.joblib",
@@ -263,11 +263,11 @@
     "config": "stack_tfidf3",
     "policy": "broad",
     "seed": 42,
-    "git_sha": "cac1065",
-    "threshold": 0.33212257378068605,
-    "val_macro_f1": 0.7654,
-    "test_macro_f1": 0.7584,
-    "test_roc_auc": 0.8482
+    "git_sha": "f854e84",
+    "threshold": 0.45669276372868356,
+    "val_macro_f1": 0.7628,
+    "test_macro_f1": 0.7561,
+    "test_roc_auc": 0.8396
   },
   "tfidf_logreg_hurtlex_strict_s42": {
     "path": "models/tfidf_logreg_hurtlex_strict_s42/model.joblib",
