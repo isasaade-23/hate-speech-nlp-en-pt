@@ -77,7 +77,7 @@ def main() -> None:
     by_page: dict[str, list[dict]] = {}
     for r in rows:
         by_page.setdefault(r["page_id"], []).append(r)
-    for page, page_rows in by_page.items():
+    for _page, page_rows in by_page.items():
         flagged = [r for r in page_rows if r["stack_flag"] or r["linear_flag"]]
         unflagged = [r for r in page_rows if not (r["stack_flag"] or r["linear_flag"])]
         sample = rng.sample(unflagged, min(FN_SAMPLE_PER_PAGE, len(unflagged)))
