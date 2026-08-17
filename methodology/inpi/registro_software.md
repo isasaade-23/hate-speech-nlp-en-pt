@@ -27,6 +27,18 @@ Get-FileHash luciola_codigo_v1.zip -Algorithm SHA512
 Guardar o ZIP em local seguro e IMUTÁVEL (Drive + disco local): o INPI guarda só
 o hash; numa disputa, é preciso apresentar o arquivo que gera aquele hash.
 
+### Pacote GERADO (16/08/2026) — usar este hash no formulário
+
+O pacote foi montado com `git archive` de HEAD dos 3 repositórios (só código
+versionado, sem venv/dados/modelos binários), mais um LEIA-ME com autora, data e
+commits (88ff878 / 40e6c60 / 72be247):
+
+- Arquivo: `luciola_codigo_v1.zip` (28,1 MB)
+- Cópias imutáveis: `C:\Users\Renato\luciola_inpi\` e `G:\Meu Drive\USP\`
+- **SHA-512**: `596151739352B2A07980148121CC80EA8A6A916721279CBF5726A1F914649AE5754B5A03376008D0B125FEBB9CB1C878766C1225A602BCD1B2F9F95334224DE6`
+
+NÃO editar nem re-compactar esse ZIP: qualquer byte diferente muda o hash.
+
 ## Passo a passo
 
 1. Cadastro no e-INPI (mesma conta do dossiê de marca).
