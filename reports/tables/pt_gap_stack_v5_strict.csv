@@ -1,0 +1,15 @@
+idioma,n_test,limiar_global,limiar_por_idioma (val),macro_f1 global,macro_f1 idioma,recall_hate global,recall_hate idioma,precision_hate global,precision_hate idioma
+en,11513,0.3372,0.3953,0.7712,0.7741,0.7757,0.7407,0.6813,0.7036
+pt,4748,0.3372,0.1092,0.6966,0.7442,0.3162,0.5564,0.6789,0.5136
+
+metrica,valor
+n_hate_pt_teste,408
+n_fn_pt (limiar global),279
+score FN p25/p50/p75,0.0695/0.0886/0.1431
+"% FN a menos de 0,1 do limiar (calibracao)",0.0932
+"% FN com score < 0,1 (representacao)",0.5914
+
+source_dataset,taxa_fn
+hatebr,0.6364
+pt_fortuna,0.6706
+toldbr,0.8333
