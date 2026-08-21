@@ -56,6 +56,20 @@ def row_from_predictions(mid: str, label: str) -> dict:
     return row
 
 
+def stack_slices() -> pd.DataFrame:
+    """Cortes do modelo do produto: idioma e adversarial × não-adversarial."""
+    df = pd.read_parquet(ROOT / "reports/predictions/stack_strict_s42_test.parquet")
+    cuts = {"en": df[df.language == "en"], "pt": df[df.language == "pt"],
+            "adversarial_vidgen": df[df.source_dataset == "vidgen"],
+            "nao_adversarial": df[df.source_dataset != "vidgen"]}
+    rows = []
+    for name, g in cuts.items():
+        rows.append({"corte": name, "n": len(g),
+                     "macro_f1": round(f1_score(g.y_true, g.y_pred, average="macro"), 4),
+                     "recall_hate": round(recall_score(g.y_true, g.y_pred), 4)})
+    return pd.DataFrame(rows)
+
+
 def main() -> None:
     rows = [row_from_predictions("stack_strict_s42", "stack (produto)")]
     rows += [row_from_metrics(mid) for mid in CLASSICAL]
@@ -67,6 +81,13 @@ def main() -> None:
     out.to_csv(dest, index=False)
     print(out.to_string(index=False))
     print("->", dest)
+
+    slices = stack_slices()
+    dest2 = ROOT / "reports/tables/stack_slices_v5_strict.csv"
+    slices.to_csv(dest2, index=False)
+    print()
+    print(slices.to_string(index=False))
+    print("->", dest2)
 
 
 if __name__ == "__main__":
