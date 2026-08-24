@@ -28,7 +28,22 @@ Get-FileHash luciola_codigo_v1.zip -Algorithm SHA512
 Guardar o ZIP em local seguro e IMUTÁVEL (Drive + disco local): o INPI guarda só
 o hash; numa disputa, é preciso apresentar o arquivo que gera aquele hash.
 
-### Pacote GERADO (16/08/2026) — usar este hash no formulário
+### Pacote v2 (24/08/2026) — É ESTE QUE VAI NO FORMULÁRIO
+
+Gerado depois da troca de licença (MIT → AGPL-3.0). O v1 abaixo contém a licença
+antiga e não deve ser protocolado. Reprodutível por `gerar_pacote.ps1`.
+
+- Arquivo: `luciola_codigo_v2.zip` (26,57 MB)
+- Cópias imutáveis: `C:\Users\Renato\luciola_inpi\` e `G:\Meu Drive\USP\`
+  (hash conferido igual nas duas)
+- Commits: b4c69b6 (pesquisa) / b34f991 (demo) / bbd52c3 (extensão)
+- **SHA-512**: `E639B21E63AEEE54815094EE1B38AB6E9ACCB237362578223F1EABADED2C9D6C7A4DCA3749A02B35266784D56AB2BFA4F70ED77B636DD58B0260F91D56D9839B`
+
+No formulário, campo de licença: **GNU AGPL-3.0**. Vale registrar que os
+artefatos de modelo têm termos próprios (`LICENSE-MODEL.md`, pesquisa e educação
+apenas), porque as licenças dos dados não permitem conceder uso comercial.
+
+### Pacote v1 (16/08/2026) — SUPERADO, contém LICENSE MIT
 
 O pacote foi montado com `git archive` de HEAD dos 3 repositórios (só código
 versionado, sem venv/dados/modelos binários), mais um LEIA-ME com autora, data e
@@ -38,7 +53,20 @@ commits (88ff878 / 40e6c60 / 72be247):
 - Cópias imutáveis: `C:\Users\Renato\luciola_inpi\` e `G:\Meu Drive\USP\`
 - **SHA-512**: `596151739352B2A07980148121CC80EA8A6A916721279CBF5726A1F914649AE5754B5A03376008D0B125FEBB9CB1C878766C1225A602BCD1B2F9F95334224DE6`
 
-NÃO editar nem re-compactar esse ZIP: qualquer byte diferente muda o hash.
+NÃO editar nem re-compactar esses ZIPs: qualquer byte diferente muda o hash.
+
+### Onde a licença precisa (e não precisa) ser registrada
+
+- **A AGPL não se registra em lugar nenhum.** Direito autoral sobre software é
+  automático (Berna; no Brasil, Lei 9.610/98 e 9.609/98). A licença vale por
+  estar publicada junto com o código. Não existe cartório de licença.
+- **INPI e-Software** é registro de AUTORIA, opcional: prova autoria e data por
+  hash, útil para tese, transferência de tecnologia e disputa. É o pacote acima.
+- **Zenodo/DOI** é o registro que serve para CITAÇÃO acadêmica. O `.zenodo.json`
+  já declara `AGPL-3.0-only`; ao criar um release no GitHub com o Zenodo ligado,
+  sai um DOI com a licença correta. Recomendado antes de citar a Luciola em
+  artigo ou na submissão do Numun.
+- **GitHub** já reconhece AGPL-3.0 nos três repositórios (conferido 24/08/2026).
 
 ## Passo a passo
 
