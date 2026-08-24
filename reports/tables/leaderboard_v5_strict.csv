@@ -1,0 +1,6 @@
+modelo,familia,macro_f1,recall_hate,macro_f1_en,recall_hate_en,macro_f1_pt,recall_hate_pt,macro_f1_vidgen
+stack (produto atual),classico,0.7906,0.7359,0.7712,0.7757,0.6966,0.3162,0.7199
+tfidf_logreg,classical,0.7878,0.7073,0.7697,0.7439,0.6977,0.3211,0.7238
+tfidf_logreg_hurtlex,classical,0.7859,0.7249,0.7658,0.7604,0.7076,0.3505,0.7174
+tfidf_lgbm,classical,0.7732,0.7145,0.7502,0.7537,0.6867,0.3015,0.693
+tfidf_svm,classical,0.7681,0.6791,0.7526,0.7409,0.504,0.027,0.7312

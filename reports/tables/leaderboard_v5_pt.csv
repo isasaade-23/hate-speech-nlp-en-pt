@@ -1,0 +1,6 @@
+modelo,escopo,macro_f1_pt,recall_hate_pt
+tfidf_logreg_hurtlex,bilingue (fatia PT),0.7076,0.3505
+tfidf_logreg,bilingue (fatia PT),0.6977,0.3211
+stack (produto atual),bilingue (fatia PT),0.6966,0.3162
+tfidf_lgbm,bilingue (fatia PT),0.6867,0.3015
+tfidf_svm,bilingue (fatia PT),0.504,0.027
