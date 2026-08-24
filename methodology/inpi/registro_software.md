@@ -1,7 +1,8 @@
 # Registro de Programa de Computador (INPI e-Software) — dossiê (14/08/2026)
 
 Registro de AUTORIA (direito autoral de software, Lei 9.609/98). Não é patente e
-não conflita com código aberto: o código continua MIT no GitHub; o registro prova
+não conflita com código aberto: o código continua livre no GitHub (AGPL-3.0 desde
+24/08/2026; era MIT quando o dossiê foi montado); o registro prova
 autoria e data, o que interessa pra tese, transferência de tecnologia e disputas.
 Validade: 50 anos. Protocolo é da Isabela (gov.br + GRU).
 

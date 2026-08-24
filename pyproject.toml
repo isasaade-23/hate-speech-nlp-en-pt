@@ -8,8 +8,8 @@ version = "0.1.0"
 description = "Bilingual (EN/PT) hate-speech text classifier: classical vs transformer models, plus a deployable API."
 readme = "README.md"
 requires-python = ">=3.11"
-license = { text = "MIT" }
-authors = [{ name = "hate-speech-project contributors" }]
+license = { text = "AGPL-3.0-only" }
+authors = [{ name = "Isabela Venancio da Silva" }]
 
 # Core (local, CPU) dependencies. Heavy DL libs live in requirements-colab.txt.
 dependencies = [

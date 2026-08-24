@@ -256,7 +256,10 @@ tfidf_logreg_strict.
 **Decisão.** Publicar o repositório como público em
 github.com/isasaade-23/hate-speech-nlp-en-pt, com README de portfólio em inglês (sem
 emojis), capa SVG na identidade visual, figuras-herói versionadas em assets/, CITATION.cff
-e topics. Código sob MIT; licenças de dados restringem uso comercial (data_provenance.md).
+e topics. Código sob AGPL-3.0 desde 24/08/2026 (antes MIT): copyleft de rede, para que
+quem rodar uma versão modificada como serviço devolva o código. Pesos do modelo ficam fora
+da AGPL, em LICENSE-MODEL.md, porque as licenças de dados não permitem conceder uso
+comercial (data_provenance.md).
 
 **Motivo.** Artefato de portfólio para candidaturas; recrutadores precisam ver o repo.
 Nenhum dado ou segredo é versionado (data/, .env, pesos são gitignored) → público é seguro.

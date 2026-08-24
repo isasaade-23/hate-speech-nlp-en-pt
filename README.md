@@ -11,7 +11,8 @@ A reproducible study comparing classical models with transformers, plus a deploy
 [![Docs](https://img.shields.io/badge/docs-online-3D5A80?style=flat-square)](https://isasaade-23.github.io/hate-speech-nlp-en-pt/)
 [![Live demo](https://img.shields.io/badge/demo-live-EE6C4D?style=flat-square)](https://luciola-hatecheck.streamlit.app/)
 ![Python](https://img.shields.io/badge/python-3.12-3D5A80?style=flat-square)
-![License](https://img.shields.io/badge/license-MIT-3D5A80?style=flat-square)
+![License](https://img.shields.io/badge/code-AGPL--3.0-3D5A80?style=flat-square)
+![Model license](https://img.shields.io/badge/model-research%20only-EE6C4D?style=flat-square)
 ![Style](https://img.shields.io/badge/lint-ruff%20%2B%20black-3D5A80?style=flat-square)
 ![Models](https://img.shields.io/badge/models-16%20compared-EE6C4D?style=flat-square)
 
@@ -250,8 +251,16 @@ support, never replace, human review. Redistribution is bound by the individual 
 
 ## License
 
-Code is released under the [MIT License](LICENSE). Training-data licenses vary by source and
-restrict commercial use; see `methodology/data_provenance.md`.
+Two licenses, because they cover different things.
+
+**Code**: [GNU Affero General Public License v3.0](LICENSE). You may use, study, modify and
+redistribute it. If you run a modified version as a network service, you must offer that
+service's users the corresponding source (AGPL section 13).
+
+**Trained model artifacts** (the bundles under `models/`): research and educational use only,
+no commercial use. They are not under the AGPL because the training-data licenses restrict
+what can be granted downstream. Terms and per-source detail in [`LICENSE-MODEL.md`](LICENSE-MODEL.md)
+and `methodology/data_provenance.md`.
 
 ## Author
 

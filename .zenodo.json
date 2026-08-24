@@ -3,7 +3,7 @@
   "description": "A reproducible, leakage-safe study comparing classical models (TF-IDF and multilingual sentence embeddings) with transformers (XLM-RoBERTa, BERTimbau, BERTweet) for binary hate-speech classification in English and Portuguese, with calibration, identity-term bias, cross-lingual transfer analyses, and a deployable inference API.",
   "upload_type": "software",
   "access_right": "open",
-  "license": "MIT",
+  "license": "AGPL-3.0-only",
   "creators": [
     {
       "name": "Venancio da Silva, Isabela",
