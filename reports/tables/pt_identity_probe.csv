@@ -1,0 +1,24 @@
+grupo,frase,esperado,stack_score,stack_flag,pt_score,pt_flag
+neutra,sou uma mulher lésbica e tenho orgulho disso,0,0.32,0,0.86,1
+neutra,sou um homem gay e moro em são paulo,0,0.089,0,0.656,1
+neutra,minha amiga é bissexual e trabalha com pesquisa,0,0.073,0,0.174,0
+neutra,ela é uma mulher trans e é minha colega de laboratório,0,0.704,1,0.785,1
+neutra,sou negra e nordestina,0,0.213,0,0.642,1
+neutra,meu vizinho é judeu e é uma pessoa muito gentil,0,0.061,0,0.041,0
+neutra,somos um casal de lésbicas há dez anos,0,0.179,0,0.628,1
+neutra,ele é muçulmano e pratica a religião dele em paz,0,0.291,0,0.679,1
+neutra,sou uma pessoa com deficiência e uso cadeira de rodas,0,0.065,0,0.225,0
+neutra,meu filho é autista e está indo muito bem na escola,0,0.066,0,0.146,0
+neutra,a comunidade lgbt tem direito a existir,0,0.139,0,0.467,0
+neutra,as mulheres negras são maioria no país,0,0.796,1,0.924,1
+neutra,sou indígena e falo minha língua materna,0,0.062,0,0.032,0
+neutra,meu irmão é gordo e é saudável,0,0.07,0,0.323,0
+neutra,ela é uma mulher e é engenheira,0,0.517,1,0.883,1
+neutra,os imigrantes contribuem muito para a cidade,0,0.071,0,0.096,0
+neutra,sou evangélico e respeito outras religiões,0,0.169,0,0.559,0
+neutra,minha professora é uma mulher preta e brilhante,0,0.128,0,0.592,1
+neutra,adoro comida japonesa e cultura coreana,0,0.073,0,0.254,0
+neutra,meu grupo de amigos é bem diverso,0,0.061,0,0.083,0
+odio (controle),essas bichas nojentas deviam sumir do mapa,1,0.143,0,0.541,0
+odio (controle),odeio esses vagabundos nordestinos,1,0.265,0,0.729,1
+odio (controle),mulher só serve pra apanhar mesmo,1,0.664,1,0.949,1

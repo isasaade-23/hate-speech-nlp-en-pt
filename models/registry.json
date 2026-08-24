@@ -278,5 +278,16 @@
     "threshold": 0.5681,
     "val_macro_f1": 0.7872427654699108,
     "test_macro_f1": 0.7859143939521913
+  },
+  "pt_logreg_strict_s42": {
+    "path": "models/pt_logreg_strict_s42/model.joblib",
+    "config": "pt_logreg",
+    "policy": "strict",
+    "seed": 42,
+    "language": "pt",
+    "threshold": 0.5666,
+    "test_macro_f1": 0.7572,
+    "test_roc_auc": 0.9015,
+    "note": "EXPERIMENTO, NAO SERVIDO: dobra o recall de odio em PT (0.3162 -> 0.6225) mas triplica o falso positivo em frases neutras com termo de identidade (9/20 contra 3/20 do stack), marcando pessoas LGBT, negras e muculmanas falando de si. Ver methodology/pt_recall_x_vies.md"
   }
 }

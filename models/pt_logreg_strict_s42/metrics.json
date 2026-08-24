@@ -1,0 +1,18 @@
+{
+  "model_id": "pt_logreg_strict_s42",
+  "config": "pt_logreg",
+  "family": "classical",
+  "policy": "strict",
+  "seed": 42,
+  "language": "pt",
+  "n_train": 23743,
+  "threshold": 0.5666,
+  "test_pt": {
+    "config": "modelo PT + limiar na valida\u00e7\u00e3o",
+    "limiar": 0.5666,
+    "macro_f1": 0.7572,
+    "recall_hate": 0.6225,
+    "precision_hate": 0.51,
+    "roc_auc": 0.9015
+  }
+}

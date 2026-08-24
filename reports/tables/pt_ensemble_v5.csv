@@ -1,0 +1,8 @@
+config,limiar,macro_f1,recall_hate,precision_hate,roc_auc,fp_identidade_20,acerto_controle_3
+stack servido,0.3372,0.6966,0.3162,0.6789,0.8918,3,1
+modelo PT sozinho,0.5666,0.7572,0.6225,0.51,0.9015,9,2
+media ponderada (PT 30%),0.2606,0.7462,0.5588,0.5182,0.9027,9,3
+media ponderada (PT 50%),0.3354,0.7524,0.6152,0.501,0.9024,10,3
+media ponderada (PT 70%),0.4283,0.7552,0.6201,0.506,0.9021,10,2
+meta-logreg (val PT),0.2164,0.7561,0.6225,0.507,0.9017,9,2
+ambos concordam,0.3223,0.7451,0.5588,0.5147,0.8933,10,3
