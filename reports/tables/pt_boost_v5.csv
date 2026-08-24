@@ -1,0 +1,5 @@
+config,limiar,macro_f1,recall_hate,precision_hate,roc_auc
+stack servido (limiar global),0.3372,0.6966,0.3162,0.6789,0.8918
+stack + limiar de idioma,0.1092,0.7442,0.5564,0.5136,0.8918
+"modelo PT (limiar 0,5)",0.5,0.7372,0.6642,0.4421,0.9015
+modelo PT + limiar na validação,0.5666,0.7572,0.6225,0.51,0.9015
