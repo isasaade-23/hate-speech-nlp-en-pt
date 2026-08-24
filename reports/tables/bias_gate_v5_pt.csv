@@ -1,0 +1,7 @@
+modelo,recall_odio_pt,fp_fundo_pt,fp_com_identidade,excesso,n_linhas
+bertimbau_pt,0.625,0.0518,0.2292,0.1773,192
+pt_logreg,0.6225,0.0562,0.3958,0.3396,192
+twitter_xlmr,0.5074,0.027,0.1458,0.1189,192
+xlmr_multilingual,0.451,0.0253,0.1458,0.1205,192
+lfm25_encoder,0.3897,0.0242,0.1354,0.1112,192
+stack,0.3162,0.0141,0.151,0.137,192

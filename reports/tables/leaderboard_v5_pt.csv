@@ -1,4 +1,8 @@
 modelo,escopo,macro_f1_pt,recall_hate_pt
+bertimbau_pt,so PT,0.7652,0.625
+twitter_xlmr,bilingue (fatia PT),0.7646,0.5074
+xlmr_multilingual,bilingue (fatia PT),0.7431,0.451
+lfm25_encoder,bilingue (fatia PT),0.7165,0.3897
 tfidf_logreg_hurtlex,bilingue (fatia PT),0.7076,0.3505
 tfidf_logreg,bilingue (fatia PT),0.6977,0.3211
 stack (produto atual),bilingue (fatia PT),0.6966,0.3162

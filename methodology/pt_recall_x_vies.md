@@ -60,6 +60,35 @@ nenhum ganho de recall compensa isso.
 O modelo fica versionado como experimento (`models/pt_logreg_strict_s42/`) e a
 entrada no registry traz a ressalva.
 
+## Desfecho (24/08/2026, noite): o painel neural resolve
+
+Os cinco modelos do painel v5 terminaram e a sonda rodou sobre o **teste real**,
+que é mais forte que as 20 frases escritas à mão: entre as linhas PT que não são
+ódio e mencionam um termo neutro de identidade, quantas o modelo sinaliza,
+comparado à taxa de falso positivo de fundo dele.
+
+| modelo | recall ódio PT | FP de fundo | FP com identidade | excesso |
+|---|---|---|---|---|
+| BERTimbau (só PT) | **0,625** | 0,052 | 0,229 | 0,177 |
+| pt_logreg (o barrado) | 0,623 | 0,056 | 0,396 | **0,340** |
+| **twitter-XLM-R** | **0,507** | 0,027 | 0,146 | **0,119** |
+| XLM-R multilingual | 0,451 | 0,025 | 0,146 | 0,121 |
+| LFM2.5 | 0,390 | 0,024 | 0,135 | 0,111 |
+| stack (servido hoje) | 0,316 | 0,014 | 0,151 | 0,137 |
+
+**O twitter-XLM-R passa no gate.** Sobe o recall PT em 60% sobre o produto atual
+(0,316 para 0,507) e ao mesmo tempo super-marca identidade MENOS que ele (0,119
+contra 0,137 de excesso). Não é troca: melhora nos dois eixos.
+
+O BERTimbau tem o maior recall PT do painel, mas paga com 0,177 de excesso, pior
+que o produto atual. Recall alto em PT continua puxando viés quando o modelo é
+treinado só na fatia PT do corpus, seja ele clássico ou transformer. O que muda o
+jogo é o pré-treino multilíngue, que traz contexto de fora do corpus.
+
+**Conclusão: o candidato a servir é o twitter-XLM-R.** O impedimento agora é
+tamanho (1,1 GB não cabe no plano gratuito), não qualidade nem viés. Caminhos:
+quantização int8 via ONNX, ou infraestrutura paga. É o pedido concreto de apoio.
+
 ## O que destrava
 
 1. **Contraexemplos anotados em português**: frases neutras e positivas

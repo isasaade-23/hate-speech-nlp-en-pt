@@ -5,94 +5,42 @@
   "policy": "strict",
   "seed": 42,
   "hf_checkpoint": "neuralmind/bert-base-portuguese-cased",
-  "n_train": 8886,
-  "threshold": 0.5235,
+  "n_train": 23743,
+  "threshold": 0.0219,
   "splits": {
     "val": {
-      "n": 1778,
-      "n_hate": 354,
-      "macro_f1": 0.7659438005404176,
-      "accuracy": 0.8503937007874016,
-      "precision_hate": 0.6235955056179775,
-      "recall_hate": 0.6271186440677966,
-      "f1_hate": 0.6253521126760564,
-      "precision_nothate": 0.9071729957805907,
-      "recall_nothate": 0.9058988764044944,
-      "roc_auc": 0.8862200850631625,
-      "pr_auc": 0.6922702401127417,
+      "n": 4747,
+      "n_hate": 407,
+      "macro_f1": 0.7650180679176765,
+      "accuracy": 0.9207920792079208,
+      "precision_hate": 0.5326315789473685,
+      "recall_hate": 0.6216216216216216,
+      "f1_hate": 0.5736961451247166,
+      "precision_nothate": 0.9639513108614233,
+      "recall_nothate": 0.9488479262672811,
+      "roc_auc": 0.9131217518314293,
+      "pr_auc": 0.5426782673490702,
       "macro_f1_ci95": [
-        0.7404,
-        0.7908
+        0.7431,
+        0.7862
       ],
       "confusion": [
         [
-          1290,
-          134
-        ],
-        [
-          132,
+          4118,
           222
-        ]
-      ],
-      "by_language": [
-        {
-          "language": "pt",
-          "n": 1778,
-          "n_hate": 354,
-          "macro_f1": 0.7659,
-          "recall_hate": 0.6271
-        }
-      ],
-      "by_source": [
-        {
-          "source_dataset": "hatebr",
-          "n": 968,
-          "n_hate": 99,
-          "macro_f1": 0.82,
-          "recall_hate": 0.6768
-        },
-        {
-          "source_dataset": "pt_fortuna",
-          "n": 810,
-          "n_hate": 255,
-          "macro_f1": 0.7116,
-          "recall_hate": 0.6078
-        }
-      ]
-    },
-    "test": {
-      "n": 1777,
-      "n_hate": 354,
-      "macro_f1": 0.7840894261015134,
-      "accuracy": 0.863252673044457,
-      "precision_hate": 0.659942363112392,
-      "recall_hate": 0.6468926553672316,
-      "f1_hate": 0.6533523537803139,
-      "precision_nothate": 0.9125874125874126,
-      "recall_nothate": 0.9170765987350668,
-      "roc_auc": 0.8889520826137188,
-      "pr_auc": 0.6775104848169059,
-      "macro_f1_ci95": [
-        0.759,
-        0.8071
-      ],
-      "confusion": [
-        [
-          1305,
-          118
         ],
         [
-          125,
-          229
+          154,
+          253
         ]
       ],
       "by_language": [
         {
           "language": "pt",
-          "n": 1777,
-          "n_hate": 354,
-          "macro_f1": 0.7841,
-          "recall_hate": 0.6469
+          "n": 4747,
+          "n_hate": 407,
+          "macro_f1": 0.765,
+          "recall_hate": 0.6216
         }
       ],
       "by_source": [
@@ -100,15 +48,81 @@
           "source_dataset": "hatebr",
           "n": 968,
           "n_hate": 99,
-          "macro_f1": 0.7841,
-          "recall_hate": 0.5859
+          "macro_f1": 0.7793,
+          "recall_hate": 0.6465
         },
         {
           "source_dataset": "pt_fortuna",
           "n": 809,
           "n_hate": 255,
-          "macro_f1": 0.7583,
-          "recall_hate": 0.6706
+          "macro_f1": 0.7127,
+          "recall_hate": 0.6314
+        },
+        {
+          "source_dataset": "toldbr",
+          "n": 2970,
+          "n_hate": 53,
+          "macro_f1": 0.6854,
+          "recall_hate": 0.5283
+        }
+      ]
+    },
+    "test": {
+      "n": 4748,
+      "n_hate": 408,
+      "macro_f1": 0.7652058424595599,
+      "accuracy": 0.9203875315922494,
+      "precision_hate": 0.53125,
+      "recall_hate": 0.625,
+      "f1_hate": 0.5743243243243243,
+      "precision_nothate": 0.9641518275538894,
+      "recall_nothate": 0.9481566820276498,
+      "roc_auc": 0.9136026588054575,
+      "pr_auc": 0.5556492435233239,
+      "macro_f1_ci95": [
+        0.7435,
+        0.7863
+      ],
+      "confusion": [
+        [
+          4115,
+          225
+        ],
+        [
+          153,
+          255
+        ]
+      ],
+      "by_language": [
+        {
+          "language": "pt",
+          "n": 4748,
+          "n_hate": 408,
+          "macro_f1": 0.7652,
+          "recall_hate": 0.625
+        }
+      ],
+      "by_source": [
+        {
+          "source_dataset": "hatebr",
+          "n": 968,
+          "n_hate": 99,
+          "macro_f1": 0.7969,
+          "recall_hate": 0.6869
+        },
+        {
+          "source_dataset": "pt_fortuna",
+          "n": 809,
+          "n_hate": 255,
+          "macro_f1": 0.6992,
+          "recall_hate": 0.6235
+        },
+        {
+          "source_dataset": "toldbr",
+          "n": 2971,
+          "n_hate": 54,
+          "macro_f1": 0.6898,
+          "recall_hate": 0.5185
         }
       ]
     }

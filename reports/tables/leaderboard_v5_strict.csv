@@ -1,4 +1,7 @@
 modelo,familia,macro_f1,recall_hate,macro_f1_en,recall_hate_en,macro_f1_pt,recall_hate_pt,macro_f1_vidgen
+lfm25_encoder,neural,0.8535,0.7622,0.8534,0.7975,0.7165,0.3897,0.8589
+twitter_xlmr,neural,0.8477,0.7707,0.8416,0.7957,0.7646,0.5074,0.8355
+xlmr_multilingual,neural,0.8416,0.7582,0.8361,0.7873,0.7431,0.451,0.8342
 stack (produto atual),classico,0.7906,0.7359,0.7712,0.7757,0.6966,0.3162,0.7199
 tfidf_logreg,classical,0.7878,0.7073,0.7697,0.7439,0.6977,0.3211,0.7238
 tfidf_logreg_hurtlex,classical,0.7859,0.7249,0.7658,0.7604,0.7076,0.3505,0.7174
