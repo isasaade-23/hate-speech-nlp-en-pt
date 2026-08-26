@@ -59,6 +59,14 @@ ensemble scores **ROC-AUC 0.8875, macro-F1 0.791, recall on hate 0.736** — rec
 jumped from 0.55 to 0.74, the most product-visible effect. Full v5 tables, the per-source
 breakdown and the language-balance analysis are in [docs/results.md](docs/results.md).
 
+**That average is carried by English.** Split by language on the same test
+(`reports/tables/stack_slices_v5_strict.csv`), recall on hate is **0.776 in English
+(n=11,513) and 0.316 in Portuguese (n=4,748)**. In Portuguese the model recovers under a
+third of the hate it is shown. The cause is measured and it is not the method: of the eight
+corpus sources, the three permissively licensed ones are all English, and the four
+Portuguese ones are restrictive or of indeterminate licence. See
+[the slice table](docs/results.md#slices-the-aggregate-hides-the-language-gap).
+
 | Model (strict, test v5) | ROC-AUC | macro-F1 | Recall on hate |
 |----------------|---------|----------|----------------|
 | **Stacked ensemble (served)** | **0.8875** | **0.7906** | **0.7359** |

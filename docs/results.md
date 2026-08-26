@@ -31,6 +31,30 @@ EN tweets 0.730. The 60k new EN rows diluted Portuguese relative to v4; a
 language-balanced training variant recovers PT (HateBR val 0.872 -> 0.895) at the cost
 of 0.006 global AUC — an open product decision, recorded in the methodology log.
 
+### Slices: the aggregate hides the language gap
+
+The 0.74 headline is an average over a test split that is 71% English. Split by language,
+the same model behaves like two different products
+(`reports/tables/stack_slices_v5_strict.csv`):
+
+| Slice | n | macro-F1 | Recall on hate |
+|---|---|---|---|
+| **English** | 11,513 | 0.7712 | **0.7757** |
+| **Portuguese** | 4,748 | 0.6966 | **0.3162** |
+| Adversarial (Vidgen) | 5,871 | 0.7199 | 0.8182 |
+| Non-adversarial | 10,390 | 0.7558 | 0.5686 |
+
+**In Portuguese the model recovers under a third of the hate it is shown.** The cause is
+measured and it is not the method: 59% of the Portuguese false negatives score below 0.10,
+which is a coverage failure rather than a threshold one. Of the eight corpus sources, the
+three permissively licensed ones are all English; the four Portuguese ones are restrictive
+or of indeterminate licence. The same missing asset caps both the Portuguese recall and
+what may be granted downstream.
+
+No aggregate figure anywhere in this repository should be read without this table. A
+language-dedicated Portuguese model doubled recall on the slice but tripled identity false
+positives and was barred by the bias gate — see [Identity-term bias](#identity-term-bias).
+
 Negative results this phase: a HurtLex affective-lexicon block (36 dims, EN+PT) adds
 nothing, either stacked into the features or as a fourth ensemble member; HurtLex is
 CC BY-NC-SA (non-commercial), so it stays out of any product model regardless.
