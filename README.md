@@ -9,14 +9,14 @@ A reproducible study comparing classical models with transformers, plus a deploy
 
 [![CI](https://github.com/isasaade-23/hate-speech-nlp-en-pt/actions/workflows/ci.yml/badge.svg)](https://github.com/isasaade-23/hate-speech-nlp-en-pt/actions/workflows/ci.yml)
 [![Docs](https://img.shields.io/badge/docs-online-3D5A80?style=flat-square)](https://isasaade-23.github.io/hate-speech-nlp-en-pt/)
-[![Live demo](https://img.shields.io/badge/demo-live-EE6C4D?style=flat-square)](https://luciola-hatecheck.streamlit.app/)
+[![Live demo](https://img.shields.io/badge/demo-live-EE6C4D?style=flat-square)](https://luciola.65-108-90-215.sslip.io)
 ![Python](https://img.shields.io/badge/python-3.12-3D5A80?style=flat-square)
 ![License](https://img.shields.io/badge/code-AGPL--3.0-3D5A80?style=flat-square)
 ![Model license](https://img.shields.io/badge/model-research%20only-EE6C4D?style=flat-square)
 ![Style](https://img.shields.io/badge/lint-ruff%20%2B%20black-3D5A80?style=flat-square)
 ![Models](https://img.shields.io/badge/models-16%20compared-EE6C4D?style=flat-square)
 
-**[Try the live demo](https://luciola-hatecheck.streamlit.app/)** ·
+**[Try the live demo](https://luciola.65-108-90-215.sslip.io)** ·
 **[Documentation](https://isasaade-23.github.io/hate-speech-nlp-en-pt/)** ·
 **[Code](https://github.com/isasaade-23/hate-speech-nlp-en-pt)**
 
@@ -42,7 +42,8 @@ The scientific core is a fair, leakage-safe comparison of two model families und
 The interactive demo, **Luciola**, runs the lightweight CPU model in the browser, in English or
 Portuguese, in a light or dark theme. It classifies text live and renders the stop-word ablation
 as an interactive heatmap.
-**[Open Luciola](https://luciola-hatecheck.streamlit.app/)**
+**[Open Luciola](https://luciola.65-108-90-215.sslip.io)** — served from our own machine, so it never sleeps.
+A mirror runs on [Streamlit Community Cloud](https://luciola-hatecheck.streamlit.app/), which hibernates when idle.
 
 There is also a **browser extension** that runs the linear member of the served ensemble
 fully inside the browser, with no network access and no server:
