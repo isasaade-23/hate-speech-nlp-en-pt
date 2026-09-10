@@ -106,9 +106,9 @@
     "policy": "strict",
     "seed": 42,
     "hf_checkpoint": "FacebookAI/xlm-roberta-base",
-    "threshold": 0.8428,
-    "val_macro_f1": 0.7265343326834199,
-    "test_macro_f1": 0.742468910896682
+    "threshold": 0.7252,
+    "val_macro_f1": 0.8414025251673558,
+    "test_macro_f1": 0.8416287697104784
   },
   "xlmr_multilingual_broad_s42": {
     "path": "models/xlmr_multilingual_broad_s42/hf",
@@ -128,9 +128,9 @@
     "policy": "strict",
     "seed": 42,
     "hf_checkpoint": "neuralmind/bert-base-portuguese-cased",
-    "threshold": 0.5235,
-    "val_macro_f1": 0.7659438005404176,
-    "test_macro_f1": 0.7840894261015134
+    "threshold": 0.0219,
+    "val_macro_f1": 0.7650180679176765,
+    "test_macro_f1": 0.7652058424595599
   },
   "bertimbau_pt_broad_s42": {
     "path": "models/bertimbau_pt_broad_s42/hf",
@@ -150,9 +150,9 @@
     "policy": "strict",
     "seed": 42,
     "hf_checkpoint": "vinai/bertweet-base",
-    "threshold": 0.3007,
-    "val_macro_f1": 0.7361038165266107,
-    "test_macro_f1": 0.707675785262487
+    "threshold": 0.66,
+    "val_macro_f1": 0.8663597250795201,
+    "test_macro_f1": 0.8609791335675605
   },
   "bertweet_en_broad_s42": {
     "path": "models/bertweet_en_broad_s42/hf",
@@ -232,9 +232,9 @@
     "policy": "strict",
     "seed": 42,
     "hf_checkpoint": "cardiffnlp/twitter-xlm-roberta-base",
-    "threshold": 0.6771,
-    "val_macro_f1": 0.7395152979041436,
-    "test_macro_f1": 0.7487334104268832
+    "threshold": 0.7522,
+    "val_macro_f1": 0.8465331761134166,
+    "test_macro_f1": 0.8477212483049489
   },
   "twitter_xlmr_broad_s42": {
     "path": "models/twitter_xlmr_broad_s42/hf",
