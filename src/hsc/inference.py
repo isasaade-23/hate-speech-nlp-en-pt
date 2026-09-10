@@ -15,13 +15,18 @@ from hsc.langid import detect as detect_lang
 from hsc.utils import read_json
 
 
-def _resolve_model_id(model_id: str | None) -> str:
+def _registry() -> dict:
     reg_path = resolve("models") / "registry.json"
     if not reg_path.exists():
         raise FileNotFoundError("models/registry.json not found — train a model first.")
     reg = read_json(reg_path)
     if not reg:
         raise RuntimeError("registry is empty — train a model first.")
+    return reg
+
+
+def _resolve_model_id(model_id: str | None) -> str:
+    reg = _registry()
     if model_id:
         if model_id not in reg:
             raise KeyError(f"model_id {model_id} not in registry")
@@ -73,7 +78,20 @@ class HateClassifier:
         self._cal = (float(cal["coef"]), float(cal["intercept"])) if cal else None
         if cal:
             self.threshold = float(cal["threshold"])
+        # Limiar por idioma. O mecanismo existe; o mapa no registry está VAZIO de propósito.
+        # Baixar o limiar em PT compra recall pagando em viés de identidade, monotonicamente
+        # (pt_threshold_bias.py): 0,1092 leva o recall de 0,316 a 0,556 e o falso positivo
+        # da sonda de 3/20 para 10/20, marcando quem fala de si. Um idioma só entra neste
+        # mapa depois de passar no gate de viés — ver `threshold_policy` no registry.
+        entry = _registry().get(self.model_id, {})
+        self.thresholds_by_lang = {
+            str(k): float(v) for k, v in (entry.get("thresholds_by_lang") or {}).items()
+        }
         self._profile = data_config()["clean"]["profiles"]["light"]
+
+    def threshold_for(self, lang: str) -> float:
+        """Limiar do idioma detectado, com o global como retaguarda."""
+        return self.thresholds_by_lang.get(lang, self.threshold)
 
     def predict(self, text: str) -> dict:
         return self.predict_batch([text])[0]
@@ -94,12 +112,14 @@ class HateClassifier:
         out = []
         for text, s in zip(texts, scores):
             code, conf = detect_lang(text)
-            label = int(s >= self.threshold)
+            thr = self.threshold_for(code)
+            label = int(s >= thr)
             out.append(
                 {
                     "text": text,
                     "label": "hate" if label else "not_hate",
                     "score": float(s),
+                    "threshold": round(thr, 4),
                     "language": {"detected": code, "confidence": round(float(conf), 4)},
                     "model_version": self.model_id,
                 }

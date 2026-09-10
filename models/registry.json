@@ -256,7 +256,9 @@
     "threshold": 0.3371778039000763,
     "val_macro_f1": 0.7911,
     "test_macro_f1": 0.7906,
-    "test_roc_auc": 0.8875
+    "test_roc_auc": 0.8875,
+    "thresholds_by_lang": {},
+    "threshold_policy": "Limiar unico, de proposito. O mapa `thresholds_by_lang` existe e esta VAZIO: um idioma so entra nele quando o ganho de recall passar no gate de vies. O limiar ajustado na validacao PT (0,1092) leva o recall de odio de 0,3162 para 0,5564, mas triplica o falso positivo da sonda de identidade, de 3/20 para 10/20, marcando pessoas LGBT, negras, nordestinas, muculmanas e evangelicas que falam de si. E pior que o modelo dedicado ao PT (9/20), recusado em 24/08/2026 por esse mesmo motivo. O maior limiar que preserva 3/20 e 0,3200, e ele compra +0,0122 de recall. Medido em scripts/pt_threshold_bias.py -> reports/tables/pt_threshold_bias.csv; decisao em methodology/pt_recall_x_vies.md."
   },
   "stack_broad_s42": {
     "path": "models/stack_broad_s42/model.joblib",

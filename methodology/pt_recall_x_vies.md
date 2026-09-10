@@ -104,3 +104,48 @@ quantização int8 via ONNX, ou infraestrutura paga. É o pedido concreto de apo
 A sonda passa a ser gate de release. Está em `scripts/pt_identity_probe.py` e
 deve rodar contra qualquer candidato a modelo servido, junto com as métricas
 agregadas. Métrica agregada boa não é suficiente.
+
+## O limiar por idioma cai no mesmo gate (10/09/2026)
+
+A tabela de 24/08 mediu o falso positivo de identidade das configurações que
+trocam de **modelo**. Ficou de fora a que não troca nada: só baixar o limiar em
+português, de 0,3372 para os 0,1092 ajustados na validação PT, que
+`pt_boost.py` mediu levando o recall de ódio de 0,316 para 0,556.
+
+Rodada a sonda sobre essa configuração, ela reprova pior que o modelo barrado:
+
+| limiar | recall ódio | precisão | macro-F1 | FP identidade |
+|---|---|---|---|---|
+| 0,3372 (servido) | 0,3162 | 0,6789 | 0,6966 | **3/20** |
+| 0,3200 | 0,3284 | 0,6768 | 0,7021 | 3/20 |
+| 0,3000 | 0,3382 | 0,6667 | 0,7053 | 4/20 |
+| 0,2500 | 0,3725 | 0,6414 | 0,7164 | 5/20 |
+| 0,2000 | 0,4020 | 0,6332 | 0,7267 | 6/20 |
+| 0,1500 | 0,4706 | 0,5981 | 0,7437 | 8/20 |
+| 0,1092 (ajustado em PT) | 0,5564 | 0,5136 | 0,7442 | **10/20** |
+
+Script: `scripts/pt_threshold_bias.py`. Tabela:
+`reports/tables/pt_threshold_bias.csv`.
+
+As sete frases que o limiar de 0,1092 passa a marcar e o global não são todas de
+pessoas falando de si: "sou uma mulher lésbica e tenho orgulho disso", "sou negra
+e nordestina", "somos um casal de lésbicas há dez anos", "ele é muçulmano e
+pratica a religião dele em paz", "a comunidade lgbt tem direito a existir", "sou
+evangélico e respeito outras religiões", "minha professora é uma mulher preta e
+brilhante".
+
+**A troca é monotônica e não tem ponto bom.** O maior limiar que preserva a
+linha de base de 3/20 é 0,3200, e ele compra 0,0122 de recall. Qualquer ganho
+que valha o nome custa marcar quem a ferramenta deveria proteger.
+
+**Decisão: o limiar por idioma não vai ao ar.** O mecanismo fica implementado em
+`hsc/inference.py` (`thresholds_by_lang`, lido do registry) com o mapa vazio, e
+a entrada do `stack_strict_s42` no registry traz o motivo em `threshold_policy`.
+Um idioma só entra no mapa depois de passar na sonda.
+
+O achado reforça o diagnóstico das seções anteriores por um terceiro caminho.
+Modelo dedicado, combinação de modelos e agora limiar: as três alavancas que não
+tocam no dado esbarram no mesmo teto. **O gargalo é o corpus**, e o que falta
+nele são contraexemplos: frases neutras e positivas em português contendo termos
+de identidade. Qualquer geração de dado sintético para o projeto precisa mirar
+esses contraexemplos, e não só mais exemplos de ódio.

@@ -23,6 +23,9 @@ class Prediction(BaseModel):
     text: str
     label: str
     score: float
+    # limiar aplicado a ESTE texto: hoje é sempre o global, mas o roteamento por
+    # idioma existe no classificador, então quem consome precisa saber onde cortou
+    threshold: float
     language: LanguageInfo
     model_version: str
 
