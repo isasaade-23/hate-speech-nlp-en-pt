@@ -6,7 +6,7 @@
   "seed": 42,
   "hf_checkpoint": "cardiffnlp/twitter-xlm-roberta-base",
   "n_train": 81304,
-  "threshold": 0.7522,
+  "threshold": 0.7524,
   "splits": {
     "val": {
       "n": 16261,
@@ -18,8 +18,8 @@
       "f1_hate": 0.7805351747949936,
       "precision_nothate": 0.9062179706183806,
       "recall_nothate": 0.918932963796986,
-      "roc_auc": 0.930163554367527,
-      "pr_auc": 0.8656271470527968,
+      "roc_auc": 0.9301647667249762,
+      "pr_auc": 0.8656297946157974,
       "macro_f1_ci95": [
         0.8404,
         0.8528
@@ -105,8 +105,8 @@
       "f1_hate": 0.7824308321670793,
       "precision_nothate": 0.9075040643449988,
       "recall_nothate": 0.9185865234713321,
-      "roc_auc": 0.9297228532501925,
-      "pr_auc": 0.8662246487844665,
+      "roc_auc": 0.9297256545306625,
+      "pr_auc": 0.8662327919684626,
       "macro_f1_ci95": [
         0.8417,
         0.8539

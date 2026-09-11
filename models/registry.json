@@ -232,7 +232,7 @@
     "policy": "strict",
     "seed": 42,
     "hf_checkpoint": "cardiffnlp/twitter-xlm-roberta-base",
-    "threshold": 0.7522,
+    "threshold": 0.7524,
     "val_macro_f1": 0.8465331761134166,
     "test_macro_f1": 0.8477212483049489
   },
