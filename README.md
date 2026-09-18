@@ -255,7 +255,12 @@ provenance with licenses, the label-mapping rationale, the experiment log, and k
 ## Responsible use
 
 This is a probabilistic research classifier, not a moderation oracle. It reflects the biases of its
-training data. The bias probe shows measurable over-flagging of some identity terms. It should
+training data. An identity-disclosure probe (2026-08-24, updated 2026-09-10) found that a
+Portuguese-only model variant over-flagged real non-hateful identity sentences by 34.0% (vs. 13.7%
+for the served model), including sentences where LGBT, Black, and Muslim people simply describe
+themselves. That variant was blocked from release; see
+[`methodology/pt_recall_x_vies.md`](methodology/pt_recall_x_vies.md) for the full result and the
+release-gate decision it produced. It should
 support, never replace, human review. Redistribution is bound by the individual dataset licenses.
 
 ## License

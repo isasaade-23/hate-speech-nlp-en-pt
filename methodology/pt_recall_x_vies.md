@@ -87,7 +87,7 @@ jogo é o pré-treino multilíngue, que traz contexto de fora do corpus.
 
 **Conclusão: o candidato a servir é o twitter-XLM-R.** O impedimento agora é
 tamanho (1,1 GB não cabe no plano gratuito), não qualidade nem viés. Caminhos:
-quantização int8 via ONNX, ou infraestrutura paga. É o pedido concreto de apoio.
+quantização int8 via ONNX, ou infraestrutura paga.
 
 ## O que destrava
 
