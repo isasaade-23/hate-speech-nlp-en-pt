@@ -263,6 +263,11 @@ themselves. That variant was blocked from release; see
 release-gate decision it produced. It should
 support, never replace, human review. Redistribution is bound by the individual dataset licenses.
 
+## Support
+
+This is independent research, self-funded and unpaid outside the author's stipend.
+One-off donations: [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/ailuciola)
+
 ## License
 
 Two licenses, because they cover different things.
