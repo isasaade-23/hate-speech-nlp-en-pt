@@ -1,0 +1,5 @@
+model_id,fp_fundo_pt,fp_com_identidade,excesso,n_linhas
+stack_broad_s42,0.0643,0.2,0.1357,185
+tfidf_logreg_broad_s42,0.0713,0.2324,0.1611,185
+tfidf_logreg_commercial_broad_s42,0.0346,0.1027,0.0681,185
+tfidf_logreg_commercial_toldbr_broad_s42,0.0273,0.0595,0.0321,185

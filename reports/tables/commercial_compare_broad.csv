@@ -1,0 +1,5 @@
+model_id,policy,n_test,roc_auc,macro_f1,recall_hate,recall_en,n_en,recall_pt,n_pt,recall_src_hatebr,recall_src_hatexplain,recall_src_multioff,recall_src_pt_fortuna,recall_src_toldbr,recall_src_tweets_ip,recall_src_vidgen,memotion_n,memotion_auc,memotion_recall_hate
+stack_broad_s42,broad,16368,0.8396,0.7561,0.7192,0.7681,11620,0.4989,4748,0.6562,0.8766,0.186,0.3843,0.4184,0.5277,0.8011,,,
+tfidf_logreg_broad_s42,broad,16368,0.8352,0.7521,0.7247,0.771,11620,0.5164,4748,0.6875,0.8656,0.2558,0.4118,0.4201,0.5446,0.8056,6992.0,0.5044,0.1322
+tfidf_logreg_commercial_broad_s42,broad,16368,0.7564,0.704,0.5937,0.7129,11620,0.0572,4748,0.0625,0.8435,0.2093,0.0863,0.0399,0.3192,0.785,6992.0,0.4963,0.1523
+tfidf_logreg_commercial_toldbr_broad_s42,broad,16368,0.7982,0.7217,0.6346,0.7231,11620,0.2365,4748,0.1875,0.8428,0.2093,0.1216,0.3281,0.3164,0.8052,6992.0,0.4996,0.1191

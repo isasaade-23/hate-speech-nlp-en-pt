@@ -291,5 +291,49 @@
     "test_macro_f1": 0.7572,
     "test_roc_auc": 0.9015,
     "note": "EXPERIMENTO, NAO SERVIDO: dobra o recall de odio em PT (0.3162 -> 0.6225) mas triplica o falso positivo em frases neutras com termo de identidade (9/20 contra 3/20 do stack), marcando pessoas LGBT, negras e muculmanas falando de si. Ver methodology/pt_recall_x_vies.md"
+  },
+  "tfidf_logreg_commercial_strict_s42": {
+    "path": "models/tfidf_logreg_commercial_strict_s42/model.joblib",
+    "config": "tfidf_logreg",
+    "policy": "strict",
+    "seed": 42,
+    "git_sha": "0238f5b",
+    "threshold": 0.5171,
+    "val_macro_f1": 0.7678591648556938,
+    "test_macro_f1": 0.768587959305223,
+    "note": "EXPERIMENTO, NAO SERVIDO: treinado so em multioff+vidgen+hatexplain (commercial_whitelist). Treino fica sem textos em PT (as 2 fontes comerciais sob strict sao 100% EN); recall PT despenca de 0.3211 para 0.0123. Ver methodology/DECISOES_METODOLOGICAS.md, 2026-10-07 Etapa 2.2."
+  },
+  "tfidf_logreg_commercial_toldbr_strict_s42": {
+    "path": "models/tfidf_logreg_commercial_toldbr_strict_s42/model.joblib",
+    "config": "tfidf_logreg",
+    "policy": "strict",
+    "seed": 42,
+    "git_sha": "0238f5b",
+    "threshold": 0.6008,
+    "val_macro_f1": 0.7712333284050537,
+    "test_macro_f1": 0.7699413451169153,
+    "note": "EXPERIMENTO, NAO SERVIDO: whitelist comercial + ToLD-BR (CC BY-SA 4.0, licenca pendente de confirmacao, nao entra por padrao). 14.856 textos PT no treino, mas recall PT continua baixo (0.0172): ToLD-BR tem poucos positivos de odio (269/14.856) e nao basta para compensar a falta de hatebr/pt_fortuna. Ver methodology/DECISOES_METODOLOGICAS.md, 2026-10-07 Etapa 2.2."
+  },
+  "tfidf_logreg_commercial_broad_s42": {
+    "path": "models/tfidf_logreg_commercial_broad_s42/model.joblib",
+    "config": "tfidf_logreg",
+    "policy": "broad",
+    "seed": 42,
+    "git_sha": "0238f5b",
+    "threshold": 0.4419,
+    "val_macro_f1": 0.7118337352370727,
+    "test_macro_f1": 0.7039835017310037,
+    "note": "EXPERIMENTO, NAO SERVIDO: whitelist comercial sob broad (multioff entra aqui, ainda sem PT). Recall PT 0.0572. Ver methodology/DECISOES_METODOLOGICAS.md, 2026-10-07 Etapa 2.2."
+  },
+  "tfidf_logreg_commercial_toldbr_broad_s42": {
+    "path": "models/tfidf_logreg_commercial_toldbr_broad_s42/model.joblib",
+    "config": "tfidf_logreg",
+    "policy": "broad",
+    "seed": 42,
+    "git_sha": "0238f5b",
+    "threshold": 0.5059,
+    "val_macro_f1": 0.7322681592403577,
+    "test_macro_f1": 0.7217304575489341,
+    "note": "EXPERIMENTO, NAO SERVIDO: whitelist comercial + ToLD-BR sob broad. 14.855 textos PT no treino com 2.875 positivos (broad dobra os positivos de ToLD-BR), recall PT sobe a 0.2365 -- melhor que as outras 3 variantes comerciais, mas ainda bem abaixo do corpus completo (0.5164). Ver methodology/DECISOES_METODOLOGICAS.md, 2026-10-07 Etapa 2.2."
   }
 }
