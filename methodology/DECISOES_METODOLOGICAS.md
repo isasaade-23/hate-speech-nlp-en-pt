@@ -534,3 +534,56 @@ com o atual no teste congelado (ROC-AUC, macro-F1, recall por idioma/fonte,
 sonda de identidade de 192 frases, strict e broad). Não executado ainda nesta
 sessão — fica para o próximo passo, com o resultado (positivo ou negativo)
 registrado aqui depois.
+
+---
+
+## 2026-10-07 — INCIDENTE: split congelado do strict apagado e restaurado
+
+**O que aconteceu.** Ao testar a flag `--commercial` na sessão da Etapa 1
+(06/10), rodei `hsc harmonize --policy strict` (sem `--commercial`) para
+conferir a trilha normal antes de testar a nova. Não tinha registrado que
+`build_corpus()` **sobrescreve** `data/processed/corpus_strict.parquet` do
+zero, sem as colunas que `hsc split` e `hsc langid` tinham adicionado depois
+da última vez que o corpus foi harmonizado. `corpus_broad.parquet` não foi
+tocado (só rodei harmonize nele via `--commercial`, que grava em arquivo
+separado) e permaneceu intacto o tempo todo.
+
+**Descoberto ao rodar a Etapa 2.2**: `build_variant()` falhou com
+`KeyError: 'split'`. Investigação confirmou: `corpus_strict.parquet` tinha
+voltado a 115.052 linhas sem dedup e sem as colunas `dup_cluster_id`/`split`/
+`lang_pred`. Nenhum backup em git (`data/processed/` é propositalmente
+gitignored).
+
+**Reconstrução, verificada antes de escrever qualquer coisa.**
+1. `drop_exact_duplicates` (determinístico, sem aleatoriedade) no corpus
+   corrompido: 115.052 → 113.826 linhas, removendo exatamente 1.226 —
+   os mesmos números do manifesto congelado.
+2. ids de teste e validação recuperados de `reports/predictions/*_strict_s42_*.parquet`
+   já salvos (8 modelos diferentes, todos com os MESMOS 16.261 ids de teste e
+   16.261 de validação, sem sobreposição entre si) — `tfidf_logreg`, `stack`,
+   `twitter_xlmr`, `xlmr_multilingual`, `tfidf_lgbm`, `tfidf_svm`,
+   `tfidf_logreg_hurtlex`, `lfm25_encoder`. Todo o resto virou `train`
+   (81.304 linhas).
+3. **Prova, não suposição**: `data/processed/splits_strict.json` (nunca
+   tocado) guarda o hash SHA-256 do split original. Recalculei o hash da
+   minha reconstrução pela mesma fórmula (`id:split` por linha, concatenado,
+   SHA-256) e bateu **exatamente**:
+   `9bfda377058d9264339179e02d066b771f9ed722602a3b529087bafa4a3651ae`.
+   Só depois desse match escrevi o arquivo de volta.
+
+**O que ficou diferente do original:** `dup_cluster_id` não foi restaurado
+(não precisava para filtrar o treino por fonte, e recalculá-lo tem risco de
+pequenas diferenças de ordenação que eu preferi não correr sem necessidade).
+Se algum dia for preciso de novo — outro re-split, por exemplo — ele pode ser
+recomputado determinística e independentemente a partir dos mesmos dados
+brutos, que não mudaram.
+
+**Causa raiz.** `hsc harmonize` e `hsc split` escrevem no MESMO arquivo
+(`corpus_<policy>.parquet`), e o primeiro não verifica nem avisa se o segundo
+já rodou em cima dele. Rodar harmonize de novo por engano apaga o split sem
+erro nem aviso.
+
+**Correção de processo, não só de dado:** a partir de agora, antes de rodar
+`hsc harmonize --policy X` (com ou sem `--commercial`) em qualquer sessão,
+confiro primeiro se `corpus_X.parquet` já tem a coluna `split` — se tiver,
+é sinal de que already passou por `hsc split` e sobrescrever é destrutivo.
