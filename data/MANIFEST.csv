@@ -1,0 +1,9 @@
+fonte,idioma,n_textos,licenca,url_origem,commercial_ok,observacao
+memotion,EN,6992,"Other (uso liberado mediante citação, Kaggle)",https://www.kaggle.com/datasets/williamscott701/memotion-dataset-7k,pendente,"Excluído do corpus primário desde a Beta 2.0 (AUC por fonte 0.547, aleatório); mantido só como teste externo"
+tweets_ip,EN,21009,"não recuperável (página de origem perdida)",pendente,nao,"Confirmar a licença na origem antes de qualquer uso comercial (pendência registrada em data_provenance.md)"
+pt_fortuna,PT,5670,"Unknown (Kaggle)",https://github.com/paulafortuna/Portuguese-Hate-Speech-Dataset,nao,"Autores não contatados sobre uso comercial; licença indeterminada"
+multioff,EN,743,Apache-2.0,https://github.com/bharathichezhiyan/Multimodal-Meme-Classification-Identifying-Offensive-Content-in-Image-and-Text,sim,"Treino+validação+teste = 445+149+149; única fonte comercialmente clara até a v5"
+hatebr,PT,7000,"research-only (Sinch)",https://github.com/franciellevargas/HateBR,nao,"Uso comercial vedado sem consentimento prévio por escrito da Sinch"
+toldbr,PT,21000,CC BY-SA 4.0,https://github.com/JAugusto97/ToLD-Br,pendente,"Share-alike sobre pesos derivados é juridicamente não testado; aguardando resposta dos autores"
+vidgen,EN,41144,CC BY 4.0,https://github.com/bvidgen/Dynamically-Generated-Hate-Speech-Dataset,sim,"100% sintético adversarial (Dynabench); sem texto real de usuário, sem PII"
+hatexplain,EN,20148,MIT,https://github.com/hate-alert/HateXplain,sim,"919 empates 3-way descartados; rótulo nativo hatespeech/offensive/normal"

@@ -24,6 +24,21 @@ A reproducible study comparing classical models with transformers, plus a deploy
 
 ---
 
+## Current status (2026-10-06)
+
+- **Corpus v5**, 8 sources ingested (see [`data/MANIFEST.csv`](data/MANIFEST.csv) for licenses and
+  download links). One source, memotion, is excluded from the primary training corpus since
+  Beta 2.0 and kept only as an external test set.
+- **Served model: the stacked ensemble (stack v5)** — ROC-AUC 0.8875, macro-F1 0.791, recall on
+  hate 0.736 on the frozen v5 test. Still what runs behind the live demo and the API.
+- **Chosen candidate, not yet served: twitter-XLM-R.** The 2026-08-24 bias gate (see
+  [`methodology/pt_recall_x_vies.md`](methodology/pt_recall_x_vies.md)) found it raises recall on
+  Portuguese hate from 0.316 to **0.507** while *lowering* identity-term over-flagging from 0.137 to
+  **0.119** — an improvement on both axes, not a trade-off. It is blocked on deployment, not
+  quality: the checkpoint is 1.1 GB, too large for the current free-tier hosting. Needs ONNX int8
+  quantization or paid infrastructure before it can replace the stack.
+- **Next steps:** see [Etapa 2](#próximos-passos-etapa-2) below.
+
 ## Overview
 
 This project trains and rigorously compares hate-speech classifiers for a **bilingual (EN + PT),
@@ -187,16 +202,27 @@ flowchart LR
 python -m venv .venv && . .venv/Scripts/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt && pip install -e .
 
-# 2. Reproduce the local pipeline (classical track, CPU)
-hsc ingest                       # 4 datasets -> common schema
+# 2. Download the 8 source datasets
+# Each has its own license and URL — see data/MANIFEST.csv for the full table
+# (license, size, commercial_ok). Download each one from its url_origem and save
+# it under data/source_zips/ with the exact zip filename configs/data.yaml expects
+# (e.g. data/source_zips/hatebr.zip). memotion, tweets_ip and pt_fortuna have
+# licenses still pending confirmation (see MANIFEST) — fine for research use,
+# do not ship them in a commercial product.
+mkdir -p data/source_zips   # then place the 8 zips here
+
+# 3. Reproduce the local pipeline (classical track, CPU)
+hsc ingest                       # 8 sources -> common schema (data/interim)
 hsc probe-dataset2               # resolve the unlabeled 1/2/3 tweets source
 hsc harmonize --policy strict    # (and --policy broad)
+hsc harmonize --policy strict --commercial          # commercial-only corpus (multioff+vidgen+hatexplain)
+hsc harmonize --policy strict --commercial --include-toldbr   # same, + ToLD-BR opted in
 hsc split --policy strict        # leakage-safe frozen split
 hsc langid  --policy strict      # language detection
 hsc train -c configs/classical/tfidf_logreg.yaml --policy strict
 hsc report                       # leaderboard + breakdown tables
 
-# 3. Deeper evaluation (Fase 9)
+# 4. Deeper evaluation (Fase 9)
 hsc analyze                      # paired McNemar + calibration
 hsc transfer                     # cross-lingual / cross-domain
 hsc bias                         # identity-term bias probe
@@ -214,6 +240,32 @@ uploads the frozen corpus and trains XLM-R / BERTimbau / BERTweet with the same 
 uvicorn api.main:app --reload
 # POST /predict {"text": "..."}  ->  {label, score, language, model_version, latency_ms}
 ```
+
+## Próximos passos (Etapa 2)
+
+In rough order of effort. Items 2.1–2.2 are done; 2.3–2.7 are scoped but not started.
+
+- [x] **2.1 Commercial-corpus flag** — `hsc harmonize --commercial` restricts the primary corpus
+  to `configs/labels.yaml`'s `commercial_whitelist` (multioff, vidgen, hatexplain);
+  `--include-toldbr` opts ToLD-BR in separately, since its license (CC BY-SA 4.0) is still
+  pending confirmation.
+- [x] **2.2 Commercial-corpus baseline** — retrain the baseline on the commercial corpus and
+  compare against the current model on the same frozen test (ROC-AUC, macro-F1, recall by
+  language/source, 192-phrase identity probe; strict and broad).
+- [ ] **2.3 Rule-based perturbations** — typos, missing accents, spacing, partial censorship,
+  "0dio"-style substitutions, applied at the same rate to hate and non-hate; plus a masked
+  version of the test set to measure robustness.
+- [ ] **2.4 PT machine translation of the permissive sources** — local open LLM, output goes to
+  the Etapa 3 human-validation queue, never straight into training.
+- [ ] **2.5 Synthetic data from a local open LLM** — seeds only from permissive sources; from
+  restricted sources, only aggregate statistics (proportions, target groups, length). N-gram
+  overlap and similarity check against real data: no near-duplicate text. Also queued for
+  validation.
+- [ ] **2.6 Synthetic-vs-real training experiments** — A (current corpus), B (100% synthetic),
+  C (permissive + synthetic), D (C + translations). Same frozen test, same identity probe.
+- [ ] **2.7 Encoder comparison** — twitter-XLM-R, moBERTo, NorBERTo, BERTomelo, mmBERT. Check
+  each one's Hugging Face license before training. Decide by the double criterion
+  (recall × identity bias), the same gate that selected twitter-XLM-R above.
 
 ## Product model selection
 
