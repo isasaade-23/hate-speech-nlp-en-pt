@@ -475,3 +475,62 @@ registro. (2) min_df=2: nada.
 restam: membros SBERT/destilado re-treinados no Colab (no v4 os 2 SBERT davam
 +0,009), e o re-run dos transformers. O número 0,9 precisa ser lido contra o
 teste que o contém: o v5 é substancialmente mais difícil que o v4.
+
+---
+
+## 2026-10-06 — Etapa 1: repositório pronto para outra pessoa rodar
+
+**Objetivo.** Deixar o repositório executável do zero por outra pessoa (cenário:
+o Vinícius clonando agora), não só pela autora.
+
+**Bug de portabilidade achado e corrigido.** `configs/data.yaml` fixava
+`source_dir` em `C:/Users/Renato/Downloads/hate-speech`, um caminho absoluto da
+máquina da autora, e `hsc/ingest/__init__.py` lia esse valor direto com
+`Path()`, sem passar por `resolve()`. Qualquer outra pessoa rodando `hsc ingest`
+cairia nesse caminho inexistente. Corrigido: `source_dir` agora é
+`data/source_zips` (relativo, resolvido contra a raiz do projeto como todo o
+resto), e o ingest passou a usar `resolve()` como os demais caminhos. Pasta
+`data/source_zips/` criada (vazia, só `.gitkeep`) e adicionada ao `.gitignore`
+junto com as demais pastas de dado.
+
+**Verificação.** Rodado `hsc ingest` e `hsc harmonize --policy strict` com o fix
+aplicado, sem os zips-fonte presentes (usando o fallback de reaproveitar os
+arquivos já extraídos em `data/raw`, documentado desde 16/08): as 8 fontes
+processaram normalmente, corpus strict saiu com 115.052 linhas (hate=33.115),
+igual ao de antes do fix. Sem regressão.
+
+**`data/MANIFEST.csv` criado**, com as 8 fontes (fonte, idioma, nº de textos,
+licença, url de origem, `commercial_ok`, observação). URLs de pt_fortuna,
+multioff, hatebr, toldbr, vidgen e hatexplain conferidas por HTTP (200) nesta
+sessão; a de multioff estava registrada errada de memória
+(`.../Multimodal-Meme-Classification-Hate-Speech-Detection`, 404) e foi
+corrigida para o repositório real
+(`.../Multimodal-Meme-Classification-Identifying-Offensive-Content-in-Image-and-Text`).
+memotion e tweets_ip seguem com licença/URL pendente de confirmação, como já
+constava em `data_provenance.md`.
+
+**2.1 implementado: flag de corpus comercial.** `build_corpus()` (harmonize.py)
+ganhou `commercial_only` e `include_toldbr`; CLI ganhou `hsc harmonize
+--commercial` e `--include-toldbr`. A flag só RESTRINGE fontes já marcadas
+`include_in_primary` pela policy (strict/broad) — nunca promove uma fonte que a
+policy já exclui. Testado nas duas policies: sob `strict`, `--commercial` dá
+60.373 linhas (vidgen+hatexplain; multioff fica fora porque sob strict ele já
+não tem rótulo de ódio confirmado, regra pré-existente do labels.yaml); sob
+`broad`, multioff entra e dá 61.116 linhas; com `--include-toldbr` adicional,
+81.373 linhas. Arquivos de saída ganham sufixo (`corpus_strict_commercial.parquet`,
+`corpus_strict_commercial_toldbr.parquet`) para não sobrescrever o corpus
+completo.
+
+**README.** Adicionada a seção "Current status" no topo (corpus v5, stack v5
+ainda servido, twitter-XLM-R escolhido pelo gate de viés de 24/08 mas bloqueado
+por tamanho — ver `pt_recall_x_vies.md`) e "Próximos passos (Etapa 2)" com os
+itens 2.1–2.7, marcando 2.1 e 2.2 como feitos. Quickstart reescrito: passo
+explícito de download das 8 fontes (link de cada uma em `data/MANIFEST.csv`,
+nome do zip esperado) antes do `hsc ingest`, e os dois comandos novos de
+`--commercial`.
+
+**Pendente (Etapa 2.2):** retreinar o baseline no corpus comercial e comparar
+com o atual no teste congelado (ROC-AUC, macro-F1, recall por idioma/fonte,
+sonda de identidade de 192 frases, strict e broad). Não executado ainda nesta
+sessão — fica para o próximo passo, com o resultado (positivo ou negativo)
+registrado aqui depois.
