@@ -4,7 +4,7 @@
 seed: 42
 
 paths:
-  source_dir: "C:/Users/Renato/Downloads/hate-speech"   # immutable source zips
+  source_dir: "data/source_zips"   # downloaded zips go here (see data/MANIFEST.csv for links); gitignored, immutable once placed
   raw: "data/raw"
   interim: "data/interim"
   processed: "data/processed"

@@ -4,8 +4,6 @@ normalize to the common schema, and write data/interim/<source>.parquet.
 
 from __future__ import annotations
 
-from pathlib import Path
-
 from hsc.config import data_config, resolve
 from hsc.ingest import (
     dataset1_memotion,
@@ -34,7 +32,7 @@ REGISTRY = {
 
 def run_ingest(cfg: dict | None = None) -> dict:
     cfg = cfg or data_config()
-    source_dir = Path(cfg["paths"]["source_dir"])
+    source_dir = resolve(cfg["paths"]["source_dir"])
     raw_root = resolve(cfg["paths"]["raw"])
     interim_root = resolve(cfg["paths"]["interim"])
     ensure_dir(raw_root)

@@ -1,4 +1,6 @@
-# Data (raw/interim/processed are reproducible from source zips in Downloads)
+# Data (raw/interim/processed are reproducible from the zips in data/source_zips/,
+# downloaded per data/MANIFEST.csv)
+data/source_zips/
 data/raw/
 data/interim/
 data/processed/
