@@ -587,3 +587,137 @@ erro nem aviso.
 `hsc harmonize --policy X` (com ou sem `--commercial`) em qualquer sessão,
 confiro primeiro se `corpus_X.parquet` já tem a coluna `split` — se tiver,
 é sinal de que already passou por `hsc split` e sobrescrever é destrutivo.
+
+---
+
+## 2026-10-07 — Etapa 2.2: baseline no corpus comercial, resultado negativo esperado
+
+**Protocolo.** Nenhum split foi refeito. `scripts/commercial_retrain_compare.py`
+filtra o corpus JÁ SPLITADO: mantém validação e teste intactos (todas as
+fontes, exatamente como no modelo servido) e restringe só o TREINO às fontes
+`commercial_ok` (`configs/labels.yaml: commercial_whitelist` = multioff,
+vidgen, hatexplain). Duas variantes por policy: com e sem ToLD-BR (CC BY-SA
+4.0, licença ainda pendente, opt-in separado). Baseline treinado:
+`tfidf_logreg` (o config do Quickstart), comparado contra o próprio
+`tfidf_logreg` no corpus completo e contra o stack v5 servido, os três
+avaliados line a line no MESMO teste congelado.
+
+**Textos em PT que sobram no treino, antes de treinar (como pedido):**
+
+| variante | treino total | treino PT | ódio PT no treino |
+|---|---|---|---|
+| strict, commercial | 43.059 | **0** | 0 |
+| strict, commercial + ToLD-BR | 57.915 | 14.856 | 269 |
+| broad, commercial | 43.589 | **0** | 0 |
+| broad, commercial + ToLD-BR | 58.444 | 14.855 | 2.875 |
+
+Sob `strict`, as duas únicas fontes comerciais (Vidgen, HateXplain) são 100%
+em inglês — o treino comercial sem ToLD-BR fica **sem nenhum texto em
+português**. Isso já era esperado antes de rodar qualquer treino.
+
+**Resultado no teste congelado (strict):**
+
+| modelo | ROC-AUC | macro-F1 | recall ódio | recall EN | recall PT | memotion AUC (externo) |
+|---|---|---|---|---|---|---|
+| stack v5 (servido) | 0,8875 | 0,7906 | 0,7359 | 0,7757 | 0,3162 | — |
+| tfidf_logreg (corpus completo) | 0,8854 | 0,7878 | 0,7073 | 0,7439 | 0,3211 | 0,5233 |
+| tfidf_logreg (comercial) | 0,8416 | 0,7686 | 0,6363 | 0,6954 | **0,0123** | 0,4912 |
+| tfidf_logreg (comercial + ToLD-BR) | 0,8479 | 0,7699 | 0,6517 | 0,7119 | **0,0172** | 0,4980 |
+
+**Resultado no teste congelado (broad):**
+
+| modelo | ROC-AUC | macro-F1 | recall ódio | recall EN | recall PT | memotion AUC (externo) |
+|---|---|---|---|---|---|---|
+| stack v5 (servido) | 0,8396 | 0,7561 | 0,7192 | 0,7681 | 0,4989 | — |
+| tfidf_logreg (corpus completo) | 0,8352 | 0,7521 | 0,7247 | 0,7710 | 0,5164 | 0,5044 |
+| tfidf_logreg (comercial) | 0,7564 | 0,7040 | 0,5937 | 0,7129 | 0,0572 | 0,4963 |
+| tfidf_logreg (comercial + ToLD-BR) | 0,7982 | 0,7217 | 0,6346 | 0,7231 | 0,2365 | 0,4996 |
+
+**A queda em português é grande, como esperado, e ToLD-BR não resolve.** Mesmo
+com 14.856/14.855 textos PT no treino graças ao ToLD-BR, o recall PT comercial
+fica muito abaixo do corpus completo nas duas policies (strict: 0,0172 contra
+0,3211; broad: 0,2365 contra 0,5164). Sob strict, ToLD-BR tem só 269 positivos
+de ódio em 14.856 linhas (1,8%) — pouco sinal para compensar a ausência de
+HateBR e pt_fortuna. Sob broad os positivos de ToLD-BR saltam para 2.875
+(offensive vira ódio), o que explica o salto maior de recall PT ali (0,0572 →
+0,2365) comparado ao strict (0,0123 → 0,0172).
+
+**Achado que pede cuidado na leitura: a sonda de identidade "melhora" nos
+modelos comerciais, mas não por serem menos enviesados.**
+
+| modelo (strict) | FP de fundo PT | FP com identidade | excesso |
+|---|---|---|---|
+| stack v5 (servido) | 0,0141 | 0,1510 | 0,1370 |
+| tfidf_logreg (corpus completo) | 0,0150 | 0,1354 | 0,1204 |
+| tfidf_logreg (comercial) | 0,0088 | 0,0365 | 0,0277 |
+| tfidf_logreg (comercial + ToLD-BR) | 0,0021 | 0,0000 | -0,0021 |
+
+O excesso cai para quase zero nos modelos comerciais, o que pareceria uma
+vitória de viés. **Não é.** Esses modelos quase não aprenderam a marcar ódio
+em português (recall PT de 0,01–0,02 no strict), então eles também quase não
+marcam as frases de identidade — o excesso baixo é consequência direta de o
+modelo não fazer quase nada em PT, não de ele discriminar melhor entre ódio e
+menção neutra de identidade. Um modelo que não funciona em português não pode
+ser lido como "mais justo" nele. A mesma tabela sob broad confirma o padrão
+(excesso cai de 0,1611 para 0,0681/0,0321, acompanhando a mesma queda de
+recall PT).
+
+**Teste externo (memotion):** AUC entre 0,49 e 0,52 para todos os candidatos,
+nas duas policies — consistente com o já registrado em 14/08 (memotion
+sozinho não carrega sinal de ódio via OCR; fica como teste externo, não
+confirma nem refuta a comparação comercial×completo).
+
+**Decisão.** Nenhuma variante comercial vai para o registry como candidata a
+servir. O corpus comercial de hoje (multioff + vidgen + hatexplain, com ou sem
+ToLD-BR) não sustenta um produto bilíngue: o recall em português desaba e a
+aparente melhora na sonda de identidade é um artefato da falta de recall, não
+um ganho real de equidade. **O que destravaria isso** é o mesmo apontado em
+`pt_recall_x_vies.md`: uma fonte em português com licença permissiva e volume
+de ódio real, não só texto PT com poucos positivos (ToLD-BR) ou nenhum
+(Vidgen/HateXplain são EN). Os 4 modelos ficam versionados em
+`models/` como experimento, cada um com a nota explicando o resultado.
+
+Tabelas completas: `reports/tables/commercial_compare_{strict,broad}.csv` e
+`reports/tables/commercial_identity_gate_{strict,broad}.csv`. Script:
+`scripts/commercial_retrain_compare.py`.
+
+---
+
+## 2026-10-07 — Regra nova: a sonda de identidade não aprova sozinha
+
+**Motivada pelo achado da Etapa 2.2 acima.** Excesso de falso positivo baixo
+não é sinal de modelo melhor quando o recall de ódio no mesmo idioma também
+caiu. Um modelo que não aprende a marcar ódio em português não marca também
+as frases de identidade — isso é ausência de sinal, não ausência de viés.
+
+**Regra adotada:** a sonda de identidade (`hsc bias` /
+`scripts/bias_gate_v5.py` / `scripts/commercial_retrain_compare.py`) só
+aprova um modelo candidato se o recall de ódio em PT **não cair** em relação
+ao modelo servido no momento da comparação. Excesso de sinalização menor com
+recall PT menor não conta como melhora — é desqualificado antes mesmo de
+olhar o número de excesso. Vale para qualquer candidato futuro (comercial,
+sintético, tradução, novo encoder), não só para o experimento acima.
+
+**Verificação do split congelado, pedida depois do incidente de ontem.** Hash
+SHA-256 do `corpus_strict.parquet` restaurado recalculado de novo agora:
+`9bfda377058d9264339179e02d066b771f9ed722602a3b529087bafa4a3651ae`, idêntico
+ao gravado em `data/processed/splits_strict.json` (nunca tocado, de antes do
+incidente) e ao conjunto de ids de teste de 8 modelos treinados
+independentemente em sessões anteriores (`n=16.261`, mesmo conjunto exato).
+Três fontes concordando é a confirmação mais forte possível sem um backup
+literal do arquivo.
+
+**Volume de ódio em PT no treino do corpus completo** (o alvo que tradução e
+dados sintéticos precisam alcançar, não só igualar):
+
+| policy | treino PT total | ódio PT | % | por fonte |
+|---|---|---|---|---|
+| strict | 23.743 | 2.039 | 8,6% | pt_fortuna 1.275, hatebr 495, toldbr 269 |
+| broad | 23.742 | 6.551 | 27,6% | toldbr 2.875, hatebr 2.401, pt_fortuna 1.275 |
+
+A diferença entre as duas não é o volume de PT (quase igual), é quanto desse
+PT conta como ódio: broad promove "offensive" a ódio, o que triplica a
+contagem em toldbr e hatebr. Qualquer meta de tradução/síntese para destravar
+o recall PT comercial precisa mirar esses números por fonte, não um total
+agregado — hatebr e pt_fortuna são justamente as duas fontes de licença
+restritiva que o corpus comercial não pode usar.
