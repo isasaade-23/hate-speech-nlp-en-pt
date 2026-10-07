@@ -108,16 +108,27 @@ def build_corpus(
     clean_profile: str = "light",
     include_auxiliary: bool = False,
     force_gated: bool = False,
+    commercial_only: bool = False,
+    include_toldbr: bool = False,
     write: bool = True,
 ) -> pd.DataFrame:
+    """commercial_only restricts PRIMARY sources to configs/labels.yaml's
+    commercial_whitelist (today: multioff, vidgen, hatexplain). ToLD-BR is CC BY-SA 4.0
+    with licensing still pending (see data/MANIFEST.csv), so it is never in the
+    whitelist by default; include_toldbr opts it in explicitly for that one run."""
     labels_cfg = labels_config()
     data_cfg = data_config()
+    whitelist = set(labels_cfg.get("commercial_whitelist", []))
+    if include_toldbr:
+        whitelist.add("toldbr")
 
     primary, auxiliary = [], []
     for sid in labels_cfg["sources"]:
         df, include = harmonize_source(
             sid, policy, labels_cfg, data_cfg, clean_profile, force_gated
         )
+        if commercial_only and sid not in whitelist:
+            include = False
         df = df[CORPUS_COLUMNS]
         (primary if include else auxiliary).append(df)
         log.info(
@@ -128,11 +139,15 @@ def build_corpus(
     corpus = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame(columns=CORPUS_COLUMNS)
 
     if write:
-        out = resolve(data_cfg["paths"]["processed"]) / f"corpus_{policy}.parquet"
+        suffix = ""
+        if commercial_only:
+            suffix = "_commercial_toldbr" if include_toldbr else "_commercial"
+        out = resolve(data_cfg["paths"]["processed"]) / f"corpus_{policy}{suffix}.parquet"
         write_parquet(corpus, out)
         log.info(
-            "corpus [%s]: %d rows (hate=%d) -> %s",
+            "corpus [%s]%s: %d rows (hate=%d) -> %s",
             policy,
+            suffix or "",
             len(corpus),
             int(corpus["label"].sum()) if len(corpus) else 0,
             out,

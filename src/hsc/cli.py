@@ -20,6 +20,16 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Include probe-gated sources even without a recorded probe decision",
     )
+    h.add_argument(
+        "--commercial",
+        action="store_true",
+        help="Restrict primary sources to configs/labels.yaml's commercial_whitelist",
+    )
+    h.add_argument(
+        "--include-toldbr",
+        action="store_true",
+        help="With --commercial, also opt in ToLD-BR (CC BY-SA 4.0, licensing pending)",
+    )
 
     sub.add_parser("probe-dataset2", help="Fase 2: analyze tweets_ip 1/2/3 labels + open gate")
 
@@ -72,6 +82,8 @@ def main(argv: list[str] | None = None) -> int:
             clean_profile=args.clean_profile,
             include_auxiliary=args.aux,
             force_gated=args.force_gated,
+            commercial_only=args.commercial,
+            include_toldbr=args.include_toldbr,
         )
         return 0
 
