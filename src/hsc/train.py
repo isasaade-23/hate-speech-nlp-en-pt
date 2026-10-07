@@ -44,8 +44,8 @@ def _git_sha() -> str:
         return "nogit"
 
 
-def _load_split_corpus(policy: str) -> pd.DataFrame:
-    path = resolve("data/processed") / f"corpus_{policy}.parquet"
+def _load_split_corpus(policy: str, corpus_suffix: str = "") -> pd.DataFrame:
+    path = resolve("data/processed") / f"corpus_{policy}{corpus_suffix}.parquet"
     df = pd.read_parquet(path)
     if "split" not in df.columns:
         raise RuntimeError(
@@ -54,18 +54,29 @@ def _load_split_corpus(policy: str) -> pd.DataFrame:
     return df
 
 
-def train_from_config(config_path: str, policy_override: str | None = None) -> dict:
+def train_from_config(
+    config_path: str, policy_override: str | None = None, corpus_suffix: str = ""
+) -> dict:
+    """corpus_suffix selects an alternate, already-split corpus file
+    (data/processed/corpus_<policy><corpus_suffix>.parquet) instead of the full one —
+    e.g. "_commercial" for a train set restricted to commercially-licensed sources,
+    built by scripts/commercial_retrain_compare.py by filtering the EXISTING frozen
+    split (never re-running `hsc split`). The resulting model_id also carries the
+    suffix so it never collides with the full-corpus model in reports/metrics or
+    models/registry.json."""
     cfg = load_yaml(config_path)
     policy = policy_override or cfg.get("policy", "strict")
     seed = int(cfg.get("seed", 42))
     text_col = cfg.get("text_column", "text_clean")
     set_all_seeds(seed)
 
-    df = _load_split_corpus(policy)
+    df = _load_split_corpus(policy, corpus_suffix)
     tr = df[df["split"] == "train"]
     va = df[df["split"] == "val"]
     te = df[df["split"] == "test"]
-    log.info("train=%d val=%d test=%d [%s]", len(tr), len(va), len(te), policy)
+    log.info(
+        "train=%d val=%d test=%d [%s%s]", len(tr), len(va), len(te), policy, corpus_suffix
+    )
 
     # Features: fit ON TRAIN ONLY
     vec = build_features(cfg["features"])
@@ -77,7 +88,7 @@ def train_from_config(config_path: str, policy_override: str | None = None) -> d
     val_score = predict_scores(est, vec.transform(va[text_col].values))
     threshold = best_threshold(va["label"].values, val_score)
 
-    model_id = f"{cfg['name']}_{policy}_s{seed}"
+    model_id = f"{cfg['name']}{corpus_suffix}_{policy}_s{seed}"
     result = {
         "model_id": model_id,
         "config": cfg["name"],
