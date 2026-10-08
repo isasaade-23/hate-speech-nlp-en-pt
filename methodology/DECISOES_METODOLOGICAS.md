@@ -819,3 +819,57 @@ resultado parcial sobrevive se o processo for interrompido.
 dois motores, subir os 500 com `luciola-annotation/upload_pilot.py`
 (metadado: origem, motor, rótulo original, texto EN, flags), e então a
 validação humana em si (fora do escopo desta sessão — é trabalho da Isa).
+
+---
+
+## 2026-10-08 — Corte de sessão: estado exato e como retomar
+
+**Por quê este registro existe.** A sessão anterior foi interrompida (limite
+de uso) no meio da tradução do Qwen. Este corte revelou algo que vale
+registrar como lição operacional: **processos em segundo plano
+(`nohup ... & disown`) não sobrevivem ao fim de uma sessão do Claude Code
+neste ambiente**, mesmo desanexados do shell. O servidor Ollama e o
+`doccano webserver` que estavam rodando morreram junto com a sessão; não foi
+um bug do pipeline, foi o processo pai sumindo. Para qualquer trabalho de
+longa duração futuro, não assumir que *nohup* basta — ou se supervisiona a
+sessão até o fim, ou se aceita que vai retomar do checkpoint depois.
+
+**Estado exato confirmado nesta retomada (2026-10-08, antes do `/clear`):**
+- `data/processed/translation_pilot_500_out.parquet`: **354/500** traduzidos
+  — MarianMT 248/248 (completo), Qwen2.5-7B-Instruct 106/252 (parado no meio,
+  checkpoint intacto, nada perdido).
+- Servidor Ollama: **morto**. Servidor doccano (`luciola-annotation`,
+  porta 8010): **morto**. Banco de dados do doccano em
+  `~/doccano/db.sqlite3` continua intacto (projeto id 4, labels e os 2
+  usuários de teste criados na sessão anterior seguem lá).
+- `_old/models_v4_backup/` (30 MB, solto desde 16/08) zipado em
+  `_arquivo/hate-speech-project-superados-2026-10-08.zip`, com
+  `_ARQUIVADO.json` documentando o que foi e o que não foi arquivado.
+
+**Para retomar a tradução** (de onde parou, não do zero — o script pula o
+que já tem `text_pt` preenchido):
+```powershell
+# 1. Subir o Ollama nesta sessão (precisa estar vivo o tempo todo da tradução)
+$env:OLLAMA_MODELS = "C:\ollama_models"
+Start-Process "C:\Users\Renato\AppData\Local\Programs\Ollama\ollama.exe" -ArgumentList "serve"
+
+# 2. Retomar a tradução (pula os 354 já feitos, faz só os 146 que faltam)
+cd C:\Users\Renato\hate-speech-project
+. .venv\Scripts\Activate.ps1
+python -u scripts\translate_pilot.py --engine qwen
+```
+
+**Para retomar o doccano:**
+```powershell
+cd C:\Users\Renato\luciola-annotation
+. .venv\Scripts\Activate.ps1
+doccano webserver --port 8010
+```
+Login admin local: `admin` (senha de teste local, removida deste registro em
+2026-10-09; não vale para o servidor). Projeto id 4 já configurado (labels, membros
+anotador1/anotador2, `collaborative_annotation: false` confirmado por teste
+real). Falta: `python luciola-annotation\upload_pilot.py 4` depois que os 500
+estiverem traduzidos (ele recusa rodar se faltar tradução).
+
+**Nada foi perdido, nada precisa ser refeito do zero.** O que falta é só
+tempo de CPU rodando com o Ollama vivo.

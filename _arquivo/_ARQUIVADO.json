@@ -1,0 +1,29 @@
+{
+  "gerado_em": "2026-10-08",
+  "origem": "C:\\Users\\Renato\\hate-speech-project",
+  "zip": "hate-speech-project-superados-2026-10-08.zip",
+  "como_restaurar": "descompactar o zip dentro de C:\\Users\\Renato\\hate-speech-project\\_old; os caminhos dentro do zip ja sao relativos a essa pasta (recria models_v4_backup/)",
+  "total_arquivos": 8,
+  "grupos": [
+    {
+      "grupo": "modelos do corpus v4, backup pre-v5",
+      "motivo": "Guardados em 16/08/2026 quando o corpus dobrou para v5 (Vidgen+HateXplain) e os modelos v4 deixaram de ser comparaveis. Ficaram soltos em _old/models_v4_backup sem zipar desde entao, 30 MB em disco. Nenhum e rastreado pelo git (models/**/*.joblib e gitignored); o registry.json deles e so copia de seguranca do registry da epoca, nao o atual (models/registry.json).",
+      "arquivos": [
+        {"caminho": "models_v4_backup/registry.json", "nota": "registry do v4, nao confundir com models/registry.json atual", "bytes": 8343},
+        {"caminho": "models_v4_backup/stack_strict_s42/model.joblib", "nota": "stack v4, substituido pelo stack v5 (corpus dobrado, AUC 0.8875)", "bytes": 15211535},
+        {"caminho": "models_v4_backup/tfidf_lgbm_strict_s42/model.joblib", "bytes": 4828288},
+        {"caminho": "models_v4_backup/tfidf_lgbm_strict_s42/model_card.md", "bytes": 559},
+        {"caminho": "models_v4_backup/tfidf_logreg_strict_s42/model.joblib", "bytes": 4400931},
+        {"caminho": "models_v4_backup/tfidf_logreg_strict_s42/model_card.md", "bytes": 564},
+        {"caminho": "models_v4_backup/tfidf_svm_strict_s42/model.joblib", "bytes": 5984583},
+        {"caminho": "models_v4_backup/tfidf_svm_strict_s42/model_card.md", "bytes": 558}
+      ]
+    }
+  ],
+  "nao_arquivado_de_proposito": [
+    "notebooks/colab_neural.ipynb: v1 (11/08), parece superado pelos notebooks v5/v6/xlmr, mas sinalizado em 25/09 como 'pode ter valor de reprodutibilidade' -- a Isa ainda nao decidiu, nao mexi de novo",
+    "reports/archive/v1_pre_hatebr/: e o padrao interno do proprio projeto para resultados de versao antiga (3.8 MB), ja organizado como 'archive', nao uma pasta solta -- deixado como esta",
+    "_old/ (a pasta em si): fica vazia de models_v4_backup mas continua existindo, e o destino padrao de qualquer coisa superada no futuro"
+  ],
+  "removidos_sem_backup": []
+}
