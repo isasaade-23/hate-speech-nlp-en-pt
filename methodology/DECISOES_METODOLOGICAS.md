@@ -721,3 +721,101 @@ contagem em toldbr e hatebr. Qualquer meta de tradução/síntese para destravar
 o recall PT comercial precisa mirar esses números por fonte, não um total
 agregado — hatebr e pt_fortuna são justamente as duas fontes de licença
 restritiva que o corpus comercial não pode usar.
+
+---
+
+## 2026-10-07/08 — Etapa 3 (doccano local) e Etapa 2.4 (piloto de tradução)
+
+**Etapa 3, escolha confirmada: doccano.** Comparação feita antes (Label
+Studio Community não tem papéis admin/anotador nem concordância — é recurso
+Enterprise pago; doccano tem os dois nativos). Instalado localmente em
+`C:\Users\Renato\luciola-annotation\` (venv Python 3.11.15 separado do
+venv de pesquisa, porque doccano 1.8.4 é 2022/2023 e trava com Python/numpy
+mais novos). Rodando em `http://127.0.0.1:8010`. **Nada subiu pro servidor
+ainda**, conforme pedido.
+
+**Problemas de ambiente, registrados porque custaram tempo:**
+- `pip install doccano` falhou 3x com `WinError 32` (arquivo em uso) em
+  arquivos diferentes a cada vez — padrão de antivírus do Windows escaneando
+  arquivo recém-gravado, não erro real. Resolvido com um laço de retry (a
+  cada tentativa reaproveita o que já instalou; convergiu na 4ª).
+- `marshmallow` 4.x quebra `environs` 9.5 (API antiga). Fixado
+  `marshmallow<4`.
+- `pandas` 1.5.3 (fixado pelo doccano) tem incompatibilidade binária com
+  `numpy` 2.4 (puxado por outra dependência). Fixado `numpy<1.25,>=1.23`.
+- Script Python standalone fora do comando `doccano` precisa repetir o
+  bootstrap que `cli.py` faz (`DOCCANO_HOME`, `DATABASE_URL` apontando para
+  `~/doccano/db.sqlite3`) — sem isso, o Django conecta num banco vazio
+  diferente do que o `doccano webserver` usa.
+
+**Anotação cega, confirmada na prática (não só lida na documentação).** Com
+o projeto criado com `collaborative_annotation: false`: `anotador1` marcou
+um item como "Ódio"; consultando a API como `anotador1`, a anotação aparece;
+consultando o MESMO item como `anotador2`, a resposta vem vazia (`[]`). Dois
+usuários reais, duas sessões autenticadas separadas, mesmo item, resposta
+documentada acima.
+
+**Configuração do projeto:** `TextClassificationProject`, multi-label (dois
+conjuntos independentes de rótulo): `Ódio` / `Não ódio` e `LLM acertou` /
+`LLM errou`. Descrição do projeto carrega o aviso de conteúdo sensível e a
+recomendação de pausa a cada 20 itens (requisito da Etapa 3; lembrete
+automático por item fica como melhoria futura, não bloqueia o piloto).
+Metadado visível por item: fonte, motor de tradução, rótulo original do
+corpus, texto em inglês lado a lado, e as duas flags heurísticas de recusa/
+suavização do script de tradução.
+
+**Leitura de "rótulo da LLM" neste piloto específico.** A Etapa 3 original
+pedia mostrar o rótulo que uma IA classificadora atribuiu, para o anotador
+dizer se ela acertou. Aqui a IA não classifica, traduz — então os botões
+viraram: **Ódio/Não ódio** = o rótulo original do corpus ainda bate depois
+da tradução; **LLM acertou/errou** = a tradução ficou fiel (acertou) ou tem
+problema — suavizou, censurou, mudou o sentido (errou). Registrado aqui para
+a Isa corrigir se não era essa a leitura pretendida.
+
+**Cohen's kappa, lendo a exportação real** (não o banco direto):
+`luciola-annotation/kappa.py` chama a mesma função que a API de exportação
+usa (`export_dataset`), só que de forma síncrona — sem isso precisaria de um
+worker Celery rodando só para este teste local. Gera 1 JSONL por anotador
+(automático quando `collaborative_annotation=false`), lê os dois, calcula
+kappa nos itens em comum. **scikit-learn não pôde ser usado**: puxa numpy
+≥2.x, o mesmo conflito do pandas acima, em sentido oposto. Kappa reimplementado
+à mão (fórmula padrão, sem dependência externa) e conferido manualmente
+contra 3 itens de teste (2 concordâncias, 1 discordância): kappa = 0,4000,
+bate com o cálculo à mão.
+
+**Licenças dos dois motores de tradução, conferidas antes de baixar:**
+
+| motor | licença | nota |
+|---|---|---|
+| `Helsinki-NLP/opus-mt-en-pt` | — | **descontinuado pela Helsinki-NLP** (404/401 ao tentar baixar) |
+| `Helsinki-NLP/opus-mt-tc-big-en-pt` | CC BY-4.0 | sucessor oficial, usado no lugar, mesma licença da família OPUS-MT |
+| `qwen2.5:7b-instruct` (Ollama) | Apache-2.0 | confirmado na página do repo GGUF oficial |
+
+NLLB não foi considerado (CC BY-NC-4.0, instrução explícita).
+
+**Piloto de 500, amostragem.** 500 textos de Vidgen+HateXplain (treino
+`strict`) + MultiOFF (treino `broad`, única política em que ele é primário),
+estratificados por fonte×rótulo na proporção REAL do pool (não 50/50):
+vidgen 336 (54% ódio), hatexplain 158 (31% ódio), multioff 6 (41% ódio) —
+ódio geral 46,4%. Divididos 248/252 entre os dois motores, mesma composição
+em cada metade. Amostra em
+`hate-speech-project/data/processed/translation_pilot_500.parquet`
+(seed 42).
+
+**MarianMT (opus-mt-tc-big-en-pt), 248/248 concluído.** 1 flag de recusa
+heurística (regex, provavelmente falso-positivo — modelo de tradução pura
+não tem mecanismo de recusa como um LLM instruído; revisar na validação
+humana). CPU, ~2-3 min efetivos de computação (o tempo de relógio foi maior
+por brigar por CPU com a instalação do doccano em paralelo).
+
+**Qwen2.5-7B-Instruct via Ollama, em andamento.** ~16-20s/item em CPU (sem
+GPU disponível nesta máquina) — o lote inteiro de 252 leva around 1h10-1h20.
+Prompt pede explicitamente para preservar tom/agressividade e não suavizar,
+emoldurado como projeto de pesquisa acadêmica (ver `scripts/translate_pilot.py`).
+Checkpointa a cada item (`data/processed/translation_pilot_500_out.parquet`),
+resultado parcial sobrevive se o processo for interrompido.
+
+**Pendente:** terminar os 252 do Qwen, contar recusas/suavizações finais dos
+dois motores, subir os 500 com `luciola-annotation/upload_pilot.py`
+(metadado: origem, motor, rótulo original, texto EN, flags), e então a
+validação humana em si (fora do escopo desta sessão — é trabalho da Isa).

@@ -249,9 +249,16 @@ In rough order of effort. Items 2.1–2.2 are done; 2.3–2.7 are scoped but not
   to `configs/labels.yaml`'s `commercial_whitelist` (multioff, vidgen, hatexplain);
   `--include-toldbr` opts ToLD-BR in separately, since its license (CC BY-SA 4.0) is still
   pending confirmation.
-- [x] **2.2 Commercial-corpus baseline** — retrain the baseline on the commercial corpus and
-  compare against the current model on the same frozen test (ROC-AUC, macro-F1, recall by
-  language/source, 192-phrase identity probe; strict and broad).
+- [x] **2.2 Commercial-corpus baseline** — retrained `tfidf_logreg` on the commercial corpus
+  (train only; val/test untouched) and compared against the same model on the full corpus and
+  against the served stack v5, on the same frozen test. **Negative result, as expected:** under
+  `strict` the commercial sources are 100% English, so the commercial train set has zero
+  Portuguese text and recall on PT hate collapses to 0.01–0.02 (vs. 0.32 full-corpus); adding
+  ToLD-BR (license still pending) barely helps under `strict` (too few hate-labeled rows) and
+  helps more under `broad` (0.24, still well below 0.52 full-corpus). The identity-bias probe
+  looks better on the commercial models, but that is an artifact of near-zero PT recall, not
+  real fairness — see [`methodology/DECISOES_METODOLOGICAS.md`](methodology/DECISOES_METODOLOGICAS.md)
+  (2026-10-07) for the full tables. No commercial variant is a serving candidate.
 - [ ] **2.3 Rule-based perturbations** — typos, missing accents, spacing, partial censorship,
   "0dio"-style substitutions, applied at the same rate to hate and non-hate; plus a masked
   version of the test set to measure robustness.
