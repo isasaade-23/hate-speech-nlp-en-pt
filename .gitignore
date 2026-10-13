@@ -76,3 +76,4 @@ tools/annotation/mapeamentos/
 tools/annotation/acessos*.txt
 tools/annotation/*.env
 resultado_projeto*.csv
+reports/anotacao_*.md
