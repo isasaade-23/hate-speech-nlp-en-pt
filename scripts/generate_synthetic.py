@@ -198,14 +198,55 @@ def cmd_filter(args) -> None:
     print("aprovados em", out)
 
 
+def cmd_final(args) -> None:
+    """Fecha o lote: aplica os filtros e grava o relatorio de descarte final por classe."""
+    from collections import Counter
+
+    syn = pd.read_json(args.out, lines=True)
+    syn["motivos"] = [
+        ["recusa"] if r.flag_refusal else descarte(r.text_pt, int(r.label))
+        for r in syn.itertuples()
+    ]
+    syn["descartado"] = syn["motivos"].map(bool)
+    aprov = Path(args.out).with_suffix(".aprovados.jsonl")
+    syn[~syn.descartado].drop(columns=["motivos", "descartado"]).to_json(
+        aprov, orient="records", lines=True, force_ascii=False)
+    linhas = [
+        f"# Lote sintético final", "",
+        f"Arquivo: `{Path(args.out).name}`. Filtros: recusa, eco do prompt, ódio sem grupo-alvo, "
+        "fora do português. Aprovados em `" + aprov.name + "`.", "",
+        "| classe | gerados | descartados | taxa de descarte | aprovados |", "|---|---|---|---|---|",
+    ]
+    for lab, nome in ((1, "ódio"), (0, "não ódio")):
+        s = syn[syn.label == lab]
+        d = int(s.descartado.sum())
+        linhas.append(f"| {nome} | {len(s)} | {d} | {d / max(len(s), 1):.0%} | {len(s) - d} |")
+    d = int(syn.descartado.sum())
+    linhas.append(f"| total | {len(syn)} | {d} | {d / max(len(syn), 1):.0%} | {len(syn) - d} |")
+    linhas += ["", "Motivos de descarte (um texto pode ter mais de um):", ""]
+    for lab, nome in ((1, "ódio"), (0, "não ódio")):
+        c = Counter(m for ms in syn[syn.label == lab]["motivos"] for m in ms)
+        linhas.append(f"- {nome}: " + (", ".join(f"{k} {v}" for k, v in c.most_common()) or "nenhum"))
+    linhas += ["", f"Meta de aprovados por classe: {args.meta_aprovados}. "
+               + ("Atingida nas duas classes." if all(
+                   (syn[(syn.label == lab) & ~syn.descartado].shape[0]) >= args.meta_aprovados
+                   for lab in (1, 0)) else "Não atingida em pelo menos uma classe.")]
+    rel = Path(args.relatorio)
+    rel.parent.mkdir(parents=True, exist_ok=True)
+    rel.write_text("\n".join(linhas) + "\n", encoding="utf-8")
+    print("relatorio:", rel)
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["gen", "check", "filter"])
+    ap.add_argument("cmd", choices=["gen", "check", "filter", "final"])
     ap.add_argument("--n", type=int, default=200)
     ap.add_argument("--offset", type=int, default=0, help="soma na semente do sorteio de sementes")
     ap.add_argument("--exclude", nargs="*", help="jsonl cujas sementes (seed_id) nao devem ser reusadas")
     ap.add_argument("--n-odio", type=int, help="sementes de odio (substitui n//2)")
     ap.add_argument("--n-nao", type=int, help="sementes de nao odio (substitui n//2)")
     ap.add_argument("--out", default="data/processed/synthetic_pilot.jsonl")
+    ap.add_argument("--relatorio", default="reports/sinteticos_lote_final.md")
+    ap.add_argument("--meta-aprovados", type=int, default=500)
     a = ap.parse_args()
-    {"gen": cmd_gen, "check": cmd_check, "filter": cmd_filter}[a.cmd](a)
+    {"gen": cmd_gen, "check": cmd_check, "filter": cmd_filter, "final": cmd_final}[a.cmd](a)

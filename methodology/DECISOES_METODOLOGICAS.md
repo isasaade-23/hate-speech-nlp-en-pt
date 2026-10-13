@@ -961,3 +961,21 @@ O descarte do não ódio caiu de 35% para 6% (o eco do prompt praticamente sumiu
 **Descartes por "sem grupo".** Dez textos de ódio descartados só por falta de grupo, lidos à mão: 5 descartes corretos (nenhum grupo citado), 3 de afiliação política (esquerda, PT: grupo político não é característica protegida, mantidos como descarte; decisão a confirmar), 1 erro do léxico ("favelão", corrigido com o radical `favel`), 1 ambíguo. O filtro é posterior à geração e o arquivo guarda os descartados com o motivo, então reverter uma regra não exige gerar de novo.
 
 **Lote grande** (`data/processed/synthetic_batch.jsonl`): 900 sementes de ódio e 600 de não ódio, sementes novas (nenhuma dos pilotos), para compensar descarte de cerca de 40% no ódio e 6% no não ódio e chegar perto de 500 aprovados por classe. Roda em segundo plano com checkpoint por item; retoma pelo mesmo comando.
+
+## 2026-10-13 — Etapa 2.7 (preparação): licença dos encoders candidatos
+
+Consultado em 13/10/2026 pela API do Hugging Face (tags `license:` e `cardData`). Nada foi treinado. A tabela cobre a licença do **modelo**; a licença dos dados de pré-treino de cada um não foi verificada. Não é parecer jurídico.
+
+| encoder | repositório no HF | licença declarada | uso comercial | parâmetros | observação |
+|---|---|---|---|---|---|
+| twitter-XLM-R | `cardiffnlp/twitter-xlm-roberta-base` | nenhuma declarada | **indeterminado** | ~279 M (arquitetura XLM-R base) | O repositório de código `cardiffnlp/xlm-t` é Apache-2.0 e o XLM-R de origem (`FacebookAI/xlm-roberta-base`) é MIT, mas o modelo continuado foi treinado em ~198 M de tweets e o cartão não traz licença. Sem licença declarada, o padrão é nenhum direito de uso concedido. Perguntar aos autores antes de qualquer uso comercial. |
+| moBERTo | `Tropic-AI/moBERTo` | Apache-2.0 | sim | ~150 M | Base ModernBERT-base. Existe também `moBERTo-orig-tokenizer`, também Apache-2.0. |
+| NorBERTo | `Itau-Unibanco/NorBERTo-base`, `-large` | CC BY-NC-SA 4.0 | **não** | ~150 M (base), ~396 M (large) | Uso não comercial e compartilhamento pela mesma licença. Fica só na trilha de pesquisa; não entra na trilha comercial. |
+| BERTomelo | `unb-labia/BERTomelo-ModernBERT-Base-v1`, `-Large-v1` | Apache-2.0 | sim | ~136 M (base), ~378 M (large) | Base ModernBERT. As variantes 8k experimentais não declaram licença na lista; usar só as `-v1`. |
+| mmBERT | `jhu-clsp/mmBERT-base`, `-small` | MIT | sim | n/d no metadado | Multilíngue, o mais adequado para EN+PT no mesmo modelo. |
+
+**Consequências para a 2.7.**
+1. O twitter-XLM-R, escolhido pela regra de recall e viés na trilha de pesquisa, não pode ser tratado como liberado para a trilha comercial enquanto não houver licença declarada.
+2. O NorBERTo está excluído da trilha comercial.
+3. Candidatos liberados para a trilha comercial: moBERTo, BERTomelo (`-v1`), mmBERT e o XLM-R base original (MIT), que é a referência sem o pré-treino em tweets.
+4. Antes de treinar qualquer um, rodar a regra de aprovação (recall PT não cai e sonda de identidade) no mesmo teste congelado.
