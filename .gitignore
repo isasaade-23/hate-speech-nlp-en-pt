@@ -73,6 +73,6 @@ data/fala/
 luciola_acessos*
 luciola_mapeamentos/
 tools/annotation/mapeamentos/
-tools/annotation/*acessos*
+tools/annotation/acessos*.txt
 tools/annotation/*.env
 resultado_projeto*.csv
