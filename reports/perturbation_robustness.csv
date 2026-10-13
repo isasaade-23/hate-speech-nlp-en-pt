@@ -1,0 +1,17 @@
+model_id,variant,roc_auc,macro_f1,recall_hate,recall_en,recall_pt,fpr_fundo,fpr_identidade,n_nao_odio_identidade
+tfidf_logreg_strict_s42,limpo,0.8854,0.7878,0.7073,0.7439,0.3211,0.0796,0.3221,2310
+tfidf_logreg_strict_s42,ofuscacao_aleatoria_0.15,0.8746,0.7754,0.6903,0.7263,0.3113,0.0862,0.3342,2310
+tfidf_logreg_strict_s42,ofuscacao_direcionada_0.7,0.8748,0.7709,0.6373,0.6726,0.2647,0.0786,0.2359,2310
+tfidf_logreg_strict_s42,identidade_removida,0.8738,0.7592,0.5858,0.6169,0.2574,0.0796,0.1515,2310
+tfidf_char_logreg_strict_s42,limpo,0.8733,0.7749,0.6971,0.736,0.2868,0.0862,0.3576,2310
+tfidf_char_logreg_strict_s42,ofuscacao_aleatoria_0.15,0.8647,0.7656,0.6988,0.739,0.2745,0.0967,0.3883,2310
+tfidf_char_logreg_strict_s42,ofuscacao_direcionada_0.7,0.8666,0.765,0.6503,0.6877,0.2549,0.0869,0.2844,2310
+tfidf_char_logreg_strict_s42,identidade_removida,0.8533,0.7311,0.5209,0.5514,0.1985,0.0862,0.1065,2310
+tfidf_logreg_broad_s42,limpo,0.8352,0.7521,0.7247,0.771,0.5164,0.1572,0.4872,1751
+tfidf_logreg_broad_s42,ofuscacao_aleatoria_0.15,0.8214,0.7403,0.72,0.7717,0.4874,0.1716,0.5197,1751
+tfidf_logreg_broad_s42,ofuscacao_direcionada_0.7,0.8174,0.7349,0.6607,0.7041,0.4653,0.1491,0.3872,1751
+tfidf_logreg_broad_s42,identidade_removida,0.8186,0.7324,0.6313,0.6602,0.5011,0.1572,0.2324,1751
+tfidf_char_logreg_broad_s42,limpo,0.8205,0.7408,0.7045,0.7603,0.4531,0.157,0.5049,1751
+tfidf_char_logreg_broad_s42,ofuscacao_aleatoria_0.15,0.8089,0.7311,0.716,0.7761,0.4455,0.18,0.5563,1751
+tfidf_char_logreg_broad_s42,ofuscacao_direcionada_0.7,0.8073,0.7264,0.6566,0.709,0.4211,0.1551,0.4266,1751
+tfidf_char_logreg_broad_s42,identidade_removida,0.7979,0.7085,0.5772,0.609,0.434,0.157,0.1953,1751

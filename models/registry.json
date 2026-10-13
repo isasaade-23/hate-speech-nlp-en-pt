@@ -335,5 +335,25 @@
     "val_macro_f1": 0.7322681592403577,
     "test_macro_f1": 0.7217304575489341,
     "note": "EXPERIMENTO, NAO SERVIDO: whitelist comercial + ToLD-BR sob broad. 14.855 textos PT no treino com 2.875 positivos (broad dobra os positivos de ToLD-BR), recall PT sobe a 0.2365 -- melhor que as outras 3 variantes comerciais, mas ainda bem abaixo do corpus completo (0.5164). Ver methodology/DECISOES_METODOLOGICAS.md, 2026-10-07 Etapa 2.2."
+  },
+  "tfidf_char_logreg_strict_s42": {
+    "path": "models/tfidf_char_logreg_strict_s42/model.joblib",
+    "config": "tfidf_char_logreg",
+    "policy": "strict",
+    "seed": 42,
+    "git_sha": "998f5a5",
+    "threshold": 0.59,
+    "val_macro_f1": 0.7790428995829974,
+    "test_macro_f1": 0.7748820448887707
+  },
+  "tfidf_char_logreg_broad_s42": {
+    "path": "models/tfidf_char_logreg_broad_s42/model.joblib",
+    "config": "tfidf_char_logreg",
+    "policy": "broad",
+    "seed": 42,
+    "git_sha": "998f5a5",
+    "threshold": 0.5196,
+    "val_macro_f1": 0.7463001985819099,
+    "test_macro_f1": 0.7408163587226991
   }
 }

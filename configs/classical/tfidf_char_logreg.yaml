@@ -1,0 +1,22 @@
+name: tfidf_char_logreg
+family: classical
+policy: strict           # override with --policy on the CLI
+seed: 42
+text_column: text_clean
+features:
+  type: tfidf
+  char:
+    analyzer: char_wb
+    ngram_range: [2, 5]
+    min_df: 3
+    max_features: 300000
+    sublinear_tf: true
+model:
+  type: logreg
+  params:
+    C: 1.0
+    class_weight: balanced
+    max_iter: 1000
+    solver: liblinear
+# 2026-10-09 (Etapa 2.3): variante so de caracteres, sem bloco de palavras, para medir
+# robustez a ofuscacao ortografica ("0dio"). Mesmo corpus, split congelado e limiar por val.
