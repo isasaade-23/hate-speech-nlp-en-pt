@@ -873,3 +873,91 @@ estiverem traduzidos (ele recusa rodar se faltar tradução).
 
 **Nada foi perdido, nada precisa ser refeito do zero.** O que falta é só
 tempo de CPU rodando com o Ollama vivo.
+
+## 2026-10-08 — Etapa 2.4 fechada: piloto de tradução completo e no doccano
+
+- Tradução retomada do checkpoint (Qwen 106/252 -> 252/252). Parquet com 500/500 linhas, `text_pt` sem nulos.
+- Recusas (`flag_refusal`): MarianMT 1/248, Qwen2.5-7B-Instruct 2/252. Suavizações/truncamentos (`flag_short`): 0 nos dois motores.
+- Resultado a documentar: o Qwen recusou mais que o MarianMT (2 vs 1), diferença de 1 caso em amostras de ~250, sem poder estatístico para afirmar diferença entre motores. Os casos recusados estão marcados no parquet para a validação humana.
+- Upload ao doccano (projeto id 4): 500 enviados, 0 falhas. O `upload_pilot.py` precisou rodar com o Python do `.venv` de `hate-speech-project` (o venv do doccano não tem pyarrow).
+- Próximo passo (validação humana no doccano) é trabalho da Isa.
+
+- Fim de sessão: Ollama encerrado; estado salvo em `methodology/ESTADO_2026-10-08.md`.
+
+## 2026-10-09 — Etapa 2.3: ofuscação ortográfica e dependência de termos de identidade
+
+**Vocabulário fixo.** "Ofuscação ortográfica" = perturbação de grafia (perturbado, na versão anterior deste registro). "Identidade removida" = troca dos termos de identidade por `[ID]` (era "mascarado"). "Mascarado" fica reservado para ódio disfarçado e não é usado nesta etapa.
+
+**Correção de um erro desta etapa (versão anterior do registro).** O texto dizia que o `tfidf_logreg` era TF-IDF "por palavra". Está errado: o config já combina palavra (1-2) e caractere `char_wb` (3-5). A variante de caracteres testada aqui é, portanto, a que tem só o bloco de caracteres (`configs/classical/tfidf_char_logreg.yaml`, `char_wb` 2-5, mesmo split congelado, limiar por val). Os números da primeira rodada (ofuscação aleatória com a regra antiga) também mudaram um pouco, porque agora a operação sorteada sempre altera a palavra.
+
+**Método** (`scripts/perturbation_robustness.py`, saída em `reports/perturbation_robustness.csv`). Só o split de teste é alterado. Semente 42.
+- Ofuscação aleatória: cada palavra com prob. 0,15; operações: tirar acento, trocar/remover letra, leet (o→0, a→4, e→3, i→1, s→5), censura `*`, espaço no meio.
+- Ofuscação direcionada: só as palavras-alvo, com prob. 0,7, mesma regra para ódio e não-ódio. Alvos: lemas HurtLex de nível conservador do idioma do texto (só unigramas) mais os termos de identidade do `bias_probe`.
+- Identidade removida: termos de identidade → `[ID]`.
+- Métrica de viés: taxa de falsos positivos (FPR) nos textos sem ódio que citam identidade (n = 2.310 no strict, 1.751 no broad), antes e depois, contra o FPR de fundo (sem ódio, sem identidade).
+
+**Resultados, strict** (word+char = `tfidf_logreg`; char = só caracteres):
+
+| modelo | variante | ROC-AUC | recall ódio | recall PT | FPR fundo | FPR c/ identidade |
+|---|---|---|---|---|---|---|
+| word+char | limpo | 0,885 | 0,707 | 0,321 | 0,080 | 0,322 |
+| word+char | ofusc. aleatória | 0,875 | 0,690 | 0,311 | 0,086 | 0,334 |
+| word+char | ofusc. direcionada | 0,875 | 0,637 | 0,265 | 0,079 | 0,236 |
+| word+char | identidade removida | 0,874 | 0,586 | 0,257 | 0,080 | 0,152 |
+| char | limpo | 0,873 | 0,697 | 0,287 | 0,086 | 0,358 |
+| char | ofusc. aleatória | 0,865 | 0,699 | 0,275 | 0,097 | 0,388 |
+| char | ofusc. direcionada | 0,867 | 0,650 | 0,255 | 0,087 | 0,284 |
+| char | identidade removida | 0,853 | 0,521 | 0,199 | 0,086 | 0,107 |
+
+**Resultados, broad**
+
+| modelo | variante | ROC-AUC | recall ódio | recall PT | FPR fundo | FPR c/ identidade |
+|---|---|---|---|---|---|---|
+| word+char | limpo | 0,835 | 0,725 | 0,516 | 0,157 | 0,487 |
+| word+char | ofusc. aleatória | 0,821 | 0,720 | 0,487 | 0,172 | 0,520 |
+| word+char | ofusc. direcionada | 0,817 | 0,661 | 0,465 | 0,149 | 0,387 |
+| word+char | identidade removida | 0,819 | 0,631 | 0,501 | 0,157 | 0,232 |
+| char | limpo | 0,821 | 0,705 | 0,453 | 0,157 | 0,505 |
+| char | ofusc. aleatória | 0,809 | 0,716 | 0,446 | 0,180 | 0,556 |
+| char | ofusc. direcionada | 0,807 | 0,657 | 0,421 | 0,155 | 0,427 |
+| char | identidade removida | 0,798 | 0,577 | 0,434 | 0,157 | 0,195 |
+
+**Leitura.**
+1. *Viés por identidade.* A queda de recall com a identidade removida é esperada (ódio é ataque a um grupo) e não mede viés. A medida é o FPR nos textos sem ódio que citam identidade. No strict, word+char vai de 0,322 para 0,152 (−53%) e o modelo só de caracteres de 0,358 para 0,107 (−70%), contra FPR de fundo de 0,08 a 0,09. No broad a queda é de 0,487 para 0,232 e de 0,505 para 0,195. A queda é grande: o modelo reage ao termo, não só ao ataque. Ressalvas: (a) o rótulo de "sem ódio" nessas fontes tem ruído e esses textos costumam tratar de temas polêmicos, então parte do FPR restante, acima do fundo, pode ser tema e não viés; (b) o termo correlaciona com ódio no treino, então parte da dependência é taxa-base legítima. A queda não separa as duas coisas.
+2. *Ofuscação aleatória* custa pouco no recall (−0,02 no strict, −0,01 no broad) e aumenta um pouco o FPR, nos dois modelos.
+3. *Ofuscação direcionada* custa mais: recall de ódio −0,07 (word+char) e −0,05 (char) no strict; −0,06 e −0,05 no broad. O modelo só de caracteres perde menos, mas parte de um recall e de um PT mais baixos, e não é mais robusto na identidade removida (queda maior). A hipótese de que os caracteres seriam claramente mais robustos a "0dio" se sustenta só em parte: a perda é menor, não ausente, e o ganho de robustez vem com perda de recall PT no limpo (0,287 contra 0,321 no strict, 0,453 contra 0,516 no broad).
+4. Limitação: a ofuscação direcionada usa HurtLex como lista de alvos, que é a mesma família de lista usada como feature em outros modelos do projeto; para o TF-IDF puro não há vazamento, mas a cobertura do léxico PT é limitada.
+## 2026-10-09 — Doccano no servidor, anotação sem rótulo da LLM visível, piloto sintético
+
+**Decisão (viés de ancoragem).** O anotador vê só o texto. O rótulo da LLM, a origem (fonte, modelo) e o texto original em inglês ficam num mapeamento por id fora do doccano e fora do repositório (`C:\Users\Renato\luciola_mapeamentos\`). Motivo: mostrar o rótulo da LLM induz o anotador a concordar com ele e infla a concordância. Rótulos por projeto (multirrótulo): `Ódio`, `Não ódio` e um opcional (`⚑ Tradução estranha` no projeto de tradução, `⚑ Texto artificial` no sintético). O par `LLM acertou/errou` deixou de existir na tela: é calculado em `export_annotations.py` comparando a anotação com o mapeamento. No projeto de tradução o "rótulo da LLM" é o rótulo original da fonte, não um rótulo de LLM. No sintético é a classe pedida ao gerador. O script exige exatamente um entre Ódio/Não ódio por item e anotador (lista os incompletos), calcula o kappa de Cohen só nesse par e conta as bandeiras ⚑.
+
+**Deploy.** Doccano 1.8.4 em Docker (`restart unless-stopped`, limite de 1 GB, banco SQLite em `/srv/doccano-data`), atrás do Caddy já existente em `https://anotar.65-108-90-215.sslip.io`, só em 127.0.0.1:8100. O Docker não registra logs; o Caddy registra apenas `POST /v1/auth/login/` (IP e status, sem cabeçalhos nem corpo) e o fail2ban bane o IP após 5 falhas em 10 min por 1 h. Backup diário às 03:30 (`doccano-backup.timer`), 14 dias, em `/var/backups/doccano`. Swap de 2 GB com swappiness 10. Usuários: `adm` (superusuário), `isa` e `vini` (administradores do projeto), `anotador1` e `anotador2`. Senhas aleatórias, fora do repositório. Projeto 1 = tradução (500 itens), projeto 2 = sintético (198 itens, 2 recusas excluídas). Teste de anotação cega repetido no servidor, em projeto descartável: anotador1 vê 1, anotador2 vê 0.
+
+**Senha de teste.** A senha de teste local do admin foi removida deste registro e dos scripts (`setup_project.py`, `upload_pilot.py` leem de `DOCCANO_ADMIN_PW`). Ela estava no commit local 998f5a5, ainda não enviado ao GitHub; precisa ser removida do histórico antes do próximo push.
+
+**Piloto sintético (2.5, 200 exemplos, Qwen2.5-7B, sementes de vidgen e hatexplain, treino).** Recusas: 2/200 (1/100 ódio, 1/100 não ódio). Similaridade de caracteres máxima contra o treino PT real: mediana 0,25, nenhum acima de 0,8. Entre sintéticos: mediana 0,21, nenhum acima de 0,8. Problemas na leitura de 10 exemplos por classe: (a) vários "não ódio" repetem o vocabulário do prompt ("projeto de detecção de discurso de ódio", "dados de treino"); (b) alguns "ódio" não atacam um grupo ("Que merda essa TV"); (c) um texto saiu com "next" em inglês e lixo no final. O lote grande não deve rodar antes de corrigir o prompt do não ódio e de filtrar esses casos.
+
+## 2026-10-09 (tarde) — Piloto sintético v2, filtros e dossiê
+
+**Prompt v2 e filtros** (`scripts/generate_synthetic.py`, comando `filter`). O prompt do não ódio deixou de mencionar discurso de ódio, projeto ou dados de treino; o de ódio passou a exigir um grupo citado de forma explícita. Filtros pós-geração: eco do prompt (lista de termos), ódio sem grupo-alvo (léxico de radicais de grupos) e texto fora do português (detector `hsc.langid`), além das recusas. O léxico de grupos foi estendido depois da primeira leitura: a primeira versão não cobria "nordeste", "Norte", "Bahia", "sertão" nem "favela", e inflava o descarte do ódio.
+
+**Taxa de descarte, com o léxico final.**
+
+| piloto | ódio | não ódio | total | principais motivos |
+|---|---|---|---|---|
+| v1 (200, prompt antigo, filtros aplicados depois) | 51/100 | 35/100 | 86/200 (43%) | sem grupo-alvo 50, eco do prompt 34, recusa 2 |
+| v2 (100, prompt novo) | 20/50 | 3/50 | 23/100 (23%) | sem grupo-alvo 16, recusa 3, eco do prompt 3, fora do português 3 |
+
+O descarte do não ódio caiu de 35% para 6% (o eco do prompt praticamente sumiu). O do ódio caiu de 51% para 40%, e o motivo dominante continua sendo texto sem grupo citado. Os 198 sintéticos já no doccano (v1) foram mantidos sem filtrar. O lote grande ainda não rodou. O léxico é uma aproximação: um texto de ódio contra um grupo que o léxico não conhece é descartado por engano, e um grupo citado de passagem passa.
+
+**Dossiê.** Seção nova ("Licence-clean Portuguese data: translation, synthetic data and human validation" / versão em português) no fim da seção 6 de `luciola-fomento/dossie/dossie_en.md` e `dossie_pt.md`, com figura nova `fig8_fluxo_dados`. PDFs regenerados com a data de 2026-10-09 (`Luciola_dossie_{pt,en}_2026-10-09.pdf`, 32 páginas cada). O número de descarte citado no dossiê é o do piloto v1 com o léxico final (43%, 86 de 200). Nada enviado ao GitHub.
+
+## 2026-10-09 (noite) — HurtLex fora do produto, scripts de anotação no repositório, lote sintético
+
+**HurtLex e o modelo comercial.** Verificado: os modelos `--commercial` não usam HurtLex. O config do baseline (`tfidf_logreg.yaml`) não tem o bloco `hurtlex`, e os quatro modelos comerciais treinados (strict e broad, com e sem ToLD-BR) têm só os blocos `word` e `char`. O stack servido usa tfidf_logreg, tfidf_svm, tfidf_lgbm e SBERT; o único modelo com HurtLex (`tfidf_logreg_hurtlex`) é um experimento negativo fora do stack. Os números da 2.2 não mudam e o dossiê não foi alterado. Salvaguarda nova: `train_from_config` recusa um config com bloco `hurtlex` quando o corpus é `_commercial`. O HurtLex continua sendo lido em `scripts/perturbation_robustness.py`, só como lista de alvos da ofuscação direcionada no teste (avaliação, não treino nem produto).
+
+**Scripts do doccano em `tools/annotation/`.** Movidos de `luciola-annotation/` para o repositório. Sem senhas nem caminhos pessoais: as senhas vêm de `DOCCANO_PW_<USUARIO>` (ou de um arquivo apontado por `LUCIOLA_ACESSOS`, fora do repositório); URL, mapeamento, chave e host SSH vêm de `DOCCANO_URL`, `LUCIOLA_MAP_DIR`, `LUCIOLA_SSH_KEY`, `LUCIOLA_SSH_HOST`. `.gitignore` cobre acessos, mapeamentos e `resultado_projeto*.csv`. Teste de anotação cega e exportação rodados do novo local.
+
+**Descartes por "sem grupo".** Dez textos de ódio descartados só por falta de grupo, lidos à mão: 5 descartes corretos (nenhum grupo citado), 3 de afiliação política (esquerda, PT: grupo político não é característica protegida, mantidos como descarte; decisão a confirmar), 1 erro do léxico ("favelão", corrigido com o radical `favel`), 1 ambíguo. O filtro é posterior à geração e o arquivo guarda os descartados com o motivo, então reverter uma regra não exige gerar de novo.
+
+**Lote grande** (`data/processed/synthetic_batch.jsonl`): 900 sementes de ódio e 600 de não ódio, sementes novas (nenhuma dos pilotos), para compensar descarte de cerca de 40% no ódio e 6% no não ódio e chegar perto de 500 aprovados por classe. Roda em segundo plano com checkpoint por item; retoma pelo mesmo comando.
