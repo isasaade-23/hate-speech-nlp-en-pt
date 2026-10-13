@@ -979,3 +979,21 @@ Consultado em 13/10/2026 pela API do Hugging Face (tags `license:` e `cardData`)
 2. O NorBERTo está excluído da trilha comercial.
 3. Candidatos liberados para a trilha comercial: moBERTo, BERTomelo (`-v1`), mmBERT e o XLM-R base original (MIT), que é a referência sem o pré-treino em tweets.
 4. Antes de treinar qualquer um, rodar a regra de aprovação (recall PT não cai e sonda de identidade) no mesmo teste congelado.
+
+## 2026-10-13 (noite) — Retradução do piloto com o Gemini: preparação e termos de uso
+
+**Por quê.** A tradução do piloto (MarianMT em 248 ids e Qwen2.5-7B em 252) foi considerada insuficiente. Retraduzir os mesmos 500 ids com a API do Gemini, chamada por REST local (`scripts/translate_gemini.py`). Cada id foi traduzido por um único motor no piloto; a comparação lado a lado de MarianMT e Qwen para o mesmo texto exige calcular o outro motor só para os itens exibidos (comando `comparar`).
+
+**Modelo.** `gemini-2.5-flash` é proibido no script (desligamento em 16/10/2026), assim como `gemini-2.0-flash`. O comando `listar` mostra os modelos da chave com `generateContent`; sem `--modelo`, o script escolhe `gemini-3.5-flash` ou o Flash estável (sem sufixo) de maior versão. O nome exato usado fica gravado em cada linha da saída e nos checkpoints. **Nome do modelo: a registrar na primeira execução com a chave.**
+
+**Termos de uso consultados em 13/10/2026** (ai.google.dev/gemini-api/terms, política de uso proibido, termos das APIs do Google, página de limites):
+- A política de uso proibido da IA generativa do Google veda gerar "hatred or hate speech" e insultos a terceiros, e prevê que "podem ser feitas exceções" por considerações educacionais, documentais, científicas ou artísticas. É uma possibilidade, não uma garantia. A política não trata de tradução nem de classificação desse conteúdo.
+- Os termos da API do Gemini proíbem contornar as proteções do serviço e usar as saídas para desenvolver modelos que competem com o serviço. Um classificador de moderação não compete com o Gemini.
+- Serviços sem custo: o Google usa o conteúdo enviado e as respostas para melhorar seus produtos e revisores humanos podem ler entrada e saída. Serviços pagos: o Google não usa prompts nem respostas para melhorar seus produtos. Se a chave for de projeto sem custo, o conteúdo ofensivo do piloto passa a ser lido e usado pelo Google. O script não consegue detectar o plano da chave; a confirmação é pela página de chaves do AI Studio.
+- Os filtros de segurança são configurados no nível mais permissivo documentado (`BLOCK_NONE`). Um item que o modelo recusa ou bloqueia é registrado como `bloqueado` ou `vazio`, sem nova tentativa de contornar a recusa.
+- Rotação de chaves: a cota do Gemini é aplicada por projeto, não por chave, e os termos das APIs do Google dizem que o usuário "não tentará contornar" os limites documentados. A rotação foi implementada, mas só liga com `--rotacionar`; sem ela, a cota esgotada grava o checkpoint e para. Recomendação registrada: uma única chave de projeto pago, que também resolve o uso do conteúdo pelo Google.
+- Risco registrado: suspensão do acesso à API ou da conta por violação dos termos, sem aviso.
+
+**Implementação.** Chaves por `GEMINI_API_KEY` ou `GEMINI_KEYS_FILE` (arquivo fora do repositório; as chaves são extraídas por padrão, nunca impressas, enviadas só no cabeçalho). Temperatura 0,2, saída JSON com esquema `{id, traducao}`, lotes de 10 com reenvio item a item do que voltar bloqueado ou inválido, checkpoints a cada 50 traduções e a cada troca de chave, retomada pelo arquivo `data/processed/translation_gemini.jsonl`. Cada item recebe um status: `ok`, `vazio`, `bloqueado` ou `erro_json`; o resumo final traz a contagem. Testes com a API simulada em `tests/test_translate_gemini.py` (7 testes, sem chave).
+
+**doccano.** O projeto 1 foi renomeado para "Tradução v1 (MarianMT+Qwen) – pausado", com descrição nova; o mapeamento passou a `traducao_v1_projeto1.json` (kind `traducao_v1`). A "Tradução v2 (Gemini)" será criada com `deploy_projects.py traducao_v2` depois das 500 traduções, com os mesmos rótulos, aviso e regras, e os 100 primeiros itens estratificados e iguais para a Isa e o Vini. O relatório de sexta passou a usar o projeto sintético e, se houver anotações nos 100 primeiros, a v2; a v1 é ignorada.

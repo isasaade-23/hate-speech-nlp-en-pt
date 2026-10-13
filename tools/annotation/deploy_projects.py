@@ -49,7 +49,14 @@ LABELS = {
     "traducao": ["Ódio", "Não ódio", "⚑ Tradução estranha"],
     "sintetico": ["Ódio", "Não ódio", "⚑ Texto artificial"],
 }
-NOMES = {"traducao": "Piloto tradução PT", "sintetico": "Piloto sintético PT"}
+DIRETRIZES["traducao_v2"] = DIRETRIZES["traducao"]
+LABELS["traducao_v2"] = LABELS["traducao"]
+NOMES = {"traducao": "Piloto tradução PT", "sintetico": "Piloto sintético PT",
+         "traducao_v2": "Tradução v2 (Gemini)"}
+DESCRICOES = {
+    "traducao_v2": ("Retradução, com o Gemini, dos mesmos textos do piloto de tradução v1 (MarianMT e Qwen), "
+                    "que ficou aquém do esperado. Validação humana cega (Luciola)."),
+}
 CORES = ["#d9534f", "#5cb85c", "#f0ad4e"]
 MEMBROS = {"isa": "project_admin", "vini": "project_admin",
            "anotador1": "annotator", "anotador2": "annotator"}
@@ -73,7 +80,25 @@ def ordenar(df, chaves, n_comum=100, seed=42):
     return pd.concat([comum, resto])
 
 
+def _traducao_v2():
+    """Textos do piloto com a traducao do Gemini (so status ok); rotulo original da fonte."""
+    df = pd.read_parquet(HSP / "data/processed/translation_pilot_500_out.parquet")
+    g = pd.read_json(HSP / "data/processed/translation_gemini.jsonl", lines=True)
+    g = g[g["status"] == "ok"][["id", "text_pt", "modelo"]].rename(columns={"text_pt": "pt_gemini"})
+    df = df.merge(g, on="id", how="inner")
+    df = ordenar(df, ["label", "source_dataset"])
+    for _, r in df.iterrows():
+        yield r["pt_gemini"], {
+            "id_corpus": r["id"], "rotulo_llm": int(r["label"]),
+            "rotulo_llm_nota": "rotulo original da fonte, nao de LLM",
+            "origem": r["source_dataset"], "modelo": r["modelo"], "texto_en": r["text"],
+            "traducao_v1": r["text_pt"], "motor_v1": r["engine"]}
+
+
 def itens(kind):
+    if kind == "traducao_v2":
+        yield from _traducao_v2()
+        return
     """(texto, mapeamento) por item."""
     if kind == "traducao":
         df = pd.read_parquet(HSP / "data/processed/translation_pilot_500_out.parquet")
@@ -99,7 +124,7 @@ def itens(kind):
 def main(kind):
     s = login("adm", senha("adm"))
     p = s.post(f"{BASE}/v1/projects", json={
-        "name": NOMES[kind], "description": "Validação humana (Luciola)",
+        "name": NOMES[kind], "description": DESCRICOES.get(kind, "Validação humana (Luciola)"),
         "resourcetype": "TextClassificationProject", "project_type": "DocumentClassification", "guideline": DIRETRIZES[kind] + COMUM,
         "random_order": False, "collaborative_annotation": False,
         "single_class_classification": False}).json()

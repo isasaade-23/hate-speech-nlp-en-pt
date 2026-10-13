@@ -1,6 +1,8 @@
 """Relatorio da validacao humana: kappa, acerto por tradutor, bandeiras, comentarios, pendencias.
 
-Para cada mapeamento (*_projeto*.json em LUCIOLA_MAP_DIR) roda export_annotations.py com
+Projetos incluidos: o sintetico sempre; a traducao v2 (kind "traducao_v2") so se ja tiver anotacoes
+nos primeiros N itens; a v1 (kind terminado em "_v1", pausada) e ignorada.
+Para cada mapeamento escolhido (*_projeto*.json em LUCIOLA_MAP_DIR) roda export_annotations.py com
 --a isa --b vini --primeiros 100 (saida vai para o log) e monta reports/anotacao_<data>.md.
 O relatorio nao traz o texto dos itens, so ids; os comentarios sao dos anotadores.
 
@@ -26,6 +28,29 @@ ODIO, NAO = ex.ODIO, ex.NAO
 def decisao(rotulos):
     core = rotulos & {ODIO, NAO}
     return next(iter(core)) if len(core) == 1 else None
+
+
+def tem_anotacoes(con, mapa, n):
+    pid = mapa["project_id"]
+    ids = [r[0] for r in con.execute("SELECT id FROM examples_example WHERE project_id=? ORDER BY id LIMIT ?", (pid, n))]
+    if not ids:
+        return False
+    marc = ",".join("?" * len(ids))
+    return con.execute(f"SELECT COUNT(*) FROM labels_category WHERE example_id IN ({marc})", ids).fetchone()[0] > 0
+
+
+def escolher(con, arquivos, n):
+    """(arquivo, mapa) dos projetos que entram no relatorio, mais os ignorados e o motivo."""
+    usar, ignorados = [], []
+    for f in arquivos:
+        m = json.loads(f.read_text(encoding="utf-8"))
+        if m["kind"].endswith("_v1"):
+            ignorados.append((f.name, "v1 pausada"))
+        elif m["kind"] == "traducao_v2" and not tem_anotacoes(con, m, n):
+            ignorados.append((f.name, "ainda sem anotacoes"))
+        else:
+            usar.append((f, m))
+    return usar, ignorados
 
 
 def analisar(con, mapa, a, b, n):
@@ -69,7 +94,7 @@ def analisar(con, mapa, a, b, n):
     return r
 
 
-def md(res, a, b, n, hoje):
+def md(res, a, b, n, hoje, ignorados=()):
     L = [f"# Validação humana, {hoje}", "",
          f"Isa ({a}) e Vini ({b}), primeiros {n} itens de cada projeto. Sem texto dos itens, só ids.", ""]
     for r in res:
@@ -81,7 +106,7 @@ def md(res, a, b, n, hoje):
               + ("" if r["ambos"] >= 2 else " (menos de 2 itens em comum, sem cálculo)"),
               "- Itens que faltam: " + ", ".join(f"{u} {r['faltam'][u]}" for u in (a, b)), "",
               "**Taxa de \"LLM acertou\"** (anotação igual ao rótulo da máquina; na tradução, o rótulo original da fonte), por " +
-              ("tradutor" if r["kind"] == "traducao" else "modelo") + ":", "",
+              ("tradutor" if r["kind"].startswith("traducao") else "modelo") + ":", "",
               "| anotador | modelo | acertou | itens | % |", "|---|---|---|---|---|"]
         linhas = 0
         for u in (a, b):
@@ -95,6 +120,8 @@ def md(res, a, b, n, hoje):
         L += ["", "**Comentários:**", ""]
         L += [f"- item {i}, {u}: {t}" for i, u, t in r["comentarios"]] or ["- nenhum"]
         L.append("")
+    if ignorados:
+        L += ["## Projetos ignorados", ""] + [f"- {n}: {m}" for n, m in ignorados] + [""]
     return "\n".join(L)
 
 
@@ -111,19 +138,24 @@ def main():
     hoje = date.today().isoformat()
     db = ex.fetch_db()
     try:
-        for m in mapas:  # a exportacao propriamente dita, com a saida no log
+        con = sqlite3.connect(db)
+        escolhidos, ignorados = escolher(con, mapas, args.primeiros)
+        for nome, motivo in ignorados:
+            print(f"ignorado: {nome} ({motivo})", flush=True)
+        if not escolhidos:
+            raise SystemExit("nenhum projeto a relatar")
+        for m, _ in escolhidos:  # a exportacao propriamente dita, com a saida no log
             print(f"=== export_annotations.py {m.name} --a {args.a} --b {args.b} --primeiros {args.primeiros}", flush=True)
             subprocess.run([sys.executable, str(Path(__file__).with_name("export_annotations.py")), str(m),
                             "--a", args.a, "--b", args.b, "--primeiros", str(args.primeiros), "--db", str(db)],
                            check=True)
-        con = sqlite3.connect(db)
-        res = [analisar(con, json.loads(m.read_text(encoding="utf-8")), args.a, args.b, args.primeiros) for m in mapas]
+        res = [analisar(con, mapa, args.a, args.b, args.primeiros) for _, mapa in escolhidos]
         con.close()
     finally:
         db.unlink(missing_ok=True)
         db.parent.rmdir()
     saida = ROOT / "reports" / f"anotacao_{hoje}.md"
-    saida.write_text(md(res, args.a, args.b, args.primeiros, hoje), encoding="utf-8")
+    saida.write_text(md(res, args.a, args.b, args.primeiros, hoje, ignorados), encoding="utf-8")
     print("relatorio:", saida)
 
 
