@@ -65,6 +65,8 @@ def train_from_config(
     suffix so it never collides with the full-corpus model in reports/metrics or
     models/registry.json."""
     cfg = load_yaml(config_path)
+    if "_commercial" in corpus_suffix and "hurtlex" in cfg.get("features", {}):
+        raise ValueError("HurtLex is CC BY-NC-SA and cannot be used in a commercial-corpus model")
     policy = policy_override or cfg.get("policy", "strict")
     seed = int(cfg.get("seed", 42))
     text_col = cfg.get("text_column", "text_clean")
