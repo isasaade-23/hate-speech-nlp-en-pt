@@ -77,3 +77,6 @@ tools/annotation/acessos*.txt
 tools/annotation/*.env
 resultado_projeto*.csv
 reports/anotacao_*.md
+
+# Arquivos zipados de faxina (modelos antigos, so pesquisa): ficam no disco, nao no GitHub
+_arquivo/*.zip
