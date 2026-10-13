@@ -68,3 +68,11 @@ _internal/
 models_v4_backup/
 reports/field_tests/
 data/fala/
+
+# Doccano / validacao humana: senhas, acessos e mapeamentos (rotulo da LLM) nunca no repositorio
+luciola_acessos*
+luciola_mapeamentos/
+tools/annotation/mapeamentos/
+tools/annotation/*acessos*
+tools/annotation/*.env
+resultado_projeto*.csv
