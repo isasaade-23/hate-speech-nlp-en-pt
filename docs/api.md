@@ -7,7 +7,7 @@ talks to over HTTP. Instead of running Python, an app, website, or bot sends a p
 and receives a structured answer.
 
 ```http
-POST /predict
+POST /v1/predict          (header X-API-Key: <chave>)
 {"text": "..."}
 ```
 
@@ -24,9 +24,21 @@ POST /predict
 
 Endpoints:
 
-- `GET /health`: liveness and the served model version.
-- `POST /predict`: one text.
-- `POST /predict_batch`: many texts at once.
+- `GET /health`: liveness, the served model version and the use notice. Open, no key.
+- `POST /v1/predict`: one text (up to 2,000 characters).
+- `POST /v1/predict_batch`: up to 256 texts at once.
+
+Access and limits:
+
+- Every `/v1` call needs the header `X-API-Key`. The server stores only the SHA-256 of each key
+  (`HSC_API_KEYS="name:sha256,..."`); generate one with `python -m api.security NAME`.
+  `HSC_API_AUTH=off` disables the check for local development only.
+- Usage limit per key: `HSC_RATE_PER_MIN` units per minute (default 600); one text costs one unit.
+  Over the limit the answer is `429` with `Retry-After`.
+- Errors always have the form `{"error": {"code": "...", "message": "..."}}`.
+- Logs record client name, counts, language and latency, never the text. Validation errors
+  do not echo the input.
+- Terms: research and evaluation use only (see `LICENSE-MODEL.md`).
 
 A Gradio demo (`python demo/app.py`) is the human-facing version of the same model: a page
 where you type EN/PT text and see the prediction.

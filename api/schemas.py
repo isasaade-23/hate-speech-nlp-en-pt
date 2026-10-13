@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from typing import Annotated
+
+from pydantic import BaseModel, Field, StringConstraints
 
 
 class PredictRequest(BaseModel):
@@ -11,7 +13,9 @@ class PredictRequest(BaseModel):
 
 
 class BatchRequest(BaseModel):
-    texts: list[str] = Field(..., min_length=1, max_length=256)
+    texts: list[Annotated[str, StringConstraints(min_length=1, max_length=2000)]] = Field(
+        ..., min_length=1, max_length=256
+    )
 
 
 class LanguageInfo(BaseModel):
@@ -42,3 +46,4 @@ class BatchResponse(BaseModel):
 class HealthResponse(BaseModel):
     status: str
     model_version: str
+    notice: str
