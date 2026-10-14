@@ -118,22 +118,27 @@ class Pool:
     def pedir(self, metodo: str, caminho: str, corpo: dict | None = None) -> dict:
         # Backoff exponencial com jitter (1, 2, 4... ate 60 s), como no manual do Google, para
         # 408, 429 e 5xx; so troca de chave (opt-in) depois de varios 429 seguidos.
-        n429 = 0
-        for tentativa in range(MAX_TENTATIVAS):
+        n429 = tentativa = 0
+        while tentativa < MAX_TENTATIVAS:
+            tentativa += 1
             self._ritmo()
-            r = requests.request(metodo, f"{BASE}/{caminho}", headers=self._cabecalho(),
-                                 json=corpo, timeout=120)
+            try:
+                r = requests.request(metodo, f"{BASE}/{caminho}", headers=self._cabecalho(),
+                                     json=corpo, timeout=120)
+            except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
+                time.sleep(min(60, 2 ** (tentativa - 1)) + random.random())
+                continue
             if r.status_code == 429:
                 n429 += 1
-                if n429 >= 3:
+                if n429 >= 3 or "PerDay" in r.text:  # cota diaria nao volta com espera
                     self._proxima()
-                    n429 = 0
+                    n429 = tentativa = 0  # chave nova, contagem nova
                     continue
             elif r.status_code not in (408, 500, 502, 503, 504):
                 if r.status_code >= 400:
                     raise RuntimeError(f"HTTP {r.status_code}: {r.text[:300]}")
                 return r.json()
-            time.sleep(min(60, 2 ** tentativa) + random.random())
+            time.sleep(min(60, 2 ** (tentativa - 1)) + random.random())
         raise SemCota("sem resposta util apos varias tentativas")
 
 
@@ -230,7 +235,8 @@ def cmd_traduzir(args) -> None:
     modelo = args.modelo or escolher_modelo(listar_modelos(pool))
     if modelo in PROIBIDOS:
         raise SystemExit(f"{modelo} sera desligado; escolha outro modelo")
-    print(f"modelo: {modelo}; chaves carregadas: {len(pool.chaves)}; rotacao: {pool.rotacionar}", flush=True)
+    print(f"modelo: {modelo}; chaves carregadas: {len(pool.chaves)} (de {os.environ.get('GEMINI_KEYS_FILE', 'GEMINI_API_KEY')}); "
+          f"rotacao: {pool.rotacionar}", flush=True)
     feitos = carregar_feitos()
     pend = alvo[~alvo["id"].isin(feitos)]
     print(f"{len(alvo)} ids no escopo, {len(pend)} pendentes", flush=True)
@@ -301,11 +307,24 @@ def cmd_comparar(args) -> None:
             print(f"  {nome}: {' '.join(str(txt).split())[:260]}")
 
 
+def cmd_chaves() -> None:
+    """Confere de onde vem cada chave sem mostrar nenhuma: slot e 4 ultimos caracteres."""
+    arq = os.environ.get("GEMINI_KEYS_FILE")
+    print("GEMINI_API_KEY:", "definida" if os.environ.get("GEMINI_API_KEY") else "nao definida")
+    print("GEMINI_KEYS_FILE:", arq or "nao definida")
+    ocorrencias = len(re.findall(r"AIza[0-9A-Za-z_\-]{30,}", Path(arq).read_text(encoding="utf-8", errors="ignore"))) if arq else 0
+    chaves = carregar_chaves()
+    print(f"chaves distintas: {len(chaves)}; ocorrencias no arquivo: {ocorrencias}; duplicadas descartadas: {ocorrencias - len(chaves)}")
+    for i, k in enumerate(chaves, 1):
+        print(f"  slot {i}: ...{k[-4:]}")
+
+
 if __name__ == "__main__":
     sys.stdout.reconfigure(encoding="utf-8")
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("listar")
+    sub.add_parser("chaves")
     t = sub.add_parser("traduzir")
     t.add_argument("--piloto", type=int, default=50)
     t.add_argument("--completo", action="store_true")
@@ -314,7 +333,9 @@ if __name__ == "__main__":
     c = sub.add_parser("comparar")
     c.add_argument("--n", type=int, default=10)
     a = ap.parse_args()
-    if a.cmd == "listar":
+    if a.cmd == "chaves":
+        cmd_chaves()
+    elif a.cmd == "listar":
         pool = Pool(carregar_chaves(), False)
         nomes = listar_modelos(pool)
         flash = [n for n in nomes if "flash" in n]

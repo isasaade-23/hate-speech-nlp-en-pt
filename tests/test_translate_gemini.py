@@ -50,6 +50,18 @@ def test_chaves_extraidas_do_arquivo_sem_vazar(monkeypatch, tmp_path, capsys):
         tg.carregar_chaves()
 
 
+def test_comando_chaves_mostra_so_4_finais_e_conta_duplicadas(monkeypatch, tmp_path, capsys):
+    k1, k2 = "AIza" + "a" * 31 + "WXYZ", "AIza" + "b" * 31 + "1234"
+    arq = tmp_path / "k.txt"
+    arq.write_text(f"{k1}\n{k2}\n{k1}\n", encoding="utf-8")
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.setenv("GEMINI_KEYS_FILE", str(arq))
+    tg.cmd_chaves()
+    out = capsys.readouterr().out
+    assert "chaves distintas: 2; ocorrencias no arquivo: 3; duplicadas descartadas: 1" in out
+    assert "...WXYZ" in out and "...1234" in out and k1 not in out and k2 not in out
+
+
 def test_status_ok_vazio_bloqueado_json_ruim(monkeypatch):
     itens = [{"id": "a", "texto": "x"}, {"id": "b", "texto": "y"}, {"id": "c", "texto": "z"}]
     pool = tg.Pool(["k1"], False)
