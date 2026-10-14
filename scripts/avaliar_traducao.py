@@ -161,7 +161,7 @@ def relatorio(df: pd.DataFrame, faltam: int) -> str:
     L += ["## Exemplos por defeito (até 5 ids)", ""]
     for motor in ("MarianMT", "Qwen", "Gemini"):
         g = df[df.motor == motor]
-        partes = [f"{d}: {', '.join(g[g[d]].id.head(5))}" for d in DEFEITOS + ["mascara"]
+        partes = [f"{d}: {', '.join(g[g[d] > 0].id.head(5))}" for d in DEFEITOS + ["mascara"]
                   if (g[d] > 0).any()]
         L.append(f"- **{motor}**: " + ("; ".join(partes) if partes else "nenhum"))
     g = df[df.ingles_palavras != ""]
