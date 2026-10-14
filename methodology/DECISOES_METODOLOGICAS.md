@@ -1006,3 +1006,17 @@ Consultado em 13/10/2026 pela API do Hugging Face (tags `license:` e `cardData`)
 - **API de pesquisa:** código endurecido (commit c17407f, 8 testes), não publicada. O plano de deploy (`api.65-108-90-215.sslip.io`, Docker `--memory=1g`, Caddy, 2 chaves, termos de uso) aguarda OK.
 - **Validação humana:** apenas 2 anotações da Isa, no projeto v1 (pausado). Relatório agendado para 16/10 às 11h30 (projeto sintético e, se houver anotações, a v2).
 - **Resumo de 2 páginas para os autores do HateBR e do ToLD-BR:** pronto, aguardando leitura do usuário; sem commit no `luciola-fomento`.
+
+## 2026-10-14 — Tradução v2 com o Gemini: modelo, rotação de chaves e avaliação de qualidade
+
+**Modelo.** `gemini-3-flash-preview`. O `gemini-3.5-flash` (padrão do script) e os Flash 3.6, 3.7, 3.8 e `flash-latest` deram 503 de sobrecarga em todas as chaves na manhã de 14/10, inclusive em pedido isolado; o preview respondeu. A usuária escolheu o preview sabendo que não é estável. As 500 ficam com um modelo só: o script recusa retomar com modelo diferente do já gravado (`--misturar-modelos` para forçar).
+
+**Chaves.** 20 chaves do plano gratuito, em arquivo fora do repositório e do OneDrive (`GEMINI_KEYS_FILE`, escopo de usuário). O comando `chaves` confere a origem mostrando só o slot e os 4 últimos caracteres. O estado das chaves sem cota no dia é gravado com a impressão SHA-256 (12 hex), nunca a chave. Decisão da usuária, com o aviso registrado em 13/10 de que a cota é por projeto e os termos pedem para não contornar limites.
+
+**Rotação.** Fila circular. 503, 5xx, 408, 429 por minuto, timeout ou queda de conexão: pula para a próxima chave na hora. 429 de cota diária (`PerDay`): a chave sai da fila até 00:05 do horário do Pacífico. Uma volta inteira sem resposta: espera com backoff exponencial e jitter (teto de 5 min). Todas sem cota no dia: espera a cota reiniciar. Ritmo mínimo de 6 s entre pedidos. Checkpoints a cada 50 traduções, a cada troca de chave e a cada espera longa. Lançador: `rodar_traducao_gemini.bat`, log em `logs/traducao_gemini_<data>.log`.
+
+**Piloto (30 de 50).** 29 traduções e 1 bloqueio do filtro do Google. Na leitura de 10 itens lado a lado, o Gemini adaptou insultos americanos ao equivalente brasileiro (`raghead` virou "cabeça de toalha", `jig` virou "macaco") e manteve o registro informal. MarianMT e Qwen deixaram insultos e palavras em inglês. Um erro do Gemini: `sheeit` (interjeição) virou "com bosta".
+
+**Avaliação de qualidade (`scripts/avaliar_traducao.py`).** Pareada nos mesmos ids (Gemini × MarianMT nos 248 do Marian, Gemini × Qwen nos 252 do Qwen), sem chamar API. Defeitos: marcação HTML/JSON nova (o HateXplain já traz `<user>` no original, que não conta), codificação quebrada, alfabeto não latino novo, inglês que sobrou (lista fixa sem colisão com o português), vazio, igual ao original, razão de tamanho fora de 0,5 a 2. "Quebrada" é ter ao menos um. Nos 30 primeiros: Gemini 3,3% quebrada (o bloqueio), MarianMT 14,3%, Qwen 18,8%. Amostra pequena; o número vale com as 500.
+
+**Máscaras.** Palavrão com letra trocada (`vi4d0`, `p*rra`) é contado à parte e não é defeito: mostra que o modelo reconheceu o termo. Ressalva registrada: a máscara também muda o texto em que o classificador vai treinar (ver a etapa 2.3, ofuscação). Nos 30 primeiros, nenhuma máscara.
