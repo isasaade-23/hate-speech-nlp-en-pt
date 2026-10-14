@@ -6,9 +6,15 @@ Chaves: nunca no codigo, no log nem no Git. Lidas de, nesta ordem:
                         padrao (AIza...), qualquer formato de linha serve
 O script nunca imprime uma chave; so o indice da chave em uso (chave 1, 2, ...).
 
-Rotacao de chaves e OPCIONAL (--rotacionar). A cota do Gemini e por PROJETO, nao por chave, e os
-termos de uso das APIs do Google dizem que o usuario nao tentara contornar os limites. Sem
---rotacionar, ao esgotar a cota o script grava o checkpoint e para; retome depois.
+Rotacao de chaves e OPCIONAL (--rotacionar; ver a classe Pool). A cota do Gemini e por PROJETO,
+nao por chave, e os termos de uso das APIs do Google dizem que o usuario nao tentara contornar os
+limites; usar varias chaves e decisao de quem roda. Sem --rotacionar, ao esgotar a cota o script
+grava o checkpoint e para; retome depois. Com ela, nao para ate terminar (ou Ctrl+C).
+
+Progresso: cada item vai para data/processed/translation_gemini.jsonl assim que o lote volta; a
+retomada pula os ids feitos. Checkpoints em translation_gemini_checkpoints.jsonl (a cada 50, a
+cada troca de chave e a cada espera longa); chaves sem cota no dia em translation_gemini_estado.json
+(so a impressao SHA-256 da chave). Tudo em data/processed/, fora do Git.
 
 Modelo: nunca gemini-2.5-flash (desligamento em 16/10/2026). --listar-modelos mostra os modelos
 da chave; sem --modelo, escolhe gemini-3.5-flash ou o Flash estavel (sem sufixo) mais recente.
@@ -25,13 +31,16 @@ Uso:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import random
 import re
 import sys
 import time
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 import requests
@@ -40,6 +49,7 @@ ROOT = Path(__file__).resolve().parents[1]
 BASE = "https://generativelanguage.googleapis.com/v1beta"
 SAIDA = ROOT / "data/processed/translation_gemini.jsonl"
 CHECKPOINTS = ROOT / "data/processed/translation_gemini_checkpoints.jsonl"
+ESTADO = ROOT / "data/processed/translation_gemini_estado.json"
 PILOTO = ROOT / "data/processed/translation_pilot_500_out.parquet"
 PROIBIDOS = {"gemini-2.5-flash", "gemini-2.0-flash"}
 LOTE = 10
@@ -88,11 +98,42 @@ def carregar_chaves() -> list[str]:
     return chaves
 
 
+PACIFICO = ZoneInfo("America/Los_Angeles")  # a cota diaria do Gemini reinicia a meia-noite daqui
+ESPERA_MAX_VOLTA = 300  # s; teto do backoff quando uma volta inteira pelas chaves falha
+TRANSITORIOS = (408, 429, 500, 502, 503, 504)
+
+
+def proxima_meia_noite_pacifico(agora: datetime | None = None) -> datetime:
+    agora = (agora or datetime.now(timezone.utc)).astimezone(PACIFICO)
+    return (agora + timedelta(days=1)).replace(hour=0, minute=5, second=0, microsecond=0)
+
+
+def impressao(chave: str) -> str:
+    """Identifica a chave no arquivo de estado sem guarda-la: 12 primeiros hex do SHA-256."""
+    return hashlib.sha256(chave.encode()).hexdigest()[:12]
+
+
 class Pool:
-    def __init__(self, chaves: list[str], rotacionar: bool):
+    """Chaves em fila circular.
+
+    Com --rotacionar: 503/5xx/408/429 por minuto/timeout pulam para a proxima chave na hora; 429 de
+    cota diaria (PerDay) tira a chave da fila ate a meia-noite do Pacifico (estado salvo em disco, so
+    com a impressao SHA-256 da chave). Uma volta inteira sem resposta 200 espera com backoff e jitter
+    (ate ESPERA_MAX_VOLTA) e recomeca; todas esgotadas no dia, espera a cota reiniciar. Nao desiste.
+    Sem --rotacionar: uma chave so, backoff ate MAX_TENTATIVAS, depois SemCota.
+    """
+
+    def __init__(self, chaves: list[str], rotacionar: bool, estado: Path | None = None):
         self.chaves, self.rotacionar, self.i = chaves, rotacionar, 0
         self.trocou = False
         self.ultimo = 0.0
+        self.estado = estado
+        self.esgotadas: dict[str, str] = {}  # impressao -> ISO de quando a cota volta
+        self.invalidas: set[int] = set()
+        self.ao_esperar = None  # callback(motivo) para checkpoint em espera longa
+        if estado and estado.exists():
+            self.esgotadas = json.loads(estado.read_text(encoding="utf-8")).get("esgotadas", {})
+        self._limpar_vencidas()
 
     @property
     def slot(self) -> int:
@@ -101,12 +142,43 @@ class Pool:
     def _cabecalho(self) -> dict:
         return {"x-goog-api-key": self.chaves[self.i], "Content-Type": "application/json"}
 
-    def _proxima(self) -> None:
-        if not self.rotacionar or self.i + 1 >= len(self.chaves):
-            raise SemCota("cota esgotada" + ("" if not self.rotacionar else " em todas as chaves"))
-        self.i += 1
-        self.trocou = True
-        print(f"  cota da chave {self.i} esgotada; passando para a chave {self.i + 1}", flush=True)
+    def _limpar_vencidas(self) -> None:
+        agora = datetime.now(timezone.utc)
+        self.esgotadas = {h: t for h, t in self.esgotadas.items() if datetime.fromisoformat(t) > agora}
+
+    def _salvar(self) -> None:
+        if self.estado:
+            self.estado.parent.mkdir(parents=True, exist_ok=True)
+            self.estado.write_text(json.dumps({"esgotadas": self.esgotadas}, indent=1), encoding="utf-8")
+
+    def _disponivel(self, i: int) -> bool:
+        return i not in self.invalidas and impressao(self.chaves[i]) not in self.esgotadas
+
+    def disponiveis(self) -> int:
+        self._limpar_vencidas()
+        return sum(self._disponivel(i) for i in range(len(self.chaves)))
+
+    def _avancar(self, motivo: str) -> None:
+        """Proxima chave disponivel na fila circular (pode ser a mesma, se for a unica)."""
+        n = len(self.chaves)
+        for passo in range(1, n + 1):
+            j = (self.i + passo) % n
+            if self._disponivel(j):
+                if j != self.i:
+                    print(f"  chave {self.slot}: {motivo}; passando para a chave {j + 1}", flush=True)
+                    self.trocou = True
+                self.i = j
+                return
+
+    def _esgotar(self) -> None:
+        self.esgotadas[impressao(self.chaves[self.i])] = proxima_meia_noite_pacifico().isoformat()
+        self._salvar()
+
+    def _esperar(self, segundos: float, motivo: str) -> None:
+        print(f"  espera de {segundos / 60:.1f} min: {motivo}", flush=True)
+        if self.ao_esperar:
+            self.ao_esperar(motivo)
+        time.sleep(segundos)
 
     def _ritmo(self) -> None:
         """Um pedido a cada INTERVALO s no maximo (o plano gratuito nao aguenta rajada)."""
@@ -115,31 +187,64 @@ class Pool:
             time.sleep(falta)
         self.ultimo = time.monotonic()
 
+    def _um_pedido(self, metodo: str, caminho: str, corpo: dict | None):
+        """(json, None) em sucesso; (None, motivo) em falha transitoria; (None, 'perday') em cota do dia."""
+        self._ritmo()
+        try:
+            r = requests.request(metodo, f"{BASE}/{caminho}", headers=self._cabecalho(), json=corpo, timeout=120)
+        except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
+            return None, type(e).__name__
+        if r.status_code == 429 and "PerDay" in r.text:
+            return None, "perday"
+        if r.status_code in TRANSITORIOS:
+            return None, f"HTTP {r.status_code}"
+        if r.status_code in (400, 401, 403) and "API key" in r.text:
+            return None, "invalida"
+        if r.status_code >= 400:
+            raise RuntimeError(f"HTTP {r.status_code}: {r.text[:300]}")
+        return r.json(), None
+
     def pedir(self, metodo: str, caminho: str, corpo: dict | None = None) -> dict:
-        # Backoff exponencial com jitter (1, 2, 4... ate 60 s), como no manual do Google, para
-        # 408, 429 e 5xx; so troca de chave (opt-in) depois de varios 429 seguidos.
-        n429 = tentativa = 0
-        while tentativa < MAX_TENTATIVAS:
-            tentativa += 1
-            self._ritmo()
-            try:
-                r = requests.request(metodo, f"{BASE}/{caminho}", headers=self._cabecalho(),
-                                     json=corpo, timeout=120)
-            except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
-                time.sleep(min(60, 2 ** (tentativa - 1)) + random.random())
+        if not self.rotacionar:
+            for tentativa in range(MAX_TENTATIVAS):
+                j, motivo = self._um_pedido(metodo, caminho, corpo)
+                if j is not None:
+                    return j
+                if motivo in ("perday", "invalida"):
+                    break
+                time.sleep(min(60, 2 ** tentativa) + random.random())  # backoff do manual do Google
+            raise SemCota("sem resposta util apos varias tentativas")
+        voltas = 0
+        while True:
+            if not self.disponiveis():
+                volta = min(datetime.fromisoformat(t) for t in self.esgotadas.values()) if self.esgotadas else None
+                if volta is None:
+                    raise SemCota("nenhuma chave valida")
+                self._esperar(max(60.0, (volta - datetime.now(timezone.utc)).total_seconds()),
+                              "todas as chaves sem cota no dia; aguardando a meia-noite do Pacifico")
+                self._limpar_vencidas()
                 continue
-            if r.status_code == 429:
-                n429 += 1
-                if n429 >= 3 or "PerDay" in r.text:  # cota diaria nao volta com espera
-                    self._proxima()
-                    n429 = tentativa = 0  # chave nova, contagem nova
-                    continue
-            elif r.status_code not in (408, 500, 502, 503, 504):
-                if r.status_code >= 400:
-                    raise RuntimeError(f"HTTP {r.status_code}: {r.text[:300]}")
-                return r.json()
-            time.sleep(min(60, 2 ** (tentativa - 1)) + random.random())
-        raise SemCota("sem resposta util apos varias tentativas")
+            if not self._disponivel(self.i):
+                self._avancar("sem cota no dia")
+            falhas = 0
+            for _ in range(self.disponiveis()):  # uma volta pelas chaves disponiveis
+                j, motivo = self._um_pedido(metodo, caminho, corpo)
+                if j is not None:
+                    return j
+                if motivo == "perday":
+                    self._esgotar()
+                    motivo = "cota do dia esgotada"
+                elif motivo == "invalida":
+                    self.invalidas.add(self.i)
+                    motivo = "chave recusada pela API"
+                falhas += 1
+                if not self.disponiveis():
+                    break
+                self._avancar(motivo)
+            if falhas and self.disponiveis():
+                voltas += 1
+                self._esperar(min(ESPERA_MAX_VOLTA, 2 ** voltas) + random.random() * 5,
+                              f"volta {voltas} sem resposta util em nenhuma chave")
 
 
 # ----------------------------------------------------------------------------- modelos
@@ -231,13 +336,18 @@ def selecionar(df: pd.DataFrame, n: int | None) -> pd.DataFrame:
 def cmd_traduzir(args) -> None:
     df = pd.read_parquet(PILOTO)[["id", "text", "label", "source_dataset", "engine"]]
     alvo = selecionar(df, args.piloto if not args.completo else None)
-    pool = Pool(carregar_chaves(), args.rotacionar)
-    modelo = args.modelo or escolher_modelo(listar_modelos(pool))
+    pool = Pool(carregar_chaves(), args.rotacionar, ESTADO)
+    feitos = carregar_feitos()
+    anteriores = {f["modelo"] for f in feitos.values()}
+    modelo = args.modelo or (anteriores.pop() if len(anteriores) == 1 else escolher_modelo(listar_modelos(pool)))
     if modelo in PROIBIDOS:
         raise SystemExit(f"{modelo} sera desligado; escolha outro modelo")
+    outros = {f["modelo"] for f in feitos.values()} - {modelo}
+    if outros and not args.misturar_modelos:  # as 500 nao devem misturar modelos sem decisao explicita
+        raise SystemExit(f"a saida ja tem itens de {sorted(outros)}; use o mesmo modelo ou --misturar-modelos")
+    pool.ao_esperar = lambda motivo: checkpoint(pool, modelo, f"espera: {motivo}")
     print(f"modelo: {modelo}; chaves carregadas: {len(pool.chaves)} (de {os.environ.get('GEMINI_KEYS_FILE', 'GEMINI_API_KEY')}); "
-          f"rotacao: {pool.rotacionar}", flush=True)
-    feitos = carregar_feitos()
+          f"rotacao: {pool.rotacionar}; sem cota hoje: {len(pool.chaves) - pool.disponiveis()}", flush=True)
     pend = alvo[~alvo["id"].isin(feitos)]
     print(f"{len(alvo)} ids no escopo, {len(pend)} pendentes", flush=True)
     ultimo_ckpt = len(feitos)
@@ -329,7 +439,9 @@ if __name__ == "__main__":
     t.add_argument("--piloto", type=int, default=50)
     t.add_argument("--completo", action="store_true")
     t.add_argument("--modelo")
-    t.add_argument("--rotacionar", action="store_true", help="passa para a proxima chave quando a cota acaba")
+    t.add_argument("--rotacionar", action="store_true",
+                   help="fila circular de chaves: pula em 503/429/timeout, tira do dia a que esgotou a cota")
+    t.add_argument("--misturar-modelos", action="store_true", help="aceita continuar com modelo diferente do ja usado")
     c = sub.add_parser("comparar")
     c.add_argument("--n", type=int, default=10)
     a = ap.parse_args()

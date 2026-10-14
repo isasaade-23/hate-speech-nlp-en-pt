@@ -106,9 +106,75 @@ def test_rotacao_so_quando_pedida(monkeypatch):
     usadas.clear()
     p = tg.Pool(["k1", "k2"], True)
     assert p.pedir("POST", "x", {}) and usadas[-1] == "k2" and p.trocou and p.slot == 2
-    with pytest.raises(tg.SemCota):  # todas esgotadas
-        monkeypatch.setattr(tg.requests, "request", lambda *a, **k: Resp(429))
+
+
+PERDAY = {"error": {"code": 429, "details": [{"violations": [
+    {"quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier"}]}]}}
+
+
+class Parar(Exception):
+    pass
+
+
+def _api(monkeypatch, respostas):
+    """respostas: chave -> lista de Resp consumida em ordem (a ultima se repete)."""
+    usadas = []
+
+    def falso(metodo, url, headers=None, json=None, timeout=None):
+        k = headers["x-goog-api-key"]
+        usadas.append(k)
+        fila = respostas[k]
+        return fila.pop(0) if len(fila) > 1 else fila[0]
+    monkeypatch.setattr(tg.requests, "request", falso)
+    return usadas
+
+
+def _esperas(monkeypatch, parar=False):
+    vistas = []
+
+    def esperar(self, s, motivo):
+        vistas.append(motivo)
+        if parar:
+            raise Parar(motivo)
+    monkeypatch.setattr(tg.Pool, "_esperar", esperar)
+    return vistas
+
+
+def test_503_pula_a_chave_na_hora(monkeypatch):
+    usadas = _api(monkeypatch, {"k1": [Resp(503)], "k2": [ok_json([])]})
+    esperas = _esperas(monkeypatch)
+    p = tg.Pool(["k1", "k2"], True)
+    p.pedir("POST", "x", {})
+    assert usadas == ["k1", "k2"] and esperas == [] and p.slot == 2
+
+
+def test_perday_tira_a_chave_do_dia_e_a_retomada_pula(monkeypatch, tmp_path):
+    estado = tmp_path / "estado.json"
+    usadas = _api(monkeypatch, {"k1": [Resp(429, PERDAY)], "k2": [ok_json([])]})
+    tg.Pool(["k1", "k2"], True, estado).pedir("POST", "x", {})
+    assert usadas == ["k1", "k2"]
+    salvo = estado.read_text()
+    assert "k1" not in salvo and tg.impressao("k1") in salvo  # so a impressao, nunca a chave
+    usadas.clear()
+    p = tg.Pool(["k1", "k2"], True, estado)  # retomada
+    assert p.disponiveis() == 1
+    p.pedir("POST", "x", {})
+    assert usadas == ["k2"]
+
+
+def test_volta_inteira_em_503_espera_e_continua(monkeypatch):
+    usadas = _api(monkeypatch, {"k1": [Resp(503), ok_json([])], "k2": [Resp(503)]})
+    esperas = _esperas(monkeypatch)
+    tg.Pool(["k1", "k2"], True).pedir("POST", "x", {})
+    assert usadas == ["k1", "k2", "k1"] and len(esperas) == 1 and "volta 1" in esperas[0]
+
+
+def test_todas_sem_cota_no_dia_espera_a_meia_noite(monkeypatch):
+    _api(monkeypatch, {"k1": [Resp(429, PERDAY)], "k2": [Resp(429, PERDAY)]})
+    _esperas(monkeypatch, parar=True)
+    with pytest.raises(Parar, match="meia-noite"):
         tg.Pool(["k1", "k2"], True).pedir("POST", "x", {})
+    assert tg.proxima_meia_noite_pacifico().astimezone(tg.PACIFICO).hour == 0
 
 
 def _ambiente(monkeypatch, tmp_path, n=120):
@@ -119,6 +185,7 @@ def _ambiente(monkeypatch, tmp_path, n=120):
     monkeypatch.setattr(tg, "PILOTO", tmp_path / "piloto.parquet")
     monkeypatch.setattr(tg, "SAIDA", tmp_path / "saida.jsonl")
     monkeypatch.setattr(tg, "CHECKPOINTS", tmp_path / "ckpt.jsonl")
+    monkeypatch.setattr(tg, "ESTADO", tmp_path / "estado.json")
     monkeypatch.setenv("GEMINI_API_KEY", "k1")
     monkeypatch.delenv("GEMINI_KEYS_FILE", raising=False)
 
@@ -133,7 +200,7 @@ def _ambiente(monkeypatch, tmp_path, n=120):
 
 def test_completo_checkpoint_a_cada_50_e_retomada(monkeypatch, tmp_path):
     _ambiente(monkeypatch, tmp_path)
-    args = SimpleNamespace(piloto=50, completo=True, modelo=None, rotacionar=False)
+    args = SimpleNamespace(piloto=50, completo=True, modelo=None, rotacionar=False, misturar_modelos=False)
     tg.cmd_traduzir(args)
     feitos = tg.carregar_feitos()
     assert len(feitos) == 120 and {f["modelo"] for f in feitos.values()} == {"gemini-3.5-flash"}
@@ -146,7 +213,15 @@ def test_completo_checkpoint_a_cada_50_e_retomada(monkeypatch, tmp_path):
 
 def test_piloto_estratificado_e_ids_do_piloto(monkeypatch, tmp_path):
     _ambiente(monkeypatch, tmp_path)
-    tg.cmd_traduzir(SimpleNamespace(piloto=50, completo=False, modelo=None, rotacionar=False))
+    tg.cmd_traduzir(SimpleNamespace(piloto=50, completo=False, modelo=None, rotacionar=False, misturar_modelos=False))
     ids = set(tg.carregar_feitos())
     base = set(pd.read_parquet(tmp_path / "piloto.parquet")["id"])
     assert len(ids) == 50 and ids <= base
+
+
+def test_retomada_com_outro_modelo_e_recusada(monkeypatch, tmp_path):
+    _ambiente(monkeypatch, tmp_path)
+    tg.cmd_traduzir(SimpleNamespace(piloto=10, completo=False, modelo=None, rotacionar=False, misturar_modelos=False))
+    with pytest.raises(SystemExit, match="ja tem itens"):
+        tg.cmd_traduzir(SimpleNamespace(piloto=20, completo=False, modelo="gemini-3-flash-preview",
+                                        rotacionar=False, misturar_modelos=False))
