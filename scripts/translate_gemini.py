@@ -27,6 +27,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import random
 import re
 import sys
 import time
@@ -63,6 +64,10 @@ SEGURANCA = [{"category": c, "threshold": "BLOCK_NONE"} for c in (
     "HARM_CATEGORY_SEXUALLY_EXPLICIT", "HARM_CATEGORY_DANGEROUS_CONTENT")]
 
 
+INTERVALO = 6.0  # s entre pedidos (~10 por minuto)
+MAX_TENTATIVAS = 8
+
+
 class SemCota(Exception):
     pass
 
@@ -87,6 +92,7 @@ class Pool:
     def __init__(self, chaves: list[str], rotacionar: bool):
         self.chaves, self.rotacionar, self.i = chaves, rotacionar, 0
         self.trocou = False
+        self.ultimo = 0.0
 
     @property
     def slot(self) -> int:
@@ -102,25 +108,32 @@ class Pool:
         self.trocou = True
         print(f"  cota da chave {self.i} esgotada; passando para a chave {self.i + 1}", flush=True)
 
+    def _ritmo(self) -> None:
+        """Um pedido a cada INTERVALO s no maximo (o plano gratuito nao aguenta rajada)."""
+        falta = INTERVALO - (time.monotonic() - self.ultimo)
+        if falta > 0:
+            time.sleep(falta)
+        self.ultimo = time.monotonic()
+
     def pedir(self, metodo: str, caminho: str, corpo: dict | None = None) -> dict:
-        espera = 15
-        for tentativa in range(5):
+        # Backoff exponencial com jitter (1, 2, 4... ate 60 s), como no manual do Google, para
+        # 408, 429 e 5xx; so troca de chave (opt-in) depois de varios 429 seguidos.
+        n429 = 0
+        for tentativa in range(MAX_TENTATIVAS):
+            self._ritmo()
             r = requests.request(metodo, f"{BASE}/{caminho}", headers=self._cabecalho(),
                                  json=corpo, timeout=120)
             if r.status_code == 429:
-                if tentativa < 2:  # limite por minuto: espera e tenta a mesma chave
-                    time.sleep(espera)
-                    espera *= 2
+                n429 += 1
+                if n429 >= 3:
+                    self._proxima()
+                    n429 = 0
                     continue
-                self._proxima()
-                espera = 15
-                continue
-            if r.status_code in (500, 503):
-                time.sleep(5 * (tentativa + 1))
-                continue
-            if r.status_code >= 400:
-                raise RuntimeError(f"HTTP {r.status_code}: {r.text[:300]}")
-            return r.json()
+            elif r.status_code not in (408, 500, 502, 503, 504):
+                if r.status_code >= 400:
+                    raise RuntimeError(f"HTTP {r.status_code}: {r.text[:300]}")
+                return r.json()
+            time.sleep(min(60, 2 ** tentativa) + random.random())
         raise SemCota("sem resposta util apos varias tentativas")
 
 
