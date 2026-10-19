@@ -1004,7 +1004,7 @@ Consultado em 13/10/2026 pela API do Hugging Face (tags `license:` e `cardData`)
 - **Git (`hate-speech-project`):** commit local 46c0d46 (Gemini, v2, relatório sem a v1) e a6dfecc, sem push. O push dos 19 commits anteriores foi feito com autorização.
 - **Lote sintético:** 498 de 1.500 em `data/processed/synthetic_batch.jsonl`; parado. Retomar com `retomar_sinteticos.bat` no terminal do usuário; ao chegar a 1.500 o filtro final grava `reports/sinteticos_lote_final.md`.
 - **API de pesquisa:** código endurecido (commit c17407f, 8 testes), não publicada. O plano de deploy (`api.65-108-90-215.sslip.io`, Docker `--memory=1g`, Caddy, 2 chaves, termos de uso) aguarda OK.
-- **Validação humana:** apenas 2 anotações da Isa, no projeto v1 (pausado). Relatório agendado para 16/10 às 11h30 (projeto sintético e, se houver anotações, a v2).
+- **Validação humana:** apenas 2 anotações da Isa, no projeto v1 (pausado). Relatório agendado para 16/10 às 11h30, adiado em 15/10 para 23/10 às 11h30 porque nenhum dos dois anotadores tinha começado (projeto sintético e, se houver anotações, a v2).
 - **Resumo de 2 páginas para os autores do HateBR e do ToLD-BR:** pronto, aguardando leitura do usuário; sem commit no `luciola-fomento`.
 
 ## 2026-10-14 — Tradução v2 com o Gemini: modelo, rotação de chaves e avaliação de qualidade
@@ -1026,3 +1026,37 @@ Consultado em 13/10/2026 pela API do Hugging Face (tags `license:` e `cardData`)
 **doccano (14/10).** Projeto 5, "Tradução v2 (Gemini)": 499 itens (o bloqueado fica fora), rótulos Ódio, Não ódio e ⚑ Tradução estranha, mesma diretriz da v1, anotação não colaborativa, nenhum metadado visível no item. Os 100 primeiros, iguais para a Isa e o Vini, têm 47 de ódio e 53 sem ódio pelo rótulo da fonte. Mapeamento em `luciola_mapeamentos/traducao_v2_projeto5.json`, fora do repositório. O relatório de sexta passa a incluir a v2 assim que houver anotação nos 100 primeiros.
 
 **Projeto 1 apagado (14/10).** A pedido da usuária, o projeto "Tradução v1 (MarianMT+Qwen) – pausado" foi apagado do doccano. Antes, as anotações foram exportadas: a Isa tinha 12 itens completos (rótulo da fonte igual ao dela em 7) e o Vini nenhum. O CSV por item (sem texto) e o mapeamento estão em `luciola_mapeamentos/_old/`; o backup diário do servidor (`/var/backups/doccano`) guarda o banco anterior. Ficam no doccano o projeto 2 (sintético) e o 5 (tradução v2).
+
+## 2026-10-16 — Prioridade até domingo: Beta 1.1 da extensão (modo chat ao vivo do YouTube)
+
+**Decisão.** Até domingo, 18/10 (debate presidencial do 2º turno na Band), a prioridade é a Beta 1.1 da `luciola-extension`: embaçar mensagens de provável ódio no chat ao vivo do YouTube enquanto a pessoa assiste. Ficam como estão, sem trabalho novo: tradução v2 (pronta no doccano), lote sintético (parado em 498 de 1.500), API de pesquisa (não publicada). O relatório de anotação segue agendado para 23/10 às 11h30.
+
+**Desenho.** Branch `beta-1.1`. Um content script (`content_ytchat.js`) roda dentro do iframe do chat (`live_chat` e `live_chat_replay`), percebe mensagens novas com MutationObserver e as manda em lotes (até 40 mensagens ou 200 ms) ao service worker, que já roda o modelo linear v5 no navegador. O service worker devolve só probabilidade e tempo; nenhum texto é guardado, enviado ou registrado. Acima do limiar, a mensagem é embaçada com um botão que a revela; nada é apagado.
+
+**Limiares (provisórios).** Três níveis: conservador 0,70 (padrão), equilibrado 0,55, sensível 0,424 (limiar do modelo). O padrão é conservador porque a regra pedida é preferir deixar passar a embaçar crítica política. Os valores serão calibrados antes da versão 1.1.0.
+
+**Primeira medida (16/10, replay de debate no Brave).** Com o modelo carregado, 66 mensagens a 0,6 ms por mensagem em média (lote inicial de 40 em 24,5 ms), contra a meta de 50 ms. No nível conservador, 0 de 66 embaçadas; o trecho tinha xingamento político sem ataque a grupo. O tempo de carga do modelo (11 MB, uma vez por sessão) não foi medido.
+
+**Teste.** Playwright e Chromium automatizado não servem para o YouTube (sem codecs, navegador recusado, Chrome 155 não carrega extensão por linha de comando). O teste é feito no navegador da usuária, com a extensão carregada sem compactação.
+
+## 2026-10-19 — Beta 1.1: prazo novo e limiares calibrados
+
+**Prazo.** O debate de 18/10 passou sem a versão pronta. O alvo novo é o debate da Globo de 23/10, 21h20, último antes do segundo turno de 25/10.
+
+**Teste dos níveis (19/10, replay de debate no Brave).** No mesmo trecho, 2 de 232 mensagens embaçadas no nível conservador (limiar provisório 0,70) e 11 de 231 no sensível (0,424). A troca de nível no popup vale na hora, sem recarregar a aba. O botão "mostrar" revela a mensagem, que continua no chat.
+
+**Critério dos limiares.** A meta inicial era por precisão (conservador com 90% de acerto quando embaça). Nos textos em português do modelo linear v5, a precisão não passa de 0,74 em nenhum limiar, então essa meta não é atingível. O critério adotado é a taxa de falso positivo, escolhida no val em português (n = 4.747; prevalência 8,6%) e conferida no test (n = 4.748):
+
+| Nível | Critério | Limiar | Precisão (test) | Recall (test) | FP (test) | Sinalizado (test) |
+|---|---|---|---|---|---|---|
+| Conservador (padrão) | FP ≤ 0,5% no val | 0,67 | 0,714 | 0,159 | 0,6% | 1,9% |
+| Equilibrado | FP ≤ 1% no val | 0,57 | 0,698 | 0,221 | 0,9% | 2,7% |
+| Sensível | limiar do modelo | 0,424 | 0,668 | 0,321 | 1,5% | 4,1% |
+
+**Ressalva.** O corpus não é chat de debate, e a taxa de crítica política embaçada não está medida diretamente.
+
+**Fixture (`test/yt_chat_fixture.html`, 16 frases sintéticas escritas para o teste, escoradas pelo modelo da extensão).** As 8 críticas políticas duras sem ataque a grupo ficaram entre 0,03 e 0,07 e não são embaçadas em nenhum nível. As 7 frases de ódio explícito contra grupos (nordestinos, gays, mulheres, negros, imigrantes) ficaram entre 0,17 e 0,62: nenhuma é embaçada no conservador, 2 no equilibrado e 4 no sensível; 3 não são embaçadas em nenhum nível. O xingamento partidário "Petista e bolsonarista, tudo gado", que não é ataque a grupo protegido, ficou em 0,75 e é embaçado nos três níveis. O resultado repete o recall de 0,16 do conservador no test: o nível padrão cumpre a regra de deixar passar crítica política, e deixa passar também a maior parte do ódio. É limitação do modelo linear em português, não do código da extensão, e está descrita no texto de limitação do popup.
+
+**Versão.** Commit `7fd8bff` na branch `beta-1.1`, local, sem push: popup com liga/desliga, 3 níveis e texto de limitação; limiares acima; contador movido para o cabeçalho do chat (antes cobria a última mensagem); fixture; versão 1.1.0 com README e CHANGELOG. Pacote `store/luciola-extension-1.1.0.zip` (17 arquivos, 3,3 MB), com os ícones novos que estavam modificados no repositório, por decisão da usuária. Não enviado à Chrome Web Store.
+
+**Não verificado.** Os limiares novos do conservador (0,67) e do equilibrado (0,57) não rodaram no replay; o teste depois da atualização (3 de 87 embaçadas, contador no cabeçalho) foi no nível sensível, que não mudou. A fixture não foi aberta no navegador (o MCP não abre páginas `chrome-extension://`). O tempo de carga do modelo segue sem medida. Falta confirmar se o debate da Globo terá transmissão no YouTube com chat ao vivo.
