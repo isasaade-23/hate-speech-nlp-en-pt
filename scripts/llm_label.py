@@ -1,12 +1,13 @@
-"""Rotulagem de discurso de ódio por LLM (Gemini e Mistral), com a mesma interface.
+"""Rotulagem de discurso de ódio por LLM (Gemini, Groq ou Mistral), com a mesma interface.
 
 Usos previstos: juiz do rótulo na auditoria PT (Fase 0, item 4), rotulador de bancos sem rótulo
 e professor (probabilidade suave). Cada uso grava num arquivo próprio (--tag).
 
 Chaves: nunca no código, no log nem no Git. Nenhuma chave é impressa.
   gemini   GEMINI_API_KEY ou GEMINI_KEYS_FILE (padrão AIza..., ver translate_gemini.py)
-  mistral  MISTRAL_API_KEY, ou MISTRAL_KEYS_FILE: a chave é a primeira linha não vazia
-           abaixo da primeira linha que contém "mistral" (sem diferenciar maiúscula)
+  groq     GROQ_API_KEY, ou GROQ_KEYS_FILE: a chave é a primeira linha não vazia abaixo da
+           primeira linha que contém "groq" (sem diferenciar maiúscula)
+  mistral  idem, com MISTRAL_API_KEY / MISTRAL_KEYS_FILE e a linha "mistral"
 
 Saída: data/processed/llm_label_<tag>_<provedor>.jsonl, uma linha por id:
   {id, rotulo, prob, categoria, justificativa_curta, status, provedor, modelo, prompt}
@@ -37,12 +38,16 @@ import translate_gemini as tg  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 CORPUS = ROOT / "data/processed/corpus_strict.parquet"
-MISTRAL_BASE = "https://api.mistral.ai/v1"
+# provedores com API no formato da OpenAI: (base, segundos entre pedidos)
+OPENAI_COMPAT = {"mistral": ("https://api.mistral.ai/v1", 1.0),
+                 "groq": ("https://api.groq.com/openai/v1", 2.5)}
+PROVEDORES = ["gemini", *OPENAI_COMPAT]
 MODELO_PADRAO = {"gemini": ("gemini-3-flash", "gemini-3-flash-preview"),
-                 "mistral": ("mistral-large-latest", "mistral-medium-3.5")}  # chave gratuita: sem large
+                 "mistral": ("mistral-large-latest", "mistral-medium-3.5"),  # chave gratuita: sem large
+                 "groq": ("openai/gpt-oss-120b",)}
 LOTE = 10
+MAX_REFAZER = 3  # acima disso, os itens com falha ficam para a próxima execução (poupa cota)
 MAX_TENTATIVAS = 8
-INTERVALO_MISTRAL = 1.0
 PROMPT_VERSAO = "v1"
 CATEGORIAS = ["nenhuma", "raca_etnia", "religiao", "genero", "orientacao_sexual",
               "identidade_de_genero", "origem_regional_ou_nacional", "deficiencia", "idade",
@@ -77,7 +82,7 @@ _ITEM = {"id": "string", "rotulo": "integer", "prob": "number", "categoria": "st
 SCHEMA_GEMINI = {"type": "OBJECT", "properties": {"itens": {"type": "ARRAY", "items": {
     "type": "OBJECT", "properties": {k: {"type": v.upper()} for k, v in _ITEM.items()},
     "required": list(_ITEM)}}}, "required": ["itens"]}
-SCHEMA_MISTRAL = {"type": "object", "additionalProperties": False, "required": ["itens"],
+SCHEMA_JSON = {"type": "object", "additionalProperties": False, "required": ["itens"],
                   "properties": {"itens": {"type": "array", "items": {
                       "type": "object", "additionalProperties": False, "required": list(_ITEM),
                       "properties": {k: {"type": v} for k, v in _ITEM.items()}}}}}
@@ -85,38 +90,39 @@ SCHEMA_MISTRAL = {"type": "object", "additionalProperties": False, "required": [
 
 # ----------------------------------------------------------------------------- chaves
 
-def chave_mistral() -> str:
-    if os.environ.get("MISTRAL_API_KEY"):
-        return os.environ["MISTRAL_API_KEY"].strip()
-    arq = os.environ.get("MISTRAL_KEYS_FILE")
+def chave_de_arquivo(provedor: str) -> str:
+    env = provedor.upper()
+    if os.environ.get(f"{env}_API_KEY"):
+        return os.environ[f"{env}_API_KEY"].strip()
+    arq = os.environ.get(f"{env}_KEYS_FILE")
     if not arq:
-        raise SystemExit("nenhuma chave: defina MISTRAL_API_KEY ou MISTRAL_KEYS_FILE (ver o cabeçalho)")
+        raise SystemExit(f"nenhuma chave: defina {env}_API_KEY ou {env}_KEYS_FILE (ver o cabeçalho)")
     linhas = Path(arq).read_text(encoding="utf-8", errors="ignore").splitlines()
     for i, l in enumerate(linhas):
-        if "mistral" in l.lower():
+        if provedor in l.lower():
             for prox in linhas[i + 1:]:
                 k = prox.strip()
                 if k:
                     if " " in k or len(k) < 20:
-                        raise SystemExit("a linha abaixo de 'mistral' não parece uma chave")
+                        raise SystemExit(f"a linha abaixo de '{provedor}' não parece uma chave")
                     return k
-    raise SystemExit("nenhuma linha com 'mistral' no arquivo de chaves")
+    raise SystemExit(f"nenhuma linha com '{provedor}' no arquivo de chaves")
 
 
-class Mistral:
-    """Cliente REST mínimo, com ritmo e backoff; a chave só vai no cabeçalho."""
+class OpenAICompat:
+    """Cliente REST mínimo (Mistral, Groq), com ritmo e backoff; a chave só vai no cabeçalho."""
 
-    def __init__(self, chave: str):
-        self._chave, self.ultimo = chave, 0.0
+    def __init__(self, provedor: str, chave: str):
+        (self.base, self.intervalo), self._chave, self.ultimo = OPENAI_COMPAT[provedor], chave, 0.0
 
     def pedir(self, metodo: str, caminho: str, corpo: dict | None = None) -> dict:
         for tentativa in range(MAX_TENTATIVAS):
-            falta = INTERVALO_MISTRAL - (time.monotonic() - self.ultimo)
+            falta = self.intervalo - (time.monotonic() - self.ultimo)
             if falta > 0:
                 time.sleep(falta)
             self.ultimo = time.monotonic()
             try:
-                r = requests.request(metodo, f"{MISTRAL_BASE}/{caminho}", json=corpo, timeout=120,
+                r = requests.request(metodo, f"{self.base}/{caminho}", json=corpo, timeout=120,
                                      headers={"Authorization": f"Bearer {self._chave}",
                                               "Content-Type": "application/json"})
             except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
@@ -132,7 +138,7 @@ class Mistral:
 def cliente(provedor: str):
     if provedor == "gemini":
         return tg.Pool(tg.carregar_chaves(), rotacionar=False)
-    return Mistral(chave_mistral())
+    return OpenAICompat(provedor, chave_de_arquivo(provedor))
 
 
 def listar_modelos(provedor: str, cli) -> list[str]:
@@ -171,7 +177,7 @@ def chamar(provedor: str, cli, modelo: str, itens: list[dict]) -> tuple[dict, st
             "systemInstruction": {"parts": [{"text": SISTEMA}]},
             "contents": [{"role": "user", "parts": [{"text": entrada}]}],
             "generationConfig": {"temperature": 0, "responseMimeType": "application/json",
-                                 "responseSchema": SCHEMA_GEMINI, "maxOutputTokens": 8192},
+                                 "responseSchema": SCHEMA_GEMINI, "maxOutputTokens": 16384},
             "safetySettings": tg.SEGURANCA})
         cand = (j.get("candidates") or [{}])[0]
         modelo_api = j.get("modelVersion", modelo)
@@ -184,7 +190,7 @@ def chamar(provedor: str, cli, modelo: str, itens: list[dict]) -> tuple[dict, st
             "model": modelo, "temperature": 0,
             "messages": [{"role": "system", "content": SISTEMA}, {"role": "user", "content": entrada}],
             "response_format": {"type": "json_schema", "json_schema": {
-                "name": "rotulos", "schema": SCHEMA_MISTRAL, "strict": True}}})
+                "name": "rotulos", "schema": SCHEMA_JSON, "strict": True}}})
         modelo_api = j.get("model", modelo)
         texto = ((j.get("choices") or [{}])[0].get("message") or {}).get("content") or ""
     try:
@@ -196,7 +202,8 @@ def chamar(provedor: str, cli, modelo: str, itens: list[dict]) -> tuple[dict, st
 
 def rotular_lote(provedor, cli, modelo, itens) -> tuple[dict, str]:
     res, modelo_api = chamar(provedor, cli, modelo, itens)
-    if len(itens) > 1:  # o que voltou bloqueado ou com erro é refeito item a item, uma vez
+    falhas = [it for it in itens if res[it["id"]][1] != "ok"]
+    if len(itens) > 1 and len(falhas) <= MAX_REFAZER:  # refeito item a item, uma vez
         for it in itens:
             if res[it["id"]][1] != "ok":
                 res[it["id"]] = chamar(provedor, cli, modelo, [it])[0][it["id"]]
@@ -251,8 +258,9 @@ def cmd_rotular(args) -> None:
     print(f"provedor {args.provedor}, modelo {modelo}: {len(itens)} ids, {len(fila)} a fazer -> {arq.name}",
           flush=True)
     arq.parent.mkdir(parents=True, exist_ok=True)
-    for ini in range(0, len(fila), LOTE):
-        lote = fila.iloc[ini:ini + LOTE].to_dict("records")
+    lote_n = args.lote
+    for ini in range(0, len(fila), lote_n):
+        lote =fila.iloc[ini:ini + lote_n].to_dict("records")
         res, modelo_api = rotular_lote(args.provedor, cli, modelo, lote)
         with arq.open("a", encoding="utf-8") as f:
             for it in lote:
@@ -260,7 +268,7 @@ def cmd_rotular(args) -> None:
                 f.write(json.dumps({"id": it["id"], **campos, "status": st, "provedor": args.provedor,
                                     "modelo_pedido": modelo, "modelo": modelo_api,
                                     "prompt": PROMPT_VERSAO}, ensure_ascii=False) + "\n")
-        print(f"  {min(ini + LOTE, len(fila))}/{len(fila)}", flush=True)
+        print(f"  {min(ini + lote_n, len(fila))}/{len(fila)}", flush=True)
     st = pd.Series([carregar_feitos(arq)[i]["status"] for i in itens.id]).value_counts().to_dict()
     print("status dos ids pedidos:", st)
 
@@ -283,15 +291,16 @@ def main(argv=None) -> None:
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
     m = sub.add_parser("modelos")
-    m.add_argument("--provedor", choices=["gemini", "mistral"], required=True)
+    m.add_argument("--provedor", choices=PROVEDORES, required=True)
     for nome in ("rotular", "custo"):
         p = sub.add_parser(nome)
         p.add_argument("--ids", required=True, help="CSV com coluna id")
         p.add_argument("--n", type=int, help="só os n primeiros ids (piloto)")
         if nome == "rotular":
-            p.add_argument("--provedor", choices=["gemini", "mistral"], required=True)
+            p.add_argument("--provedor", choices=PROVEDORES, required=True)
             p.add_argument("--modelo")
             p.add_argument("--tag", default="juiz_pt")
+            p.add_argument("--lote", type=int, default=LOTE, help="textos por pedido")
     args = ap.parse_args(argv)
     {"rotular": cmd_rotular, "modelos": cmd_modelos, "custo": cmd_custo}[args.cmd](args)
 

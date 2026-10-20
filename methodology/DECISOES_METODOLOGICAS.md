@@ -1106,3 +1106,8 @@ Consultado em 13/10/2026 pela API do Hugging Face (tags `license:` e `cardData`)
 **Piloto.** Gemini (`gemini-3-flash-preview`, o Gemini 3 Flash da lista): 20 de 20 `ok`; a segunda execução não fez chamada. Mistral: todo pedido volta 429 com `x-ratelimit-limit-req-minute: 0`, em qualquer modelo. A conta não tem cota ativa; falta ativar o plano gratuito no console da Mistral. O item 4 espera essa ativação.
 
 **Local das chaves.** O arquivo de chaves usado agora está na Área de Trabalho dentro do OneDrive, e não no local fora do OneDrive registrado em 14/10.
+
+**Atualização (20/10, noite).**
+- Mistral descartado: a conta não tem cota ativa e a usuária não vai pagar. O segundo juiz passa a ser o Groq com `openai/gpt-oss-120b` (plano gratuito, de outra família que não a do Google). `llm_label.py` ganhou o provedor `groq`, com API no formato da OpenAI; a chave é a primeira linha não vazia abaixo da linha "groq" no arquivo de chaves. Pendente: a usuária pôr a chave no arquivo.
+- Gemini: o plano gratuito tem 20 pedidos por dia por projeto e modelo (`GenerateRequestsPerDayPerProjectPerModel-FreeTier`). Com lotes de 10, a cota acabou em 60 dos 501 itens. Decisão da usuária: sem rotação de chaves; os 441 restantes vão em lotes de 50 (`--lote 50`, 9 pedidos) depois que a cota reiniciar (00:00 do Pacífico, 4h de Brasília). Com lote grande, o item que falha só é refeito sozinho se falharem até 3 no lote; o resto fica para a execução seguinte, para poupar a cota.
+- Seção 4 do relatório: `python scripts/auditoria_pt.py --juiz`. Em FN e FP o rótulo é constante, então a seção traz a taxa de concordância com o rótulo nesses grupos; o kappa vale para a amostra inteira e por fonte.

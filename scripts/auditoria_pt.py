@@ -7,7 +7,7 @@
 3. Erros por fonte: linear da extensão, linear PT e BERTimbau, separados por
    ToLD-BR, HateBR e pt_fortuna (e pelo rótulo original dentro de cada fonte).
 
-O item 4 (LLM como juiz) depende da Fase 1 e fica pendente no relatório.
+4. LLM como juiz do rótulo, sobre a amostra de --amostra e as saídas de llm_label.py.
 
 Uso: python scripts/auditoria_pt.py
 Saída: reports/auditoria_pt.md (só agregados) e reports/tables/auditoria_pt_dups.csv (só ids)
@@ -16,6 +16,7 @@ Saída: reports/auditoria_pt.md (só agregados) e reports/tables/auditoria_pt_du
 from __future__ import annotations
 
 import sys
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -23,7 +24,7 @@ import pandas as pd
 import yaml
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import (average_precision_score, f1_score, precision_score,
+from sklearn.metrics import (average_precision_score, cohen_kappa_score, f1_score, precision_score,
                              recall_score, roc_auc_score)
 from sklearn.pipeline import FeatureUnion
 
@@ -341,7 +342,85 @@ def amostra_juiz() -> pd.DataFrame:
     return out
 
 
+def kappa_ic(a, b) -> str:
+    """Kappa de Cohen com IC 95% por bootstrap simples."""
+    a, b = np.asarray(a), np.asarray(b)
+    rng = np.random.default_rng(SEED)
+    with warnings.catch_warnings():  # reamostra com uma classe só: kappa indefinido (nan)
+        warnings.simplefilter("ignore")
+        bs = [cohen_kappa_score(a[i], b[i]) for i in rng.integers(0, len(a), size=(N_BOOT, len(a)))]
+    return "{:.3f} [{:.3f}–{:.3f}]".format(cohen_kappa_score(a, b), *np.nanpercentile(bs, [2.5, 97.5]))
+
+
+def juiz() -> str:
+    """Item 4: LLMs contra o rótulo do corpus e entre si, na amostra de erros e acertos comuns."""
+    amostra = pd.read_csv(ROOT / "data/processed/auditoria_pt_amostra.csv")
+    llms = {}
+    for arq in sorted((ROOT / "data/processed").glob("llm_label_juiz_pt_*.jsonl")):
+        j = pd.read_json(arq, lines=True).drop_duplicates("id", keep="last")
+        nome = f"{j.provedor.iloc[0]} ({j.modelo.iloc[0]})"
+        llms[nome] = j.set_index("id")
+    if not llms:
+        return "## 4. LLM como juiz do rótulo\n\nPendente: nenhuma saída de LLM.\n"
+    d = amostra.set_index("id")
+    status = {}
+    for nome, j in llms.items():
+        d[nome] = j.rotulo.where(j.status == "ok").reindex(d.index)
+        status[nome] = j.status.reindex(d.index).fillna("faltando").value_counts().to_dict()
+    nomes = list(llms)
+    ok = d.dropna(subset=nomes).copy()
+    for n in nomes:
+        ok[n] = ok[n].astype(int)
+
+    out = ["## 4. LLM como juiz do rótulo\n",
+           f"Amostra de {len(d)} ids do test PT (`data/processed/auditoria_pt_amostra.csv`): erros e "
+           "acertos comuns ao BERTimbau e ao linear PT. A amostra super-representa os erros, então o "
+           "kappa com o rótulo vale para ela, não para o test inteiro. Prompt v1 de "
+           "`scripts/llm_label.py`. Status por LLM: "
+           + "; ".join(f"{n}: {s}" for n, s in status.items())
+           + f". Análise com os {len(ok)} ids que têm resposta `ok` de todos os LLMs.\n"]
+
+    # concordância com o rótulo por grupo (no FN e no FP o rótulo é constante: kappa não se aplica)
+    rows = []
+    for (g, src), h in list(ok.groupby(["grupo", "fonte"])) + [((g, "todas"), h) for g, h in ok.groupby("grupo")]:
+        r = {"grupo": g, "fonte": src, "n": len(h)}
+        for n in nomes:
+            r[f"concorda_rotulo {n}"] = float((h[n] == h.label).mean())
+        if len(nomes) > 1:
+            iguais = (h[nomes].nunique(axis=1) == 1)
+            r["LLMs_iguais_e_contra_rotulo"] = float((iguais & (h[nomes[0]] != h.label)).mean())
+        rows.append(r)
+    tab = pd.DataFrame(rows).sort_values(["grupo", "fonte"])
+    out.append("**Concordância com o rótulo do corpus, por grupo.** Em FN, \"discordar\" quer dizer que o "
+               "LLM também acha que não é ódio; em FP, que acha que é. A última coluna é a proporção "
+               "em que os LLMs concordam entre si e discordam do rótulo.\n")
+    out.append(md(tab) + "\n")
+
+    # kappa (amostra inteira e por fonte)
+    rows = []
+    for src, h in [("todas", ok)] + list(ok.groupby("fonte")):
+        r = {"fonte": src, "n": len(h)}
+        for n in nomes:
+            r[f"kappa rotulo × {n}"] = kappa_ic(h.label, h[n])
+        if len(nomes) > 1:
+            r["kappa LLM × LLM"] = kappa_ic(h[nomes[0]], h[nomes[1]])
+        rows.append(r)
+    out.append(f"**Kappa de Cohen** (IC 95% por bootstrap, {N_BOOT} reamostras):\n")
+    out.append(md(pd.DataFrame(rows)) + "\n")
+    out.append("Leitura prevista no plano: se os LLMs concordam entre si e discordam do rótulo "
+               "justamente nos FN e FP comuns, e não nos acertos, o teto é ruído de rótulo, não o "
+               "algoritmo.\n")
+    return "\n".join(out)
+
+
 def main() -> None:
+    if "--juiz" in sys.argv:  # só a seção 4, sobre o relatório existente
+        dest = ROOT / "reports/auditoria_pt.md"
+        txt = dest.read_text(encoding="utf-8")
+        base = txt.split("## 4. LLM como juiz")[0].rstrip() + "\n\n"
+        dest.write_text(base + juiz(), encoding="utf-8")
+        print("->", dest)
+        return
     if "--amostra" in sys.argv:
         a = amostra_juiz()
         print(a.groupby(["grupo", "fonte", "label"]).size().to_string())
@@ -361,9 +440,9 @@ def main() -> None:
     head = ("# Auditoria do pipeline em português (Fase 0, itens 1 a 3)\n\n"
             "Gerado por `scripts/auditoria_pt.py`. Corpus `corpus_strict.parquet`, fatia PT "
             f"({len(pt)} textos: {pt.split.value_counts().to_dict()}). Só agregados; nenhum texto.\n\n"
-            "O item 4 (LLM como juiz do rótulo) espera o pipeline de API da Fase 1.\n")
+            "`--juiz` refaz só a seção 4 sobre este arquivo; `--amostra` refaz a amostra do item 4.\n")
     dest = ROOT / "reports/auditoria_pt.md"
-    dest.write_text("\n".join([head, sec1, sec2, sec3]), encoding="utf-8")
+    dest.write_text("\n".join([head, sec1, sec2, sec3, juiz()]), encoding="utf-8")
     dups.to_csv(ROOT / "reports/tables/auditoria_pt_dups.csv", index=False)
     print("->", dest)
 

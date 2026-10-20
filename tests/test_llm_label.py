@@ -48,7 +48,7 @@ def test_chave_mistral_na_linha_abaixo(monkeypatch, tmp_path):
     arq.write_text(f"gemini\n{CHAVE_G}\n\nMistral (conta pessoal)\n\n  {CHAVE_M}  \noutra\nxyz\n",
                    encoding="utf-8")
     monkeypatch.setenv("MISTRAL_KEYS_FILE", str(arq))
-    assert ll.chave_mistral() == CHAVE_M
+    assert ll.chave_de_arquivo("mistral") == CHAVE_M
 
 
 def test_chave_mistral_ausente_nao_vaza(monkeypatch, tmp_path, capsys):
@@ -56,7 +56,7 @@ def test_chave_mistral_ausente_nao_vaza(monkeypatch, tmp_path, capsys):
     arq.write_text(f"mistral\ncurta\n{CHAVE_G}\n", encoding="utf-8")
     monkeypatch.setenv("MISTRAL_KEYS_FILE", str(arq))
     with pytest.raises(SystemExit) as e:
-        ll.chave_mistral()
+        ll.chave_de_arquivo("mistral")
     assert "curta" not in str(e.value) and CHAVE_G not in str(e.value)
 
 
@@ -85,7 +85,7 @@ def test_mistral_corpo_temperatura_zero_e_esquema(monkeypatch):
         return resp_mistral([item("a", rot=0, prob=0.1, cat="nenhuma")])
 
     monkeypatch.setattr(ll.requests, "request", fake)
-    res, modelo = ll.chamar("mistral", ll.Mistral(CHAVE_M), "mistral-large-latest",
+    res, modelo = ll.chamar("mistral", ll.OpenAICompat("mistral", CHAVE_M), "mistral-large-latest",
                             [{"id": "a", "texto": "t"}])
     assert res["a"] == ({"rotulo": 0, "prob": 0.1, "categoria": "nenhuma",
                          "justificativa_curta": "ataque"}, "ok")
@@ -98,7 +98,7 @@ def test_mistral_corpo_temperatura_zero_e_esquema(monkeypatch):
 def test_mistral_tenta_de_novo_em_429(monkeypatch):
     respostas = iter([Resp(429), Resp(503), resp_mistral([item("a")])])
     monkeypatch.setattr(ll.requests, "request", lambda *a, **k: next(respostas))
-    res, _ = ll.chamar("mistral", ll.Mistral(CHAVE_M), "m", [{"id": "a", "texto": "t"}])
+    res, _ = ll.chamar("mistral", ll.OpenAICompat("mistral", CHAVE_M), "m", [{"id": "a", "texto": "t"}])
     assert res["a"][1] == "ok"
 
 
@@ -141,3 +141,19 @@ def test_retomada_nao_refaz_ok_e_nao_vaza_chave(monkeypatch, tmp_path, capsys):
 
     saida = capsys.readouterr().out + (tmp_path / "out_juiz_pt_mistral.jsonl").read_text(encoding="utf-8")
     assert CHAVE_M not in saida
+
+
+def test_groq_mesma_interface(monkeypatch, tmp_path):
+    arq = tmp_path / "keys.txt"
+    arq.write_text(f"mistral\n{CHAVE_M}\nGroq\ngsk_FAKE0123456789abcdefghij\n", encoding="utf-8")
+    monkeypatch.setenv("GROQ_KEYS_FILE", str(arq))
+    assert ll.chave_de_arquivo("groq") == "gsk_FAKE0123456789abcdefghij"
+    visto = {}
+
+    def fake(metodo, url, json=None, headers=None, timeout=None):
+        visto["url"] = url
+        return resp_mistral([item("a")])
+
+    monkeypatch.setattr(ll.requests, "request", fake)
+    res, _ = ll.chamar("groq", ll.cliente("groq"), "openai/gpt-oss-120b", [{"id": "a", "texto": "t"}])
+    assert res["a"][1] == "ok" and visto["url"].startswith("https://api.groq.com/openai/v1/")
