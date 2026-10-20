@@ -312,7 +312,41 @@ def erros(pt: pd.DataFrame) -> str:
             + md(orig) + "\n")
 
 
+def amostra_juiz() -> pd.DataFrame:
+    """Item 4: erros e acertos COMUNS ao BERTimbau e ao linear PT no test PT. Grava só ids."""
+    a = pd.read_parquet(ROOT / "reports/predictions/bertimbau_pt_strict_s42_test.parquet")
+    b = pd.read_parquet(ROOT / "reports/predictions/pt_logreg_strict_s42_test.parquet")
+    d = a[a.language == "pt"].merge(b[["id", "y_pred"]], on="id", suffixes=("", "_lin"))
+    d["grupo"] = None
+    d.loc[(d.y_true == 1) & (d.y_pred == 0) & (d.y_pred_lin == 0), "grupo"] = "FN_comum"
+    d.loc[(d.y_true == 0) & (d.y_pred == 1) & (d.y_pred_lin == 1), "grupo"] = "FP_comum"
+    d.loc[(d.y_pred == d.y_true) & (d.y_pred_lin == d.y_true), "grupo"] = "acerto_comum"
+    fn = d[d.grupo == "FN_comum"]
+    fp_all = d[d.grupo == "FP_comum"]
+    # 100 FP, proporcional à fonte (maior resto para fechar a conta)
+    cota = fp_all.source_dataset.value_counts() * 100 / len(fp_all)
+    n_fp = cota.astype(int)
+    n_fp[(cota - n_fp).sort_values(ascending=False).index[:100 - n_fp.sum()]] += 1
+    fp = pd.concat([g.sample(n_fp[s], random_state=SEED) for s, g in fp_all.groupby("source_dataset")])
+    # 300 acertos: 100 por fonte, metade ódio quando houver
+    ac = []
+    for s, g in d[d.grupo == "acerto_comum"].groupby("source_dataset"):
+        odio = g[g.y_true == 1]
+        n1 = min(50, len(odio))
+        ac += [odio.sample(n1, random_state=SEED),
+               g[g.y_true == 0].sample(100 - n1, random_state=SEED)]
+    out = pd.concat([fn, fp] + ac).sample(frac=1, random_state=SEED)
+    out = out.rename(columns={"source_dataset": "fonte", "y_true": "label"})[["id", "grupo", "fonte", "label"]]
+    out.to_csv(ROOT / "data/processed/auditoria_pt_amostra.csv", index=False)
+    return out
+
+
 def main() -> None:
+    if "--amostra" in sys.argv:
+        a = amostra_juiz()
+        print(a.groupby(["grupo", "fonte", "label"]).size().to_string())
+        print(f"{len(a)} ids -> data/processed/auditoria_pt_amostra.csv")
+        return
     data_cfg = yaml.safe_load(open(ROOT / "configs/data.yaml", encoding="utf-8"))
     corpus = pd.read_parquet(ROOT / "data/processed/corpus_strict.parquet")
     pt = corpus[corpus.language == "pt"].reset_index(drop=True)

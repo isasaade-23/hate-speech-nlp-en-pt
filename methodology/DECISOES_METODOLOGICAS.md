@@ -1090,3 +1090,19 @@ Consultado em 13/10/2026 pela API do Hugging Face (tags `license:` e `cardData`)
 **Leitura.** O pipeline não tem defeito que explique o recall baixo. O teto em PT parece vir dos dados: o BERTimbau não supera o linear com significância, os dois param no mesmo ponto do pt_fortuna e há rótulos conflitantes em textos quase idênticos. A troca de limiar na extensão recupera parte do recall sem trocar de modelo.
 
 **Próximo.** Item 4: amostra dos erros comuns ao BERTimbau e ao linear PT no test (101 FN, 100 dos 120 FP e 300 acertos), classificada pelo Gemini 3 Flash e pelo Mistral Large 4.
+
+## 2026-10-20 — Fase 0, item 4: pipeline de LLM, amostra do juiz e planos gratuitos
+
+**Pipeline.** `scripts/llm_label.py` rotula com Gemini ou Mistral pela mesma interface. Reaproveita de `translate_gemini.py` a carga de chaves, o `Pool` e a listagem de modelos. A saída tem um arquivo por uso e provedor (`data/processed/llm_label_<tag>_<provedor>.jsonl`, fora do Git), com rótulo, probabilidade, categoria do grupo, justificativa curta, status (`ok`, `bloqueado`, `erro_json`), modelo pedido, modelo informado pela API e versão do prompt. A retomada refaz só o que não está `ok`, e o script recusa misturar modelos no mesmo arquivo. Temperatura 0 e esquema JSON nos dois provedores. Prompt v1: definição strict com grupos protegidos, regra explícita de que xingamento político sem ataque a grupo não é ódio, texto que cita ou denuncia ódio não é ódio, e cinco exemplos sintéticos. A chave do Mistral é a primeira linha não vazia abaixo da linha que contém "mistral" no arquivo de chaves. Testes com API simulada: `tests/test_llm_label.py` (7 testes).
+
+**Amostra do juiz** (`python scripts/auditoria_pt.py --amostra`, só ids em `data/processed/auditoria_pt_amostra.csv`). Erros e acertos comuns ao BERTimbau e ao linear PT no test PT. Os dois modelos erram juntos em 101 FN e 120 FP; a meta original de 200 FN não cabe. Composição: 101 FN (hatebr 20, pt_fortuna 61, toldbr 20), 100 FP proporcionais à fonte (13, 62, 25) e 300 acertos, 100 por fonte, metade ódio quando há (o toldbr tem só 21 acertos de ódio). Total: 501 ids. Estimativa: cerca de 37 mil tokens de entrada e 23 mil de saída por provedor.
+
+**Termos da Mistral** (lidos em 20/10). Termos comerciais de 25/09/2026, seção 3.3: a única restrição ao uso das saídas é não usar saída de imagem para treinar produto concorrente de geração de imagem; rótulos de texto podem treinar o modelo do projeto. Seção 4.2: a Mistral não treina com os dados do cliente, salvo opção de treino ativa no produto, feedback, contrato ou uso de modelos Labs ou Preview. A Usage Policy de 11/06/2026 proíbe usar os produtos para promover ou gerar conteúdo de ódio; não trata do envio de texto para classificação e não tem exceção para pesquisa.
+
+**Decisões da usuária (20/10).**
+- Gemini: usar as chaves do plano gratuito, sem projeto pago. No plano gratuito o Google pode usar entrada e saída e revisores humanos podem ler (aviso de 13/10). Os 501 textos vêm de bancos públicos e vão com as marcas `<user>` e `<url>`.
+- Mistral: só há plano gratuito. A chave não lista nenhum `mistral-large` (nem o 3 nem o 4). O modelo passa a ser o `mistral-medium-3.5`, o mais forte disponível, no lugar do Mistral Large 4 do plano. O Large 4 está em Public Preview, e dados enviados a modelos Preview podem ir para treino (seção 4.2).
+
+**Piloto.** Gemini (`gemini-3-flash-preview`, o Gemini 3 Flash da lista): 20 de 20 `ok`; a segunda execução não fez chamada. Mistral: todo pedido volta 429 com `x-ratelimit-limit-req-minute: 0`, em qualquer modelo. A conta não tem cota ativa; falta ativar o plano gratuito no console da Mistral. O item 4 espera essa ativação.
+
+**Local das chaves.** O arquivo de chaves usado agora está na Área de Trabalho dentro do OneDrive, e não no local fora do OneDrive registrado em 14/10.
