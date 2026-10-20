@@ -2,7 +2,7 @@
 
 Gerado por `scripts/auditoria_pt.py`. Corpus `corpus_strict.parquet`, fatia PT (33238 textos: {'train': 23743, 'test': 4748, 'val': 4747}). Só agregados; nenhum texto.
 
-O item 4 (LLM como juiz do rótulo) espera o pipeline de API da Fase 1.
+`--juiz` refaz só a seção 4 sobre este arquivo; `--amostra` refaz a amostra do item 4.
 
 ## 1. Integridade
 
@@ -78,10 +78,14 @@ Linear da extensão = `tfidf_logreg_strict_s42` (bilíngue) com o Platt do bundl
 | linear extensão (sensível 0,424) | hatebr | 968 | 99 | 0.3636 | 0.8182 | 0.0092 | 8 | 63 | 0.6092 | 0.8552 | 0.273–0.465 | 0.705–0.923 | 0.003–0.016 | 0.523–0.694 |
 | linear extensão (sensível 0,424) | pt_fortuna | 809 | 255 | 0.3333 | 0.6800 | 0.0722 | 40 | 170 | 0.5817 | 0.7624 | 0.275–0.392 | 0.604–0.754 | 0.052–0.094 | 0.526–0.641 |
 | linear extensão (sensível 0,424) | toldbr | 2971 | 54 | 0.1852 | 0.3704 | 0.0058 | 17 | 44 | 0.2349 | 0.8736 | 0.093–0.296 | 0.200–0.552 | 0.003–0.009 | 0.148–0.358 |
-| linear extensão (conservador 0,70) | todas | 4748 | 408 | 0.1422 | 0.7073 | 0.0055 | 24 | 350 | 0.5074 | 0.8886 | 0.110–0.176 | 0.606–0.804 | 0.003–0.008 | 0.460–0.555 |
-| linear extensão (conservador 0,70) | hatebr | 968 | 99 | 0.1818 | 1.0000 | 0.0000 | 0 | 81 | 0.6092 | 0.8552 | 0.111–0.263 | 1.000–1.000 | 0.000–0.000 | 0.523–0.694 |
-| linear extensão (conservador 0,70) | pt_fortuna | 809 | 255 | 0.1412 | 0.6792 | 0.0307 | 17 | 219 | 0.5817 | 0.7624 | 0.102–0.188 | 0.552–0.804 | 0.016–0.045 | 0.526–0.641 |
-| linear extensão (conservador 0,70) | toldbr | 2971 | 54 | 0.0741 | 0.3636 | 0.0024 | 7 | 50 | 0.2349 | 0.8736 | 0.019–0.148 | 0.100–0.667 | 0.001–0.004 | 0.148–0.358 |
+| linear extensão (equilibrado 0,57) | todas | 4748 | 408 | 0.2206 | 0.6977 | 0.0090 | 39 | 318 | 0.5074 | 0.8886 | 0.181–0.260 | 0.623–0.774 | 0.006–0.012 | 0.460–0.555 |
+| linear extensão (equilibrado 0,57) | hatebr | 968 | 99 | 0.2525 | 0.8621 | 0.0046 | 4 | 74 | 0.6092 | 0.8552 | 0.172–0.343 | 0.731–0.969 | 0.001–0.009 | 0.523–0.694 |
+| linear extensão (equilibrado 0,57) | pt_fortuna | 809 | 255 | 0.2353 | 0.6977 | 0.0469 | 26 | 195 | 0.5817 | 0.7624 | 0.184–0.290 | 0.602–0.792 | 0.031–0.065 | 0.526–0.641 |
+| linear extensão (equilibrado 0,57) | toldbr | 2971 | 54 | 0.0926 | 0.3571 | 0.0031 | 9 | 49 | 0.2349 | 0.8736 | 0.019–0.185 | 0.118–0.625 | 0.001–0.005 | 0.148–0.358 |
+| linear extensão (conservador 0,67) | todas | 4748 | 408 | 0.1593 | 0.7143 | 0.0060 | 26 | 343 | 0.5074 | 0.8886 | 0.125–0.196 | 0.620–0.806 | 0.004–0.008 | 0.460–0.555 |
+| linear extensão (conservador 0,67) | hatebr | 968 | 99 | 0.2020 | 0.9524 | 0.0012 | 1 | 79 | 0.6092 | 0.8552 | 0.131–0.283 | 0.842–1.000 | 0.000–0.003 | 0.523–0.694 |
+| linear extensão (conservador 0,67) | pt_fortuna | 809 | 255 | 0.1608 | 0.6949 | 0.0325 | 18 | 214 | 0.5817 | 0.7624 | 0.118–0.208 | 0.574–0.811 | 0.018–0.047 | 0.526–0.641 |
+| linear extensão (conservador 0,67) | toldbr | 2971 | 54 | 0.0741 | 0.3636 | 0.0024 | 7 | 50 | 0.2349 | 0.8736 | 0.019–0.148 | 0.100–0.667 | 0.001–0.004 | 0.148–0.358 |
 | linear PT (limiar val) | todas | 4748 | 408 | 0.6225 | 0.5100 | 0.0562 | 244 | 154 | 0.5233 | 0.9015 | 0.574–0.669 | 0.476–0.546 | 0.050–0.063 | 0.475–0.570 |
 | linear PT (limiar val) | hatebr | 968 | 99 | 0.6465 | 0.5872 | 0.0518 | 45 | 35 | 0.6546 | 0.8842 | 0.545–0.737 | 0.513–0.667 | 0.038–0.067 | 0.570–0.738 |
 | linear PT (limiar val) | pt_fortuna | 809 | 255 | 0.6392 | 0.5739 | 0.2184 | 121 | 92 | 0.5675 | 0.7634 | 0.580–0.694 | 0.530–0.621 | 0.184–0.253 | 0.515–0.628 |
@@ -102,13 +106,45 @@ Linear da extensão = `tfidf_logreg_strict_s42` (bilíngue) com o Platt do bundl
 
 **Taxa de predito ódio por rótulo original.** Nas linhas `hate`/`1` é o recall; nas outras, a taxa de FP. Separa o FP sobre ofensa sem ódio do FP sobre texto neutro.
 
-| fonte | rotulo_original | n | BERTimbau (limiar val) | linear PT (limiar val) | linear extensão (conservador 0,70) | linear extensão (sensível 0,424) |
+| fonte | rotulo_original | n | BERTimbau (limiar val) | linear PT (limiar val) | linear extensão (conservador 0,67) | linear extensão (equilibrado 0,57) | linear extensão (sensível 0,424) |
+|---|---|---|---|---|---|---|---|
+| hatebr | hate | 99 | 0.6869 | 0.6465 | 0.2020 | 0.2525 | 0.3636 |
+| hatebr | neither | 494 | 0.0304 | 0.0385 | 0.0020 | 0.0040 | 0.0081 |
+| hatebr | offensive_nothate | 375 | 0.0827 | 0.0693 | 0.0000 | 0.0053 | 0.0107 |
+| pt_fortuna | 0 | 554 | 0.2148 | 0.2184 | 0.0325 | 0.0469 | 0.0722 |
+| pt_fortuna | 1 | 255 | 0.6235 | 0.6392 | 0.1608 | 0.2353 | 0.3333 |
+| toldbr | hate | 54 | 0.5185 | 0.5000 | 0.0741 | 0.0926 | 0.1852 |
+| toldbr | neither | 2422 | 0.0169 | 0.0223 | 0.0021 | 0.0029 | 0.0054 |
+| toldbr | offensive_nothate | 495 | 0.0384 | 0.0485 | 0.0040 | 0.0040 | 0.0081 |
+
+## 4. LLM como juiz do rótulo
+
+Amostra de 501 ids do test PT (`data/processed/auditoria_pt_amostra.csv`): erros e acertos comuns ao BERTimbau e ao linear PT. A amostra super-representa os erros, então o kappa com o rótulo vale para ela, não para o test inteiro. Prompt v1 de `scripts/llm_label.py`. Status por LLM: gemini (gemini-3-flash-preview): {'faltando': 441, 'ok': 60}; groq (openai/gpt-oss-120b): {'ok': 501}. Cada LLM é medido nos ids em que respondeu `ok`; as colunas LLM × LLM usam os 60 ids respondidos por todos.
+
+**Concordância com o rótulo do corpus, por grupo.** Em FN, "discordar" quer dizer que o LLM também acha que não é ódio; em FP, que acha que é. A última coluna é a proporção em que os LLMs concordam entre si e discordam do rótulo.
+
+| grupo | fonte | n gemini | concorda_rotulo gemini | n groq | concorda_rotulo groq | n ambos | LLMs_iguais_e_contra_rotulo |
+|---|---|---|---|---|---|---|---|
+| FN_comum | hatebr | 8 | 0.1250 | 20 | 0.0000 | 8 | 0.8750 |
+| FN_comum | pt_fortuna | 9 | 0.3333 | 61 | 0.1803 | 9 | 0.4444 |
+| FN_comum | todas | 19 | 0.2105 | 101 | 0.1881 | 19 | 0.6842 |
+| FN_comum | toldbr | 2 | 0.0000 | 20 | 0.4000 | 2 | 1.0000 |
+| FP_comum | hatebr | 2 | 1.0000 | 13 | 1.0000 | 2 | 0.0000 |
+| FP_comum | pt_fortuna | 5 | 1.0000 | 62 | 0.8226 | 5 | 0.0000 |
+| FP_comum | todas | 11 | 0.9091 | 100 | 0.7700 | 11 | 0.0000 |
+| FP_comum | toldbr | 4 | 0.7500 | 25 | 0.5200 | 4 | 0.0000 |
+| acerto_comum | hatebr | 4 | 0.2500 | 100 | 0.5000 | 4 | 0.7500 |
+| acerto_comum | pt_fortuna | 9 | 0.8889 | 100 | 0.7400 | 9 | 0.1111 |
+| acerto_comum | todas | 30 | 0.7333 | 300 | 0.7067 | 30 | 0.2333 |
+| acerto_comum | toldbr | 17 | 0.7647 | 100 | 0.8800 | 17 | 0.1765 |
+
+**Kappa de Cohen** (IC 95% por bootstrap, 2000 reamostras):
+
+| fonte | n gemini | kappa rotulo × gemini | n groq | kappa rotulo × groq | n ambos | kappa LLM × LLM |
 |---|---|---|---|---|---|---|
-| hatebr | hate | 99 | 0.6869 | 0.6465 | 0.1818 | 0.3636 |
-| hatebr | neither | 494 | 0.0304 | 0.0385 | 0.0000 | 0.0081 |
-| hatebr | offensive_nothate | 375 | 0.0827 | 0.0693 | 0.0000 | 0.0107 |
-| pt_fortuna | 0 | 554 | 0.2148 | 0.2184 | 0.0307 | 0.0722 |
-| pt_fortuna | 1 | 255 | 0.6235 | 0.6392 | 0.1412 | 0.3333 |
-| toldbr | hate | 54 | 0.5185 | 0.5000 | 0.0741 | 0.1852 |
-| toldbr | neither | 2422 | 0.0169 | 0.0223 | 0.0021 | 0.0054 |
-| toldbr | offensive_nothate | 495 | 0.0384 | 0.0485 | 0.0040 | 0.0081 |
+| todas | 60 | 0.248 [0.082–0.430] | 501 | 0.169 [0.096–0.242] | 60 | 0.624 [0.315–0.839] |
+| hatebr | 14 | 0.041 [0.000–0.197] | 133 | -0.005 [-0.076–0.064] | 14 | 0.000 [0.000–0.000] |
+| pt_fortuna | 23 | 0.427 [0.148–0.736] | 223 | 0.218 [0.112–0.318] | 23 | 0.679 [0.246–1.000] |
+| toldbr | 23 | 0.291 [-0.082–0.646] | 145 | 0.379 [0.197–0.543] | 23 | 0.587 [-0.022–1.000] |
+
+Leitura prevista no plano: se os LLMs concordam entre si e discordam do rótulo justamente nos FN e FP comuns, e não nos acertos, o teto é ruído de rótulo, não o algoritmo.

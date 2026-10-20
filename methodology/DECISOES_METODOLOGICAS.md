@@ -1080,12 +1080,12 @@ Consultado em 13/10/2026 pela API do Hugging Face (tags `license:` e `cardData`)
 **Curva de aprendizado** (linear só PT, receita de `pt_boost.py`, 3 sementes de subamostra). O PR-AUC no test vai de 0,431 (25% do treino) a 0,476, 0,504 e 0,523 (100%). Mais dado ainda ajuda, com ganho menor a cada fração. O ToLD-BR ganha mais (PR-AUC de 0,17 para 0,29). O salto de recall em 100% (0,46 para 0,62) vem do limiar escolhido na validação: a precisão caiu junto.
 
 **Erros por fonte** (IC 95% por bootstrap, 2.000 reamostras estratificadas por fonte e classe).
-- O linear da extensão ordena quase como o linear só PT (PR-AUC 0,507 [0,460–0,555] contra 0,523 [0,475–0,570]). O recall baixo dele vem do limiar: 0,142 [0,110–0,176] no conservador e 0,321 no sensível, contra 0,623 do linear PT no limiar da validação. No ToLD-BR, o conservador recupera 0,074 [0,019–0,148].
+- O linear da extensão ordena quase como o linear só PT (PR-AUC 0,507 [0,460–0,555] contra 0,523 [0,475–0,570]). O recall baixo dele vem do limiar: 0,159 [0,125–0,196] no conservador (0,67), 0,221 no equilibrado (0,57) e 0,321 no sensível (0,424), contra 0,623 do linear PT no limiar da validação. No ToLD-BR, o conservador recupera 0,074 [0,019–0,148].
 - No pt_fortuna, linear PT e BERTimbau param no mesmo ponto: ROC-AUC 0,763 e 0,774, taxa de FP 0,218 e 0,215. Nas outras fontes, o ROC-AUC fica entre 0,86 e 0,92. É a fonte candidata a ruído de rótulo para o item 4.
 - BERTimbau menos linear PT, PR-AUC (bootstrap pareado): +0,032 [−0,013; 0,082] no geral, +0,057 [−0,031; 0,145] no HateBR, +0,008 no pt_fortuna e −0,012 no ToLD-BR. Nenhum intervalo exclui zero.
 - Nos três modelos, a taxa de FP em ofensa sem ódio é cerca do dobro da taxa em texto neutro.
 
-**Divergência não resolvida.** No nível conservador, a entrada de 19/10 mede recall 0,159 e precisão 0,714 no test PT; a auditoria mede 0,142 e 0,707. A auditoria usa o escore gravado em `reports/predictions/tfidf_logreg_strict_s42_test.parquet` com o Platt do bundle; a origem da diferença não foi verificada.
+**Divergência resolvida (20/10).** A primeira versão da auditoria usou o limiar provisório 0,70 e mediu recall 0,142. A extensão serve 0,67, 0,57 e 0,424 (`LEVELS` em `content_ytchat.js`); com esses limiares, a auditoria reproduz a tabela de 19/10 (conservador: precisão 0,714, recall 0,159, FP 0,6%). O modelo JavaScript da extensão (`test/score_file.mjs`) dá o mesmo escore que o Python nos 4.748 textos do test PT (diferença máxima abaixo de 0,0001, com texto bruto ou limpo): o modelo do navegador é o avaliado.
 
 **Leitura.** O pipeline não tem defeito que explique o recall baixo. O teto em PT parece vir dos dados: o BERTimbau não supera o linear com significância, os dois param no mesmo ponto do pt_fortuna e há rótulos conflitantes em textos quase idênticos. A troca de limiar na extensão recupera parte do recall sem trocar de modelo.
 
@@ -1111,3 +1111,17 @@ Consultado em 13/10/2026 pela API do Hugging Face (tags `license:` e `cardData`)
 - Mistral descartado: a conta não tem cota ativa e a usuária não vai pagar. O segundo juiz passa a ser o Groq com `openai/gpt-oss-120b` (plano gratuito, de outra família que não a do Google). `llm_label.py` ganhou o provedor `groq`, com API no formato da OpenAI; a chave é a primeira linha não vazia abaixo da linha "groq" no arquivo de chaves. Pendente: a usuária pôr a chave no arquivo.
 - Gemini: o plano gratuito tem 20 pedidos por dia por projeto e modelo (`GenerateRequestsPerDayPerProjectPerModel-FreeTier`). Com lotes de 10, a cota acabou em 60 dos 501 itens. Decisão da usuária: sem rotação de chaves; os 441 restantes vão em lotes de 50 (`--lote 50`, 9 pedidos) depois que a cota reiniciar (00:00 do Pacífico, 4h de Brasília). Com lote grande, o item que falha só é refeito sozinho se falharem até 3 no lote; o resto fica para a execução seguinte, para poupar a cota.
 - Seção 4 do relatório: `python scripts/auditoria_pt.py --juiz`. Em FN e FP o rótulo é constante, então a seção traz a taxa de concordância com o rótulo nesses grupos; o kappa vale para a amostra inteira e por fonte.
+
+## 2026-10-20 (noite) — Fase 0, item 4: resultado parcial do juiz e o partidarismo no HateBR
+
+**Cobertura.** Groq (`openai/gpt-oss-120b`): 501 de 501 itens `ok`. Gemini (`gemini-3-flash-preview`): 60 de 501, o resto depois que a cota diária reiniciar. Os números abaixo são do Groq; a comparação LLM × LLM espera o Gemini completo.
+
+**Groq contra o rótulo do corpus** (amostra de 501, que super-representa erros; kappa geral 0,169 [0,096–0,242]):
+- FN comuns (o corpus diz ódio, os dois modelos dizem não): o Groq diz ódio em 0% dos 20 do HateBR, 18% dos 61 do pt_fortuna e 40% dos 20 do ToLD-BR.
+- FP comuns (o corpus diz não ódio, os dois modelos dizem ódio): o Groq diz ódio em 0% dos 13 do HateBR, 18% dos 62 do pt_fortuna e 48% dos 25 do ToLD-BR.
+- Acertos comuns marcados como ódio no corpus: o Groq concorda em 6% dos 50 do HateBR, 48% dos 50 do pt_fortuna e 67% dos 21 do ToLD-BR.
+- Kappa por fonte: HateBR −0,005, pt_fortuna 0,218, ToLD-BR 0,379.
+
+**Achado: o ódio do HateBR é, na maior parte, partidarismo.** O código `hate_speech` 5 do HateBR, somado às combinações que o incluem, dá 496 dos 702 casos que o strict marca como ódio (71%). A contagem coincide com a categoria "Partyism" da tabela 9 do artigo (Vargas et al., LREC 2022: Partyism 496, Sexism 97 = código 8 com combinações). O HateBR foi coletado em comentários de contas de políticos no Instagram e trata ataque a partido como grupo de ódio. Isso contradiz a regra do projeto de que xingamento político sem ataque a grupo protegido não é ódio, e explica por que o Groq quase nunca concorda com o ódio do HateBR, mesmo nos textos que os dois modelos acertam. É também uma fonte provável do viés da sigla "PT" registrado em 19/10.
+
+**Leitura provisória.** No HateBR, a discordância não é ruído de anotação: é diferença de definição. No pt_fortuna e no ToLD-BR, a leitura depende do Gemini completo. Decisão pendente com a usuária: o que fazer com o partidarismo do HateBR na política strict (tirar do positivo, tirar do treino ou manter e documentar).

@@ -38,7 +38,8 @@ FRACS = (0.25, 0.5, 0.75, 1.0)
 SUB_SEEDS = (0, 1, 2)
 # Platt do bundle tfidf_logreg_strict_s42 (o linear da extensão)
 PLATT_COEF, PLATT_INT = 5.891850407761439, -3.715252235801602
-NIVEIS = {"sensível 0,424": 0.42417971021544754, "conservador 0,70": 0.70}
+# os três níveis servidos na extensão (LEVELS em luciola-extension/content_ytchat.js)
+NIVEIS = {"sensível 0,424": 0.42417971021544754, "equilibrado 0,57": 0.57, "conservador 0,67": 0.67}
 SPLITS = ("train", "val", "test")
 N_BOOT = 2000
 
@@ -368,9 +369,8 @@ def juiz() -> str:
         d[nome] = j.rotulo.where(j.status == "ok").reindex(d.index)
         status[nome] = j.status.reindex(d.index).fillna("faltando").value_counts().to_dict()
     nomes = list(llms)
-    ok = d.dropna(subset=nomes).copy()
-    for n in nomes:
-        ok[n] = ok[n].astype(int)
+    curto = {n: n.split(" ")[0] for n in nomes}  # gemini, groq...
+    ambos = d.dropna(subset=nomes)
 
     out = ["## 4. LLM como juiz do rótulo\n",
            f"Amostra de {len(d)} ids do test PT (`data/processed/auditoria_pt_amostra.csv`): erros e "
@@ -378,17 +378,27 @@ def juiz() -> str:
            "kappa com o rótulo vale para ela, não para o test inteiro. Prompt v1 de "
            "`scripts/llm_label.py`. Status por LLM: "
            + "; ".join(f"{n}: {s}" for n, s in status.items())
-           + f". Análise com os {len(ok)} ids que têm resposta `ok` de todos os LLMs.\n"]
+           + f". Cada LLM é medido nos ids em que respondeu `ok`; as colunas LLM × LLM usam os "
+           f"{len(ambos)} ids respondidos por todos.\n"]
+
+    def blocos(por):
+        return list(d.groupby(por)) + ([] if por == "fonte" else
+                                        [((g, "todas"), h) for g, h in d.groupby("grupo")])
 
     # concordância com o rótulo por grupo (no FN e no FP o rótulo é constante: kappa não se aplica)
     rows = []
-    for (g, src), h in list(ok.groupby(["grupo", "fonte"])) + [((g, "todas"), h) for g, h in ok.groupby("grupo")]:
-        r = {"grupo": g, "fonte": src, "n": len(h)}
+    for (g, src), h in blocos(["grupo", "fonte"]):
+        r = {"grupo": g, "fonte": src}
         for n in nomes:
-            r[f"concorda_rotulo {n}"] = float((h[n] == h.label).mean())
+            hn = h[h[n].notna()]
+            r[f"n {curto[n]}"] = len(hn)
+            r[f"concorda_rotulo {curto[n]}"] = float((hn[n] == hn.label).mean()) if len(hn) else np.nan
         if len(nomes) > 1:
-            iguais = (h[nomes].nunique(axis=1) == 1)
-            r["LLMs_iguais_e_contra_rotulo"] = float((iguais & (h[nomes[0]] != h.label)).mean())
+            hb = h.dropna(subset=nomes)
+            iguais = hb[nomes].nunique(axis=1) == 1
+            r["n ambos"] = len(hb)
+            r["LLMs_iguais_e_contra_rotulo"] = (float((iguais & (hb[nomes[0]] != hb.label)).mean())
+                                                if len(hb) else np.nan)
         rows.append(r)
     tab = pd.DataFrame(rows).sort_values(["grupo", "fonte"])
     out.append("**Concordância com o rótulo do corpus, por grupo.** Em FN, \"discordar\" quer dizer que o "
@@ -398,12 +408,16 @@ def juiz() -> str:
 
     # kappa (amostra inteira e por fonte)
     rows = []
-    for src, h in [("todas", ok)] + list(ok.groupby("fonte")):
-        r = {"fonte": src, "n": len(h)}
+    for src, h in [("todas", d)] + list(d.groupby("fonte")):
+        r = {"fonte": src}
         for n in nomes:
-            r[f"kappa rotulo × {n}"] = kappa_ic(h.label, h[n])
+            hn = h[h[n].notna()]
+            r[f"n {curto[n]}"] = len(hn)
+            r[f"kappa rotulo × {curto[n]}"] = kappa_ic(hn.label, hn[n].astype(int))
         if len(nomes) > 1:
-            r["kappa LLM × LLM"] = kappa_ic(h[nomes[0]], h[nomes[1]])
+            hb = h.dropna(subset=nomes)
+            r["n ambos"] = len(hb)
+            r["kappa LLM × LLM"] = kappa_ic(hb[nomes[0]].astype(int), hb[nomes[1]].astype(int))
         rows.append(r)
     out.append(f"**Kappa de Cohen** (IC 95% por bootstrap, {N_BOOT} reamostras):\n")
     out.append(md(pd.DataFrame(rows)) + "\n")

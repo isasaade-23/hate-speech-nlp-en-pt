@@ -6,7 +6,8 @@ e professor (probabilidade suave). Cada uso grava num arquivo próprio (--tag).
 Chaves: nunca no código, no log nem no Git. Nenhuma chave é impressa.
   gemini   GEMINI_API_KEY ou GEMINI_KEYS_FILE (padrão AIza..., ver translate_gemini.py)
   groq     GROQ_API_KEY, ou GROQ_KEYS_FILE: a chave é a primeira linha não vazia abaixo da
-           primeira linha que contém "groq" (sem diferenciar maiúscula)
+           primeira linha que contém "groq" (sem diferenciar maiúscula); sem essa linha, a
+           primeira chave no formato gsk_ do arquivo
   mistral  idem, com MISTRAL_API_KEY / MISTRAL_KEYS_FILE e a linha "mistral"
 
 Saída: data/processed/llm_label_<tag>_<provedor>.jsonl, uma linha por id:
@@ -26,6 +27,7 @@ import argparse
 import json
 import os
 import random
+import re
 import sys
 import time
 from pathlib import Path
@@ -106,6 +108,10 @@ def chave_de_arquivo(provedor: str) -> str:
                     if " " in k or len(k) < 20:
                         raise SystemExit(f"a linha abaixo de '{provedor}' não parece uma chave")
                     return k
+    if provedor == "groq":  # sem a linha "groq": a primeira chave no formato gsk_
+        achadas = re.findall(r"gsk_[A-Za-z0-9]{20,}", "\n".join(linhas))
+        if achadas:
+            return achadas[0]
     raise SystemExit(f"nenhuma linha com '{provedor}' no arquivo de chaves")
 
 
