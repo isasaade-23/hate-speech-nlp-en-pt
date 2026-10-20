@@ -1070,3 +1070,23 @@ Consultado em 13/10/2026 pela API do Hugging Face (tags `license:` e `cardData`)
 **Efeito medido.** As frases com PT e com PL passam a ter o mesmo escore (0,06 a 0,10 nos pares acima). As frases de ataque a grupo sem partido não mudam. No corpus em português, precisão, recall e taxa de falso positivo mudam no máximo 2 pontos nos três limiares (test, conservador: precisão 0,714 → 0,711; recall 0,159 → 0,157; FP 0,60% → 0,60%), então a calibração continua valendo. Custo: ataque a grupo que também cita partido perde parte do escore ("Nordestino é tudo burro, não sabe votar, vota no PT" cai de 0,82 para 0,51). Na fixture, "tudo gado" cai de 0,75 para 0,13 e deixa de ser embaçado; o conservador não embaça nenhuma das 18 frases.
 
 **Fora do escopo agora.** A correção na origem (retreinar com o viés tratado nos dados) fica para depois do debate. O viés vale também para o modo "Analisar esta página", que usa o mesmo modelo e não foi alterado. No modelo do site (stack) não foi verificado.
+
+## 2026-10-20 — Fase 0 (itens 1 a 3): auditoria do pipeline em português
+
+**O que foi feito.** `scripts/auditoria_pt.py` gera `reports/auditoria_pt.md` (só agregados) e `reports/tables/auditoria_pt_dups.csv` (só ids). Escopo: fatia PT do `corpus_strict.parquet`, 33.238 textos. Sem chamada de API. O item 4 (LLM como juiz do rótulo) fica para depois do pipeline de LLM.
+
+**Integridade.** Nenhum texto repetido exato. Nenhum cluster de quase repetidos (Jaccard ≥ 0,90) atravessa os splits. Com Jaccard ≥ 0,70, 116 textos do test (2,4%) têm um parecido no treino, 23 deles de ódio. O rótulo strict bate com o rótulo original em todas as linhas, e a taxa de ódio por fonte é a mesma nos três splits. A limpeza light não esvazia texto, e o `text_clean` gravado é igual ao da limpeza atual. Sinal de ruído de rótulo: 17 clusters de textos quase idênticos (≥ 0,90) têm rótulos diferentes; com ≥ 0,70, são 65.
+
+**Curva de aprendizado** (linear só PT, receita de `pt_boost.py`, 3 sementes de subamostra). O PR-AUC no test vai de 0,431 (25% do treino) a 0,476, 0,504 e 0,523 (100%). Mais dado ainda ajuda, com ganho menor a cada fração. O ToLD-BR ganha mais (PR-AUC de 0,17 para 0,29). O salto de recall em 100% (0,46 para 0,62) vem do limiar escolhido na validação: a precisão caiu junto.
+
+**Erros por fonte** (IC 95% por bootstrap, 2.000 reamostras estratificadas por fonte e classe).
+- O linear da extensão ordena quase como o linear só PT (PR-AUC 0,507 [0,460–0,555] contra 0,523 [0,475–0,570]). O recall baixo dele vem do limiar: 0,142 [0,110–0,176] no conservador e 0,321 no sensível, contra 0,623 do linear PT no limiar da validação. No ToLD-BR, o conservador recupera 0,074 [0,019–0,148].
+- No pt_fortuna, linear PT e BERTimbau param no mesmo ponto: ROC-AUC 0,763 e 0,774, taxa de FP 0,218 e 0,215. Nas outras fontes, o ROC-AUC fica entre 0,86 e 0,92. É a fonte candidata a ruído de rótulo para o item 4.
+- BERTimbau menos linear PT, PR-AUC (bootstrap pareado): +0,032 [−0,013; 0,082] no geral, +0,057 [−0,031; 0,145] no HateBR, +0,008 no pt_fortuna e −0,012 no ToLD-BR. Nenhum intervalo exclui zero.
+- Nos três modelos, a taxa de FP em ofensa sem ódio é cerca do dobro da taxa em texto neutro.
+
+**Divergência não resolvida.** No nível conservador, a entrada de 19/10 mede recall 0,159 e precisão 0,714 no test PT; a auditoria mede 0,142 e 0,707. A auditoria usa o escore gravado em `reports/predictions/tfidf_logreg_strict_s42_test.parquet` com o Platt do bundle; a origem da diferença não foi verificada.
+
+**Leitura.** O pipeline não tem defeito que explique o recall baixo. O teto em PT parece vir dos dados: o BERTimbau não supera o linear com significância, os dois param no mesmo ponto do pt_fortuna e há rótulos conflitantes em textos quase idênticos. A troca de limiar na extensão recupera parte do recall sem trocar de modelo.
+
+**Próximo.** Item 4: amostra dos erros comuns ao BERTimbau e ao linear PT no test (101 FN, 100 dos 120 FP e 300 acertos), classificada pelo Gemini 3 Flash e pelo Mistral Large 4.
