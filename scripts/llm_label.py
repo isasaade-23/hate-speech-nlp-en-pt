@@ -50,10 +50,10 @@ MODELO_PADRAO = {"gemini": ("gemini-3-flash", "gemini-3-flash-preview"),
 LOTE = 10
 MAX_REFAZER = 3  # acima disso, os itens com falha ficam para a próxima execução (poupa cota)
 MAX_TENTATIVAS = 8
-PROMPT_VERSAO = "v1"
+PROMPT_VERSAO = "v2.1"  # v2 (20/10): filiação política protegida; v2.1 (21/10): político e veículo não são grupo
 CATEGORIAS = ["nenhuma", "raca_etnia", "religiao", "genero", "orientacao_sexual",
               "identidade_de_genero", "origem_regional_ou_nacional", "deficiencia", "idade",
-              "classe_social", "outro_grupo"]
+              "classe_social", "filiacao_politica", "outro_grupo"]
 
 SISTEMA = (
     "Você classifica comentários de redes sociais em português para um projeto acadêmico de "
@@ -62,15 +62,25 @@ SISTEMA = (
     "Discurso de ódio: ataque, desumanização, ameaça ou incitação à violência ou à discriminação "
     "contra uma pessoa ou um grupo POR CAUSA de uma característica de grupo protegido: raça, cor, "
     "etnia, religião, gênero, identidade de gênero, orientação sexual, origem regional ou nacional, "
-    "deficiência, idade ou classe social.\n\n"
+    "deficiência, idade, classe social ou filiação ou ideologia política. Qualquer ataque a "
+    "eleitores, militantes ou seguidores de uma corrente política (petistas, bolsonaristas, "
+    "esquerdistas, comunistas, \"gado\" etc.), ou a uma pessoa por causa da filiação política dela, "
+    "é discurso de ódio.\n\n"
     "NÃO é discurso de ódio:\n"
     "- palavrão, xingamento ou ofensa sem alvo em grupo protegido;\n"
-    "- crítica ou xingamento político contra político, partido, governo ou eleitor, sem ataque a "
-    "grupo protegido;\n"
+    "- crítica ou xingamento contra partido, governo, instituição ou político individual pelo que "
+    "ele faz, sem ataque a quem vota ou milita. Xingar um político pelo nome ou apelido "
+    "(\"Luladrão\", \"Bozo\") ou um veículo de imprensa não é ataque a grupo político;\n"
     "- texto que cita, denuncia ou discute o ódio sem endossá-lo.\n\n"
     "Marcas <user> e <url> substituem menções e links.\n\n"
     "Exemplos (sintéticos):\n"
     "- \"esse deputado é um ladrão safado\" -> rotulo 0, categoria nenhuma\n"
+    "- \"o PT virou uma quadrilha\" -> rotulo 0, categoria nenhuma\n"
+    "- \"petista é tudo vagabundo\" -> rotulo 1, categoria filiacao_politica\n"
+    "- \"Luladrão, canalha\" -> rotulo 0, categoria nenhuma\n"
+    "- \"a Globo é lixo\" -> rotulo 0, categoria nenhuma\n"
+    "- \"esses minions desgraçados\" -> rotulo 1, categoria filiacao_politica\n"
+    "- \"a direita maldita inventa tudo\" -> rotulo 1, categoria filiacao_politica\n"
     "- \"que jogo horrível, time de merda\" -> rotulo 0, categoria nenhuma\n"
     "- \"nordestino é tudo burro, devia voltar pra lá\" -> rotulo 1, categoria origem_regional_ou_nacional\n"
     "- \"gay tinha que apanhar até virar homem\" -> rotulo 1, categoria orientacao_sexual\n"
@@ -141,9 +151,10 @@ class OpenAICompat:
         raise tg.SemCota("sem resposta útil após várias tentativas")
 
 
-def cliente(provedor: str):
-    if provedor == "gemini":
-        return tg.Pool(tg.carregar_chaves(), rotacionar=False)
+def cliente(provedor: str, rotacionar: bool = False):
+    if provedor == "gemini":  # rotação: troca de chave (projeto) quando a cota do dia acaba
+        return tg.Pool(tg.carregar_chaves(), rotacionar=rotacionar,
+                       estado=ROOT / "data/processed/llm_label_gemini_estado.json" if rotacionar else None)
     return OpenAICompat(provedor, chave_de_arquivo(provedor))
 
 
@@ -256,7 +267,7 @@ def cmd_rotular(args) -> None:
     arq = saida(args.tag, args.provedor)
     feitos = carregar_feitos(arq)
     modelos_antes = {f["modelo_pedido"] for f in feitos.values()}
-    cli = cliente(args.provedor)
+    cli = cliente(args.provedor, args.rotacionar)
     modelo = args.modelo or escolher_modelo(args.provedor, listar_modelos(args.provedor, cli))
     if modelos_antes and modelos_antes != {modelo}:
         raise SystemExit(f"o arquivo já tem {sorted(modelos_antes)}; não misturo com {modelo}")
@@ -307,6 +318,8 @@ def main(argv=None) -> None:
             p.add_argument("--modelo")
             p.add_argument("--tag", default="juiz_pt")
             p.add_argument("--lote", type=int, default=LOTE, help="textos por pedido")
+            p.add_argument("--rotacionar", action="store_true",
+                           help="gemini: passa para a próxima chave quando a cota do dia acaba")
     args = ap.parse_args(argv)
     {"rotular": cmd_rotular, "modelos": cmd_modelos, "custo": cmd_custo}[args.cmd](args)
 

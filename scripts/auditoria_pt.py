@@ -353,11 +353,13 @@ def kappa_ic(a, b) -> str:
     return "{:.3f} [{:.3f}–{:.3f}]".format(cohen_kappa_score(a, b), *np.nanpercentile(bs, [2.5, 97.5]))
 
 
-def juiz() -> str:
+def juiz(tag: str = "juiz_pt_v2") -> str:
     """Item 4: LLMs contra o rótulo do corpus e entre si, na amostra de erros e acertos comuns."""
     amostra = pd.read_csv(ROOT / "data/processed/auditoria_pt_amostra.csv")
     llms = {}
-    for arq in sorted((ROOT / "data/processed").glob("llm_label_juiz_pt_*.jsonl")):
+    for arq in sorted((ROOT / "data/processed").glob(f"llm_label_{tag}_*.jsonl")):
+        if "_" in arq.stem.removeprefix(f"llm_label_{tag}_"):  # juiz_pt não pega juiz_pt_v2
+            continue
         j = pd.read_json(arq, lines=True).drop_duplicates("id", keep="last")
         nome = f"{j.provedor.iloc[0]} ({j.modelo.iloc[0]})"
         llms[nome] = j.set_index("id")
@@ -375,11 +377,19 @@ def juiz() -> str:
     out = ["## 4. LLM como juiz do rótulo\n",
            f"Amostra de {len(d)} ids do test PT (`data/processed/auditoria_pt_amostra.csv`): erros e "
            "acertos comuns ao BERTimbau e ao linear PT. A amostra super-representa os erros, então o "
-           "kappa com o rótulo vale para ela, não para o test inteiro. Prompt v1 de "
-           "`scripts/llm_label.py`. Status por LLM: "
+           "kappa com o rótulo vale para ela, não para o test inteiro. Saídas de "
+           f"`scripts/llm_label.py` (tag `{tag}`, prompt "
+           + "/".join(sorted({str(p) for j in llms.values() for p in j.prompt.unique()}))
+           + "). Status por LLM: "
            + "; ".join(f"{n}: {s}" for n, s in status.items())
            + f". Cada LLM é medido nos ids em que respondeu `ok`; as colunas LLM × LLM usam os "
            f"{len(ambos)} ids respondidos por todos.\n"]
+
+    flip = ROOT / "reports/tables/hatebr_partidarismo_flip.csv"
+    if flip.exists():
+        mud = d[d.index.isin(pd.read_csv(flip).id)].groupby("grupo").size().to_dict()
+        out.append(f"O rótulo é o do strict atual. No strict v2 (partidarismo do HateBR), "
+                   f"{sum(mud.values())} ids da amostra passam de ódio a não ódio: {mud}.\n")
 
     def blocos(por):
         return list(d.groupby(por)) + ([] if por == "fonte" else
@@ -432,7 +442,8 @@ def main() -> None:
         dest = ROOT / "reports/auditoria_pt.md"
         txt = dest.read_text(encoding="utf-8")
         base = txt.split("## 4. LLM como juiz")[0].rstrip() + "\n\n"
-        dest.write_text(base + juiz(), encoding="utf-8")
+        tag = sys.argv[sys.argv.index("--tag") + 1] if "--tag" in sys.argv else "juiz_pt_v2"
+        dest.write_text(base + juiz(tag), encoding="utf-8")
         print("->", dest)
         return
     if "--amostra" in sys.argv:

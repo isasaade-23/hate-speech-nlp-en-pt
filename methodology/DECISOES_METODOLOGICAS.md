@@ -1125,3 +1125,35 @@ Consultado em 13/10/2026 pela API do Hugging Face (tags `license:` e `cardData`)
 **Achado: o ódio do HateBR é, na maior parte, partidarismo.** O código `hate_speech` 5 do HateBR, somado às combinações que o incluem, dá 496 dos 702 casos que o strict marca como ódio (71%). A contagem coincide com a categoria "Partyism" da tabela 9 do artigo (Vargas et al., LREC 2022: Partyism 496, Sexism 97 = código 8 com combinações). O HateBR foi coletado em comentários de contas de políticos no Instagram e trata ataque a partido como grupo de ódio. Isso contradiz a regra do projeto de que xingamento político sem ataque a grupo protegido não é ódio, e explica por que o Groq quase nunca concorda com o ódio do HateBR, mesmo nos textos que os dois modelos acertam. É também uma fonte provável do viés da sigla "PT" registrado em 19/10.
 
 **Leitura provisória.** No HateBR, a discordância não é ruído de anotação: é diferença de definição. No pt_fortuna e no ToLD-BR, a leitura depende do Gemini completo. Decisão pendente com a usuária: o que fazer com o partidarismo do HateBR na política strict (tirar do positivo, tirar do treino ou manter e documentar).
+
+## 2026-10-20 (noite) — Política strict v2: filiação política protegida e partidarismo do HateBR
+
+**Decisão da usuária.** Filiação ou ideologia política passa a ser característica protegida. Qualquer ataque a eleitores, militantes ou seguidores de uma corrente política (petistas, bolsonaristas, esquerdistas, comunistas, "gado") é ódio, inclusive o ataque a uma pessoa por causa da filiação dela. Crítica ou xingamento contra partido, governo, instituição ou político individual pelo que ele faz continua não sendo ódio. Antes de decidir, ela viu uma amostra de 30 textos do HateBR só com o código 5 (semente 42), classificada à mão: cerca de 17 atacam grupo político, 11 atacam partido ou político e 2 ficam em outro caso.
+
+**Reversão.** A decisão reverte a regra de 19/10 de que "Petista e bolsonarista, tudo gado" não é ataque a grupo protegido, e o prompt v1 do juiz, que tratava o xingamento contra eleitor como não ódio. Ficam para a Fase 2: a fixture `test/yt_chat_fixture.html`, o texto do popup e a retirada de nomes de partido na hora de escorar. A Beta 1.1 continua segurada.
+
+**Partidarismo do HateBR (opção 1: tirar do positivo o que não é ódio).** Dos 496 positivos com o código 5, os 17 combinados com outro grupo continuam ódio. Os 479 só com o código 5 (477 no corpus, depois do dedup) são reclassificados pelo Groq (`openai/gpt-oss-120b`) com o prompt v2: rótulo 0 com status `ok` vira não ódio; rótulo 1 ou falha continua ódio. O resultado é o `corpus_strict_v2.parquet`, derivado do strict atual só pela troca de `label` nesses ids (`scripts/hatebr_partidarismo.py`). O `split` não muda: refazer o split reestratifica pelo rótulo e mexe no test. O loader do HateBR e o `corpus_strict.parquet` ficam como estão.
+
+**Prompt v2** (`scripts/llm_label.py`): filiação ou ideologia política na lista protegida, categoria `filiacao_politica`, e dois exemplos sintéticos novos ("o PT virou uma quadrilha" → 0; "petista é tudo vagabundo" → 1). O item 4 é refeito com o v2 nos dois juízes (tag `juiz_pt_v2`); as saídas v1 ficam guardadas.
+
+**Limitação conhecida.** pt_fortuna, ToLD-BR e as fontes em inglês não tratam grupo político como protegido. Nelas, ataque a petistas ou bolsonaristas pode estar rotulado como não ódio. A medir depois com o Groq v2 numa amostra.
+
+## 2026-10-21 — Prompt v2.1, rotação de chaves do Gemini e estado da Fase 0 (pausado)
+
+**Prompt v2.1.** Na revisão de 40 saídas do Groq com o v2 (20 que viravam 0, 20 que continuavam 1), cerca de 25% a 40% discordavam da regra. O Groq marcava "Luladrão" e ataque a veículo de imprensa como `filiacao_politica` e deixava passar "minions desgraçados". O v2.1 acrescenta a frase "xingar um político pelo nome ou apelido, ou um veículo de imprensa, não é ataque a grupo político" e quatro exemplos sintéticos ("Luladrão, canalha" → 0; "a Globo é lixo" → 0; "esses minions desgraçados" → 1; "a direita maldita inventa tudo" → 1). Numa amostra nova de 40, a discordância caiu para cerca de 20%, ainda concentrada em "continua ódio": menção a esquerda ou direita sem ataque ao grupo. A usuária aceitou o v2.1 e esse erro fica registrado como limitação; ele deixa o v2 mais conservador.
+
+**HateBR com o v2.1** (tag `hatebr_cod5_v21`): 406 dos 477 ids voltaram `ok` no Groq. Os 71 restantes falham sempre no JSON do Groq (HTTP 400 `json_validate_failed`), inclusive com lote 1. Decisão da usuária: rotulá-los com o Gemini e o mesmo prompt v2.1. A lista está em `data/processed/hatebr_cod5_v21_falhas_ids.csv`, e `hatebr_partidarismo.py corpus` completa com o Gemini o que o Groq não respondeu. O `corpus_strict_v2.parquet` em disco ainda é o da rodada v2 e precisa ser refeito.
+
+**Rotação de chaves do Gemini (muda a decisão de 20/10).** A usuária tem vários projetos no Google Cloud e autorizou a rotação: `llm_label.py rotular --rotacionar` passa para a próxima chave quando a cota do dia acaba. As chaves esgotadas ficam em `data/processed/llm_label_gemini_estado.json`, pelo hash. O progresso já vem salvo a cada lote no jsonl, e a retomada refaz só o que não está `ok`; numa queda, perde-se no máximo o lote em andamento. Com lote 50, o Gemini falhou sem gravar nada (provável tempo limite); com lote 25, funciona.
+
+**Groq: teto diário de tokens.** O plano gratuito do `openai/gpt-oss-120b` tem 200 mil tokens por dia, numa janela móvel de 24 h, além de 8 mil por minuto e mil pedidos por dia. As duas rodadas do HateBR com lote pequeno consumiram o teto de 21/10, porque o prompt do sistema vai inteiro em cada pedido. O juiz nos 501 precisa de uns 200 mil tokens com lote 10.
+
+**Estado ao pausar (21/10).**
+- Juiz v2.1, tag `juiz_pt_v2`: Gemini com 200 de 501 `ok` e 150 `erro_json`, que a retomada refaz; Groq com 10 de 501.
+- Ainda não rodados: `hatebr_partidarismo.py corpus` (final), `comparar`, `auditoria_pt.py --juiz` e o fechamento da Fase 0. Nada foi commitado desde `e4876b3`.
+
+**Retomar, nesta ordem** (no Git Bash, na pasta do projeto; chaves em `GEMINI_KEYS_FILE` e `GROQ_KEYS_FILE`):
+1. Gemini, juiz: `.venv/Scripts/python scripts/llm_label.py rotular --provedor gemini --modelo gemini-3-flash-preview --ids data/processed/auditoria_pt_amostra.csv --tag juiz_pt_v2 --lote 25 --rotacionar`
+2. Gemini, os 71: o mesmo comando com `--ids data/processed/hatebr_cod5_v21_falhas_ids.csv --tag hatebr_cod5_v21`
+3. Groq, juiz: `--provedor groq --ids data/processed/auditoria_pt_amostra.csv --tag juiz_pt_v2 --lote 10`, repetindo até completar, conforme o teto diário de tokens libera.
+4. `python scripts/hatebr_partidarismo.py corpus`, depois `comparar`, depois `python scripts/auditoria_pt.py --juiz`. Por fim, a entrada de fechamento da Fase 0 e o commit local, sem push e sem trailer.
