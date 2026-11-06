@@ -1157,3 +1157,15 @@ Consultado em 13/10/2026 pela API do Hugging Face (tags `license:` e `cardData`)
 2. Gemini, os 71: o mesmo comando com `--ids data/processed/hatebr_cod5_v21_falhas_ids.csv --tag hatebr_cod5_v21`
 3. Groq, juiz: `--provedor groq --ids data/processed/auditoria_pt_amostra.csv --tag juiz_pt_v2 --lote 10`, repetindo até completar, conforme o teto diário de tokens libera.
 4. `python scripts/hatebr_partidarismo.py corpus`, depois `comparar`, depois `python scripts/auditoria_pt.py --juiz`. Por fim, a entrada de fechamento da Fase 0 e o commit local, sem push e sem trailer.
+
+## 2026-11-06 — Fase 0 fechada: juiz v2.1, corpus strict v2 e leitura da auditoria
+
+**Execução.** Gemini e Groq responderam `ok` nos 501 ids da amostra (tag `juiz_pt_v2`, prompt v2.1), e os 71 ids do HateBR que o Groq não respondia saíram pelo Gemini. O `corpus_strict_v2.parquet` foi refeito: dos 477 ids, 115 viram não ódio e 362 continuam ódio; o split não mudou. O test do HateBR passa de 99 para 83 positivos.
+
+**Efeito do strict v2 no linear PT.** Quase nulo. PR-AUC no test PT inteiro: 0,523 (treino v1, rótulo v1), 0,514 (treino v1, rótulo v2), 0,510 (treino v2, rótulo v2). No viés partidário, "PT" sozinho segue em 0,991 contra 0,141 de "PL". Só "Votei no PT a vida toda" caiu (0,725 para 0,494). Retirar o partidarismo do positivo não corrige o viés; ele continua sendo tratado pela retirada dos nomes de partido antes de escorar.
+
+**Leitura da auditoria (seção 4 de `reports/auditoria_pt.md`).** Nos falsos negativos comuns, os dois LLMs concordam entre si e contra o rótulo em 63% dos casos (75% no HateBR, 69% no pt_fortuna, 35% no ToLD-BR). Nos falsos positivos, 21%; nos acertos, 12%. Kappa rótulo × LLM: 0,32 (Gemini) e 0,29 (Groq) na amostra, 0,17 e 0,15 no pt_fortuna. Kappa LLM × LLM: 0,56. Parte relevante do teto de recall em português é, portanto, rótulo ausente de ódio no corpus, sobretudo no pt_fortuna, e não só algoritmo.
+
+**Limites.** A amostra super-representa erros, então o kappa vale para ela e não para o test. Os LLMs não são padrão-ouro; o discordar deles do rótulo é indício, não prova. A discordância de cerca de 20% do prompt v2.1 com a regra segue aceita. Pt_fortuna, ToLD-BR e as fontes em inglês continuam sem tratar grupo político como protegido.
+
+**Próximo passo.** Revisão humana dos 101 falsos negativos comuns (começando por pt_fortuna e HateBR) antes de qualquer correção de rótulo; Fase 1 do plano smooth-liskov só depois disso. Beta 1.1 continua segurada até a máscara de partido seguir a strict v2.

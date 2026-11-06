@@ -119,32 +119,34 @@ Linear da extensão = `tfidf_logreg_strict_s42` (bilíngue) com o Platt do bundl
 
 ## 4. LLM como juiz do rótulo
 
-Amostra de 501 ids do test PT (`data/processed/auditoria_pt_amostra.csv`): erros e acertos comuns ao BERTimbau e ao linear PT. A amostra super-representa os erros, então o kappa com o rótulo vale para ela, não para o test inteiro. Prompt v1 de `scripts/llm_label.py`. Status por LLM: gemini (gemini-3-flash-preview): {'faltando': 441, 'ok': 60}; groq (openai/gpt-oss-120b): {'ok': 501}. Cada LLM é medido nos ids em que respondeu `ok`; as colunas LLM × LLM usam os 60 ids respondidos por todos.
+Amostra de 501 ids do test PT (`data/processed/auditoria_pt_amostra.csv`): erros e acertos comuns ao BERTimbau e ao linear PT. A amostra super-representa os erros, então o kappa com o rótulo vale para ela, não para o test inteiro. Saídas de `scripts/llm_label.py` (tag `juiz_pt_v2`, prompt v2.1). Status por LLM: gemini (gemini-3-flash-preview): {'ok': 501}; groq (openai/gpt-oss-120b): {'ok': 501}. Cada LLM é medido nos ids em que respondeu `ok`; as colunas LLM × LLM usam os 501 ids respondidos por todos.
+
+O rótulo é o do strict atual. No strict v2 (partidarismo do HateBR), 13 ids da amostra passam de ódio a não ódio: {'FN_comum': 6, 'acerto_comum': 7}.
 
 **Concordância com o rótulo do corpus, por grupo.** Em FN, "discordar" quer dizer que o LLM também acha que não é ódio; em FP, que acha que é. A última coluna é a proporção em que os LLMs concordam entre si e discordam do rótulo.
 
 | grupo | fonte | n gemini | concorda_rotulo gemini | n groq | concorda_rotulo groq | n ambos | LLMs_iguais_e_contra_rotulo |
 |---|---|---|---|---|---|---|---|
-| FN_comum | hatebr | 8 | 0.1250 | 20 | 0.0000 | 8 | 0.8750 |
-| FN_comum | pt_fortuna | 9 | 0.3333 | 61 | 0.1803 | 9 | 0.4444 |
-| FN_comum | todas | 19 | 0.2105 | 101 | 0.1881 | 19 | 0.6842 |
-| FN_comum | toldbr | 2 | 0.0000 | 20 | 0.4000 | 2 | 1.0000 |
-| FP_comum | hatebr | 2 | 1.0000 | 13 | 1.0000 | 2 | 0.0000 |
-| FP_comum | pt_fortuna | 5 | 1.0000 | 62 | 0.8226 | 5 | 0.0000 |
-| FP_comum | todas | 11 | 0.9091 | 100 | 0.7700 | 11 | 0.0000 |
-| FP_comum | toldbr | 4 | 0.7500 | 25 | 0.5200 | 4 | 0.0000 |
-| acerto_comum | hatebr | 4 | 0.2500 | 100 | 0.5000 | 4 | 0.7500 |
-| acerto_comum | pt_fortuna | 9 | 0.8889 | 100 | 0.7400 | 9 | 0.1111 |
-| acerto_comum | todas | 30 | 0.7333 | 300 | 0.7067 | 30 | 0.2333 |
-| acerto_comum | toldbr | 17 | 0.7647 | 100 | 0.8800 | 17 | 0.1765 |
+| FN_comum | hatebr | 20 | 0.1500 | 20 | 0.1500 | 20 | 0.7500 |
+| FN_comum | pt_fortuna | 61 | 0.1967 | 61 | 0.1803 | 61 | 0.6885 |
+| FN_comum | todas | 101 | 0.2574 | 101 | 0.2376 | 101 | 0.6337 |
+| FN_comum | toldbr | 20 | 0.5500 | 20 | 0.5000 | 20 | 0.3500 |
+| FP_comum | hatebr | 13 | 0.9231 | 13 | 0.6923 | 13 | 0.0769 |
+| FP_comum | pt_fortuna | 62 | 0.7903 | 62 | 0.6452 | 62 | 0.1774 |
+| FP_comum | todas | 100 | 0.7500 | 100 | 0.5600 | 100 | 0.2100 |
+| FP_comum | toldbr | 25 | 0.5600 | 25 | 0.2800 | 25 | 0.3600 |
+| acerto_comum | hatebr | 100 | 0.8100 | 100 | 0.8300 | 100 | 0.0900 |
+| acerto_comum | pt_fortuna | 100 | 0.7000 | 100 | 0.7700 | 100 | 0.2000 |
+| acerto_comum | todas | 300 | 0.8000 | 300 | 0.8333 | 300 | 0.1167 |
+| acerto_comum | toldbr | 100 | 0.8900 | 100 | 0.9000 | 100 | 0.0600 |
 
 **Kappa de Cohen** (IC 95% por bootstrap, 2000 reamostras):
 
 | fonte | n gemini | kappa rotulo × gemini | n groq | kappa rotulo × groq | n ambos | kappa LLM × LLM |
 |---|---|---|---|---|---|---|
-| todas | 60 | 0.248 [0.082–0.430] | 501 | 0.169 [0.096–0.242] | 60 | 0.624 [0.315–0.839] |
-| hatebr | 14 | 0.041 [0.000–0.197] | 133 | -0.005 [-0.076–0.064] | 14 | 0.000 [0.000–0.000] |
-| pt_fortuna | 23 | 0.427 [0.148–0.736] | 223 | 0.218 [0.112–0.318] | 23 | 0.679 [0.246–1.000] |
-| toldbr | 23 | 0.291 [-0.082–0.646] | 145 | 0.379 [0.197–0.543] | 23 | 0.587 [-0.022–1.000] |
+| todas | 501 | 0.322 [0.242–0.393] | 501 | 0.288 [0.199–0.376] | 501 | 0.557 [0.475–0.633] |
+| hatebr | 133 | 0.456 [0.329–0.586] | 133 | 0.436 [0.284–0.572] | 133 | 0.578 [0.430–0.719] |
+| pt_fortuna | 223 | 0.173 [0.064–0.276] | 223 | 0.146 [0.031–0.261] | 223 | 0.510 [0.369–0.641] |
+| toldbr | 145 | 0.461 [0.294–0.621] | 145 | 0.390 [0.234–0.549] | 145 | 0.592 [0.439–0.724] |
 
 Leitura prevista no plano: se os LLMs concordam entre si e discordam do rótulo justamente nos FN e FP comuns, e não nos acertos, o teto é ruído de rótulo, não o algoritmo.
