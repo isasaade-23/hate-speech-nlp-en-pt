@@ -4,38 +4,41 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hsc"
-version = "0.1.0"
+version = "0.2.0"
 description = "Bilingual (EN/PT) hate-speech text classifier: classical vs transformer models, plus a deployable API."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "AGPL-3.0-only" }
 authors = [{ name = "Isabela Venancio da Silva" }]
 
-# Core (local, CPU) dependencies. Heavy DL libs live in requirements-colab.txt.
+# Core = what hsc.inference needs to serve a model (the demo installs the package from a Git tag).
+# Training, ingestion and analysis dependencies are in the `train` extra.
 dependencies = [
     "pandas>=2.1",
     "numpy>=1.26",
-    "pyarrow>=15.0",
     "pyyaml>=6.0",
     "pydantic>=2.5",
     "scikit-learn>=1.4",
     "lightgbm>=4.3",
-    "xgboost>=2.0",
     "emoji>=2.10",
+    "lingua-language-detector>=2.0",
+    "joblib>=1.3",
+]
+
+[project.optional-dependencies]
+train = [
+    "pyarrow>=15.0",
+    "xgboost>=2.0",
     "datasketch>=1.6",          # MinHash/LSH near-duplicate detection
     "better-profanity>=0.7",    # bundled profanity lexicon (dataset2 probe + error analysis)
-    "lingua-language-detector>=2.0",
     "fasttext-wheel>=0.9.2",    # lid.176 language id (prebuilt wheel, no compiler)
     "optuna>=3.5",
     "mlflow>=2.11",
     "matplotlib>=3.8",
     "seaborn>=0.13",
     "tqdm>=4.66",
-    "joblib>=1.3",
     "requests>=2.31",           # scripts/ and tools/ (LLM judge, translation, doccano)
 ]
-
-[project.optional-dependencies]
 embeddings = ["sentence-transformers>=2.6"]   # multilingual SBERT (pulls torch CPU)
 api = ["fastapi>=0.110", "uvicorn[standard]>=0.29", "slowapi>=0.1.9"]
 demo = ["gradio>=4.20"]

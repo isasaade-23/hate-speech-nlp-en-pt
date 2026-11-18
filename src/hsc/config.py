@@ -7,6 +7,7 @@ hard-codes a location.
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Any
 
@@ -14,8 +15,12 @@ import yaml
 
 
 def project_root() -> Path:
-    """Repo root = two levels up from this file (src/hsc/config.py -> repo)."""
-    return Path(__file__).resolve().parents[2]
+    """Repo root = two levels up from this file (src/hsc/config.py -> repo).
+
+    HSC_ROOT overrides it when the package is pip-installed away from the repo layout
+    (e.g. the Streamlit demo: configs/ and models/ live next to its own app)."""
+    env = os.environ.get("HSC_ROOT")
+    return Path(env).resolve() if env else Path(__file__).resolve().parents[2]
 
 
 def load_yaml(rel_or_abs: str | Path) -> dict[str, Any]:

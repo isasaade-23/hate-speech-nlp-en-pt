@@ -24,7 +24,7 @@ jobs:
       - name: Install package + dev tools
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev,api]"
+          pip install -e ".[dev,api,train]"
 
       - name: Lint (ruff)
         run: ruff check src tests api demo assets scripts tools
