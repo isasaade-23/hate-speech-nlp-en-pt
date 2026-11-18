@@ -20,6 +20,7 @@ dot(coef) + intercept -> sigmoid -> Platt sigmoid.
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -32,7 +33,7 @@ sys.path.insert(0, "src")
 from hsc.clean import clean_text  # noqa: E402
 from hsc.config import data_config, resolve  # noqa: E402
 
-OUT_ROOT = Path("C:/Users/Renato/luciola-extension")
+OUT_ROOT = Path(os.environ.get("HSC_EXT_DIR", Path(__file__).resolve().parents[2] / "luciola-extension"))
 MODEL_ID = "tfidf_logreg_strict_s42"
 
 

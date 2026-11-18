@@ -90,8 +90,9 @@ def cmd_comparar() -> None:
 
     sys.path.insert(0, str(ROOT / "scripts"))
     sys.path.insert(0, str(ROOT / "src"))
-    from hsc.clean import clean_text, get_profile
     from pt_boost import SEED, best_threshold, build_vectorizer
+
+    from hsc.clean import clean_text, get_profile
 
     v1 = pd.read_parquet(CORPUS)
     v2 = pd.read_parquet(CORPUS_V2).set_index("id").label

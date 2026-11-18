@@ -10,6 +10,7 @@ Updates both bundle copies: the research repo and the Streamlit space.
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
@@ -24,7 +25,7 @@ from hsc.predictions import load_predictions  # noqa: E402
 from hsc.utils import read_json  # noqa: E402
 
 MODEL_ID = "tfidf_logreg_strict_s42"
-SPACE_MODELS = Path("C:/Users/Renato/hate-speech-space/models")
+SPACE_MODELS = Path(os.environ.get("HSC_SPACE_DIR", Path(__file__).resolve().parents[2] / "hate-speech-space")) / "models"
 
 
 def main() -> None:

@@ -135,7 +135,7 @@ def cmd_gen(args) -> None:
     out = Path(args.out)
     done = set()
     if out.exists():
-        done = {json.loads(l)["seed_id"] for l in out.read_text(encoding="utf-8").splitlines() if l}
+        done = {json.loads(ln)["seed_id"] for ln in out.read_text(encoding="utf-8").splitlines() if ln}
     seeds = load_seeds(args.n, args.offset, args.exclude, args.n_odio, args.n_nao)
     t0 = time.time()
     with out.open("a", encoding="utf-8") as f:
@@ -212,7 +212,7 @@ def cmd_final(args) -> None:
     syn[~syn.descartado].drop(columns=["motivos", "descartado"]).to_json(
         aprov, orient="records", lines=True, force_ascii=False)
     linhas = [
-        f"# Lote sintético final", "",
+        "# Lote sintético final", "",
         f"Arquivo: `{Path(args.out).name}`. Filtros: recusa, eco do prompt, ódio sem grupo-alvo, "
         "fora do português. Aprovados em `" + aprov.name + "`.", "",
         "| classe | gerados | descartados | taxa de descarte | aprovados |", "|---|---|---|---|---|",

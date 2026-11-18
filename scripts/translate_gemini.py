@@ -38,7 +38,7 @@ import random
 import re
 import sys
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -104,7 +104,7 @@ TRANSITORIOS = (408, 429, 500, 502, 503, 504)
 
 
 def proxima_meia_noite_pacifico(agora: datetime | None = None) -> datetime:
-    agora = (agora or datetime.now(timezone.utc)).astimezone(PACIFICO)
+    agora = (agora or datetime.now(UTC)).astimezone(PACIFICO)
     return (agora + timedelta(days=1)).replace(hour=0, minute=5, second=0, microsecond=0)
 
 
@@ -143,7 +143,7 @@ class Pool:
         return {"x-goog-api-key": self.chaves[self.i], "Content-Type": "application/json"}
 
     def _limpar_vencidas(self) -> None:
-        agora = datetime.now(timezone.utc)
+        agora = datetime.now(UTC)
         self.esgotadas = {h: t for h, t in self.esgotadas.items() if datetime.fromisoformat(t) > agora}
 
     def _salvar(self) -> None:
@@ -220,7 +220,7 @@ class Pool:
                 volta = min(datetime.fromisoformat(t) for t in self.esgotadas.values()) if self.esgotadas else None
                 if volta is None:
                     raise SemCota("nenhuma chave valida")
-                self._esperar(max(60.0, (volta - datetime.now(timezone.utc)).total_seconds()),
+                self._esperar(max(60.0, (volta - datetime.now(UTC)).total_seconds()),
                               "todas as chaves sem cota no dia; aguardando a meia-noite do Pacifico")
                 self._limpar_vencidas()
                 continue
@@ -312,7 +312,7 @@ def traduzir_lote(pool: Pool, modelo: str, itens: list[dict]) -> dict[str, tuple
 def carregar_feitos() -> dict[str, dict]:
     if not SAIDA.exists():
         return {}
-    return {j["id"]: j for j in (json.loads(l) for l in SAIDA.read_text(encoding="utf-8").splitlines() if l)}
+    return {j["id"]: j for j in (json.loads(ln) for ln in SAIDA.read_text(encoding="utf-8").splitlines() if ln)}
 
 
 def checkpoint(pool: Pool, modelo: str, motivo: str) -> None:

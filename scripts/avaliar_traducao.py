@@ -127,9 +127,9 @@ def montar() -> tuple[pd.DataFrame, int]:
     piloto = pd.read_parquet(PILOTO)
     gem = {}
     if GEMINI.exists():
-        for l in GEMINI.read_text(encoding="utf-8").splitlines():
-            if l:
-                j = json.loads(l)
+        for ln in GEMINI.read_text(encoding="utf-8").splitlines():
+            if ln:
+                j = json.loads(ln)
                 gem[j["id"]] = j
     linhas = []
     for r in piloto.itertuples():

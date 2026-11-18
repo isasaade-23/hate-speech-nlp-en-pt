@@ -3,6 +3,7 @@ itens de teste/piloto. Roda contra o servidor local ja no ar (porta 8010).
 """
 import os
 import sys
+
 import requests
 
 BASE = "http://127.0.0.1:8010"

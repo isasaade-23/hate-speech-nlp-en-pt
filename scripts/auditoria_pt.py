@@ -24,8 +24,14 @@ import pandas as pd
 import yaml
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import (average_precision_score, cohen_kappa_score, f1_score, precision_score,
-                             recall_score, roc_auc_score)
+from sklearn.metrics import (
+    average_precision_score,
+    cohen_kappa_score,
+    f1_score,
+    precision_score,
+    recall_score,
+    roc_auc_score,
+)
 from sklearn.pipeline import FeatureUnion
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -332,7 +338,7 @@ def amostra_juiz() -> pd.DataFrame:
     fp = pd.concat([g.sample(n_fp[s], random_state=SEED) for s, g in fp_all.groupby("source_dataset")])
     # 300 acertos: 100 por fonte, metade ódio quando houver
     ac = []
-    for s, g in d[d.grupo == "acerto_comum"].groupby("source_dataset"):
+    for _s, g in d[d.grupo == "acerto_comum"].groupby("source_dataset"):
         odio = g[g.y_true == 1]
         n1 = min(50, len(odio))
         ac += [odio.sample(n1, random_state=SEED),

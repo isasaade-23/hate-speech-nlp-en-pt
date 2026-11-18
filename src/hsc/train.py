@@ -13,6 +13,7 @@ Outputs per run:
 
 from __future__ import annotations
 
+import hashlib
 import subprocess
 from pathlib import Path
 
@@ -96,6 +97,7 @@ def train_from_config(
         "config": cfg["name"],
         "family": cfg.get("family", "classical"),
         "policy": policy,
+        "corpus": f"corpus_{policy}{corpus_suffix}.parquet",
         "seed": seed,
         "git_sha": _git_sha(),
         "n_train": int(len(tr)),
@@ -154,6 +156,8 @@ def _persist(result: dict, cfg: dict, vec, est, model_id: str) -> None:
         "seed": result["seed"],
         "git_sha": result["git_sha"],
         "threshold": result["threshold"],
+        "corpus": result["corpus"],
+        "sha256": hashlib.sha256((model_dir / "model.joblib").read_bytes()).hexdigest(),
         "val_macro_f1": result["splits"]["val"]["macro_f1"],
         "test_macro_f1": result["splits"]["test"]["macro_f1"],
     }

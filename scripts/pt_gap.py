@@ -52,15 +52,15 @@ def main() -> None:
         va, te = val[val.language == lang], test[test.language == lang]
         thr_lang = best_threshold(va.y_true, va.y_score)
         g = block(te, GLOBAL_THR)
-        l = block(te, thr_lang)
+        lg = block(te, thr_lang)
         rows.append({"idioma": lang, "n_test": len(te),
                      "limiar_global": round(GLOBAL_THR, 4),
                      "limiar_por_idioma (val)": round(thr_lang, 4),
-                     "macro_f1 global": g["macro_f1"], "macro_f1 idioma": l["macro_f1"],
+                     "macro_f1 global": g["macro_f1"], "macro_f1 idioma": lg["macro_f1"],
                      "recall_hate global": g["recall_hate"],
-                     "recall_hate idioma": l["recall_hate"],
+                     "recall_hate idioma": lg["recall_hate"],
                      "precision_hate global": g["precision_hate"],
-                     "precision_hate idioma": l["precision_hate"]})
+                     "precision_hate idioma": lg["precision_hate"]})
     out = pd.DataFrame(rows)
 
     # anatomia dos falsos negativos PT no teste (limiar global)

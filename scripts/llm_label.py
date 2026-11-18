@@ -110,8 +110,8 @@ def chave_de_arquivo(provedor: str) -> str:
     if not arq:
         raise SystemExit(f"nenhuma chave: defina {env}_API_KEY ou {env}_KEYS_FILE (ver o cabeçalho)")
     linhas = Path(arq).read_text(encoding="utf-8", errors="ignore").splitlines()
-    for i, l in enumerate(linhas):
-        if provedor in l.lower():
+    for i, ln in enumerate(linhas):
+        if provedor in ln.lower():
             for prox in linhas[i + 1:]:
                 k = prox.strip()
                 if k:
@@ -237,9 +237,9 @@ def carregar_feitos(arq: Path) -> dict[str, dict]:
     if not arq.exists():
         return {}
     feitos = {}
-    for l in arq.read_text(encoding="utf-8").splitlines():
-        if l:
-            j = json.loads(l)
+    for ln in arq.read_text(encoding="utf-8").splitlines():
+        if ln:
+            j = json.loads(ln)
             feitos[j["id"]] = j  # a última linha de cada id vale
     return feitos
 

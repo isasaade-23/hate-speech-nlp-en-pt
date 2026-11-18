@@ -13,9 +13,9 @@ Uso: python export_annotations.py <mapeamento.json> [--a anotador1] [--b anotado
 Isa e Vini: --a isa --b vini --primeiros 100 (amostra comum).
 """
 import argparse
-import os
 import csv
 import json
+import os
 import sqlite3
 import subprocess
 import tempfile

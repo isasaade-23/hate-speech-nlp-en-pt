@@ -26,10 +26,10 @@ from sklearn.metrics import f1_score, precision_score, recall_score
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
-from hsc.inference import HateClassifier  # noqa: E402
-
 # a sonda é a mesma de pt_identity_probe.py: as frases não podem divergir entre os dois
 from pt_identity_probe import FRASES  # noqa: E402
+
+from hsc.inference import HateClassifier  # noqa: E402
 
 # limiares de interesse: o global servido, o ajustado na validação PT, e a grade
 # entre os dois, para achar onde o viés começa a subir

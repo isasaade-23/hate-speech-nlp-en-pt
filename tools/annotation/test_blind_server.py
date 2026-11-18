@@ -3,7 +3,6 @@ Usa anotador1/anotador2 reais; credenciais do arquivo fora do repositorio."""
 import os
 
 import requests
-
 from _acessos import senha
 
 URL = os.environ["DOCCANO_URL"]

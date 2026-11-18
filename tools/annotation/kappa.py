@@ -14,7 +14,6 @@ import json
 import os
 import sys
 import zipfile
-from pathlib import Path
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.development")
 # pasta "backend" do pacote doccano instalado no venv do doccano local

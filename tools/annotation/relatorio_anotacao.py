@@ -88,7 +88,7 @@ def analisar(con, mapa, a, b, n):
         r["acerto"][u] = dict(h)
     for i in ids:
         for u in (a, b):
-            fl = sorted(l for l in lab[u].get(i, set()) if l.startswith("⚑"))
+            fl = sorted(x for x in lab[u].get(i, set()) if x.startswith("⚑"))
             if fl:
                 r["bandeiras"].append((i, itens[str(i)]["id_corpus"], u, ", ".join(fl)))
     return r

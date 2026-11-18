@@ -14,7 +14,6 @@ from pathlib import Path
 
 import pandas as pd
 import requests
-
 from _acessos import senha
 
 BASE = os.environ.get("DOCCANO_URL", "http://127.0.0.1:8010")

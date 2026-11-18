@@ -14,6 +14,7 @@ Saídas:
 
 import csv
 import json
+import os
 import random
 import subprocess
 import sys
@@ -23,7 +24,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from hsc.inference import get_classifier  # noqa: E402
 
-EXT_DIR = Path("C:/Users/Renato/luciola-extension")
+EXT_DIR = Path(os.environ.get("HSC_EXT_DIR", Path(__file__).resolve().parents[2] / "luciola-extension"))
 LINEAR_THRESHOLD = 0.424
 FN_SAMPLE_PER_PAGE = 30
 SEED = 42

@@ -7,7 +7,9 @@
     "git_sha": "c182003",
     "threshold": 0.5787,
     "val_macro_f1": 0.7883447530869965,
-    "test_macro_f1": 0.7878131630282545
+    "test_macro_f1": 0.7878131630282545,
+    "corpus": "corpus_strict.parquet",
+    "sha256": "925cd02331e19cd3502590efccd7401ba63f9f2972e000ff7b43074fc477d979"
   },
   "tfidf_svm_strict_s42": {
     "path": "models/tfidf_svm_strict_s42/model.joblib",
@@ -17,7 +19,9 @@
     "git_sha": "c182003",
     "threshold": 0.3149,
     "val_macro_f1": 0.7687679087054438,
-    "test_macro_f1": 0.7681313681143557
+    "test_macro_f1": 0.7681313681143557,
+    "corpus": "corpus_strict.parquet",
+    "sha256": "2fd4f2a6254d4733b0b26a197f814a466f41533c7fd69ac33f383e8e34373777"
   },
   "tfidf_lgbm_strict_s42": {
     "path": "models/tfidf_lgbm_strict_s42/model.joblib",
@@ -27,7 +31,9 @@
     "git_sha": "c182003",
     "threshold": 0.581,
     "val_macro_f1": 0.7702998187455272,
-    "test_macro_f1": 0.773160366514335
+    "test_macro_f1": 0.773160366514335,
+    "corpus": "corpus_strict.parquet",
+    "sha256": "fabf00bf15ec007eccf49ccf83b8a83fe4f51a3ce3bf9d0de5da7139de2d9df3"
   },
   "tfidf_logreg_broad_s42": {
     "path": "models/tfidf_logreg_broad_s42/model.joblib",
@@ -37,7 +43,9 @@
     "git_sha": "f854e84",
     "threshold": 0.5125,
     "val_macro_f1": 0.7585738648694887,
-    "test_macro_f1": 0.7521088936943742
+    "test_macro_f1": 0.7521088936943742,
+    "corpus": "corpus_broad.parquet",
+    "sha256": "8b6d6d50e85220db6d902ed4c2f55dd95c1fd3175d79139d5daf2004291f6a95"
   },
   "tfidf_svm_broad_s42": {
     "path": "models/tfidf_svm_broad_s42/model.joblib",
@@ -47,7 +55,9 @@
     "git_sha": "f854e84",
     "threshold": 0.4157,
     "val_macro_f1": 0.6576981889015392,
-    "test_macro_f1": 0.6511530291441835
+    "test_macro_f1": 0.6511530291441835,
+    "corpus": "corpus_broad.parquet",
+    "sha256": "930e825e4cb2b5fb08aa79b9b83dbeb8b798f69184ec26a5d46721d1040c119e"
   },
   "tfidf_lgbm_broad_s42": {
     "path": "models/tfidf_lgbm_broad_s42/model.joblib",
@@ -57,7 +67,9 @@
     "git_sha": "f854e84",
     "threshold": 0.5056,
     "val_macro_f1": 0.7430770396095814,
-    "test_macro_f1": 0.7438269041412552
+    "test_macro_f1": 0.7438269041412552,
+    "corpus": "corpus_broad.parquet",
+    "sha256": "82849c433710ab03d1d95eaf52ddfb4a2170be69e11effbc60e1cf4e1544a4bc"
   },
   "sbert_logreg_strict_s42": {
     "path": "models/sbert_logreg_strict_s42/model.joblib",
@@ -67,7 +79,9 @@
     "git_sha": "cac1065",
     "threshold": 0.719,
     "val_macro_f1": 0.6392068130470663,
-    "test_macro_f1": 0.6233877600156239
+    "test_macro_f1": 0.6233877600156239,
+    "corpus": "corpus_strict.parquet",
+    "sha256": "72c879d60ce7d67c40f310629b1c3dca47d07bfd7e09717553175063f61c59cb"
   },
   "sbert_lgbm_strict_s42": {
     "path": "models/sbert_lgbm_strict_s42/model.joblib",
@@ -77,7 +91,9 @@
     "git_sha": "cac1065",
     "threshold": 0.2718,
     "val_macro_f1": 0.656390078479938,
-    "test_macro_f1": 0.6440708649421496
+    "test_macro_f1": 0.6440708649421496,
+    "corpus": "corpus_strict.parquet",
+    "sha256": "429f7df4adfe8fbf603c92cc33342a14f6f63eb225b3daadc0959b11630e1585"
   },
   "sbert_logreg_broad_s42": {
     "path": "models/sbert_logreg_broad_s42/model.joblib",
@@ -87,7 +103,9 @@
     "git_sha": "cac1065",
     "threshold": 0.5973,
     "val_macro_f1": 0.7113884760010905,
-    "test_macro_f1": 0.6943348946576806
+    "test_macro_f1": 0.6943348946576806,
+    "corpus": "corpus_broad.parquet",
+    "sha256": "8945ea0e16246784fb72088fe029b482b7d602787c3e09c84f552149e2d633d0"
   },
   "sbert_lgbm_broad_s42": {
     "path": "models/sbert_lgbm_broad_s42/model.joblib",
@@ -97,7 +115,9 @@
     "git_sha": "cac1065",
     "threshold": 0.4791,
     "val_macro_f1": 0.7297282681193644,
-    "test_macro_f1": 0.7116720944277382
+    "test_macro_f1": 0.7116720944277382,
+    "corpus": "corpus_broad.parquet",
+    "sha256": "4a530e61db97de75f6a21b5098a0e1875172789737ba9821293b441f7a45becd"
   },
   "xlmr_multilingual_strict_s42": {
     "path": "models/xlmr_multilingual_strict_s42/hf",
@@ -108,7 +128,8 @@
     "hf_checkpoint": "FacebookAI/xlm-roberta-base",
     "threshold": 0.7252,
     "val_macro_f1": 0.8414025251673558,
-    "test_macro_f1": 0.8416287697104784
+    "test_macro_f1": 0.8416287697104784,
+    "corpus": "corpus_strict.parquet"
   },
   "xlmr_multilingual_broad_s42": {
     "path": "models/xlmr_multilingual_broad_s42/hf",
@@ -119,7 +140,8 @@
     "hf_checkpoint": "FacebookAI/xlm-roberta-base",
     "threshold": 0.6542,
     "val_macro_f1": 0.7701688478029016,
-    "test_macro_f1": 0.7635238278207437
+    "test_macro_f1": 0.7635238278207437,
+    "corpus": "corpus_broad.parquet"
   },
   "bertimbau_pt_strict_s42": {
     "path": "models/bertimbau_pt_strict_s42/hf",
@@ -130,7 +152,8 @@
     "hf_checkpoint": "neuralmind/bert-base-portuguese-cased",
     "threshold": 0.0219,
     "val_macro_f1": 0.7650180679176765,
-    "test_macro_f1": 0.7652058424595599
+    "test_macro_f1": 0.7652058424595599,
+    "corpus": "corpus_strict.parquet"
   },
   "bertimbau_pt_broad_s42": {
     "path": "models/bertimbau_pt_broad_s42/hf",
@@ -141,7 +164,8 @@
     "hf_checkpoint": "neuralmind/bert-base-portuguese-cased",
     "threshold": 0.347,
     "val_macro_f1": 0.8425972584188273,
-    "test_macro_f1": 0.8349916344243438
+    "test_macro_f1": 0.8349916344243438,
+    "corpus": "corpus_broad.parquet"
   },
   "bertweet_en_strict_s42": {
     "path": "models/bertweet_en_strict_s42/hf",
@@ -152,7 +176,8 @@
     "hf_checkpoint": "vinai/bertweet-base",
     "threshold": 0.66,
     "val_macro_f1": 0.8663597250795201,
-    "test_macro_f1": 0.8609791335675605
+    "test_macro_f1": 0.8609791335675605,
+    "corpus": "corpus_strict.parquet"
   },
   "bertweet_en_broad_s42": {
     "path": "models/bertweet_en_broad_s42/hf",
@@ -163,7 +188,8 @@
     "hf_checkpoint": "vinai/bertweet-base",
     "threshold": 0.8651,
     "val_macro_f1": 0.7430160921621438,
-    "test_macro_f1": 0.7528567539493959
+    "test_macro_f1": 0.7528567539493959,
+    "corpus": "corpus_broad.parquet"
   },
   "tfidf_logreg_nostop_strict_s42": {
     "path": "models/tfidf_logreg_nostop_strict_s42/model.joblib",
@@ -173,7 +199,9 @@
     "git_sha": "cac1065",
     "threshold": 0.6858,
     "val_macro_f1": 0.7069232086604303,
-    "test_macro_f1": 0.7062324018447599
+    "test_macro_f1": 0.7062324018447599,
+    "corpus": "corpus_strict.parquet",
+    "sha256": "ce70a9ce198dc40be504168d10c043a25c2dfd88fd9b25118436271f1b2e6b93"
   },
   "tfidf_logreg_nostop_broad_s42": {
     "path": "models/tfidf_logreg_nostop_broad_s42/model.joblib",
@@ -183,7 +211,9 @@
     "git_sha": "cac1065",
     "threshold": 0.5262,
     "val_macro_f1": 0.7586491373175095,
-    "test_macro_f1": 0.7548322683463242
+    "test_macro_f1": 0.7548322683463242,
+    "corpus": "corpus_broad.parquet",
+    "sha256": "ab1b1d0a59ca56380054166c694a923967e9534a13d74dc319549b9967ee59ed"
   },
   "tfidf_lgbm_nostop_strict_s42": {
     "path": "models/tfidf_lgbm_nostop_strict_s42/model.joblib",
@@ -193,7 +223,9 @@
     "git_sha": "cac1065",
     "threshold": 0.5851,
     "val_macro_f1": 0.7010241954191082,
-    "test_macro_f1": 0.6978524978756002
+    "test_macro_f1": 0.6978524978756002,
+    "corpus": "corpus_strict.parquet",
+    "sha256": "d2b0b30992538266b098fa350718004410c83189ff85573e495ccb8ceb2f7430"
   },
   "tfidf_lgbm_nostop_broad_s42": {
     "path": "models/tfidf_lgbm_nostop_broad_s42/model.joblib",
@@ -203,7 +235,9 @@
     "git_sha": "cac1065",
     "threshold": 0.5115,
     "val_macro_f1": 0.7566518889197342,
-    "test_macro_f1": 0.746381236200848
+    "test_macro_f1": 0.746381236200848,
+    "corpus": "corpus_broad.parquet",
+    "sha256": "2ca1307e7132c32ab309ce80f0d4755277da113b4bd10c3dfcc0d2f2c034f23f"
   },
   "tfidf_svm_nostop_strict_s42": {
     "path": "models/tfidf_svm_nostop_strict_s42/model.joblib",
@@ -213,7 +247,9 @@
     "git_sha": "cac1065",
     "threshold": 0.151,
     "val_macro_f1": 0.6988598698540255,
-    "test_macro_f1": 0.6882366408675689
+    "test_macro_f1": 0.6882366408675689,
+    "corpus": "corpus_strict.parquet",
+    "sha256": "876a4cf782e81008c4210ddbc1ae6feef53daa55d9bc4bbd335b08ff81606036"
   },
   "tfidf_svm_nostop_broad_s42": {
     "path": "models/tfidf_svm_nostop_broad_s42/model.joblib",
@@ -223,7 +259,9 @@
     "git_sha": "cac1065",
     "threshold": 0.3611,
     "val_macro_f1": 0.733589220796707,
-    "test_macro_f1": 0.7360111833759244
+    "test_macro_f1": 0.7360111833759244,
+    "corpus": "corpus_broad.parquet",
+    "sha256": "461418720121441601ce6dc2cacf2a5971040f387a7b370db3ef3452ef28a62c"
   },
   "twitter_xlmr_strict_s42": {
     "path": "models/twitter_xlmr_strict_s42/hf",
@@ -234,7 +272,8 @@
     "hf_checkpoint": "cardiffnlp/twitter-xlm-roberta-base",
     "threshold": 0.7524,
     "val_macro_f1": 0.8465331761134166,
-    "test_macro_f1": 0.8477212483049489
+    "test_macro_f1": 0.8477212483049489,
+    "corpus": "corpus_strict.parquet"
   },
   "twitter_xlmr_broad_s42": {
     "path": "models/twitter_xlmr_broad_s42/hf",
@@ -245,7 +284,8 @@
     "hf_checkpoint": "cardiffnlp/twitter-xlm-roberta-base",
     "threshold": 0.6973,
     "val_macro_f1": 0.772888743095175,
-    "test_macro_f1": 0.7657782013143098
+    "test_macro_f1": 0.7657782013143098,
+    "corpus": "corpus_broad.parquet"
   },
   "stack_strict_s42": {
     "path": "models/stack_strict_s42/model.joblib",
@@ -258,7 +298,9 @@
     "test_macro_f1": 0.7906,
     "test_roc_auc": 0.8875,
     "thresholds_by_lang": {},
-    "threshold_policy": "Limiar unico, de proposito. O mapa `thresholds_by_lang` existe e esta VAZIO: um idioma so entra nele quando o ganho de recall passar no gate de vies. O limiar ajustado na validacao PT (0,1092) leva o recall de odio de 0,3162 para 0,5564, mas triplica o falso positivo da sonda de identidade, de 3/20 para 10/20, marcando pessoas LGBT, negras, nordestinas, muculmanas e evangelicas que falam de si. E pior que o modelo dedicado ao PT (9/20), recusado em 24/08/2026 por esse mesmo motivo. O maior limiar que preserva 3/20 e 0,3200, e ele compra +0,0122 de recall. Medido em scripts/pt_threshold_bias.py -> reports/tables/pt_threshold_bias.csv; decisao em methodology/pt_recall_x_vies.md."
+    "threshold_policy": "Limiar unico, de proposito. O mapa `thresholds_by_lang` existe e esta VAZIO: um idioma so entra nele quando o ganho de recall passar no gate de vies. O limiar ajustado na validacao PT (0,1092) leva o recall de odio de 0,3162 para 0,5564, mas triplica o falso positivo da sonda de identidade, de 3/20 para 10/20, marcando pessoas LGBT, negras, nordestinas, muculmanas e evangelicas que falam de si. E pior que o modelo dedicado ao PT (9/20), recusado em 24/08/2026 por esse mesmo motivo. O maior limiar que preserva 3/20 e 0,3200, e ele compra +0,0122 de recall. Medido em scripts/pt_threshold_bias.py -> reports/tables/pt_threshold_bias.csv; decisao em methodology/pt_recall_x_vies.md.",
+    "corpus": "corpus_strict.parquet",
+    "sha256": "a17ad071446e7dbdc873983be8abcf94249b1fa16b9fb7ec31debc9b32294753"
   },
   "stack_broad_s42": {
     "path": "models/stack_broad_s42/model.joblib",
@@ -269,7 +311,9 @@
     "threshold": 0.45669276372868356,
     "val_macro_f1": 0.7628,
     "test_macro_f1": 0.7561,
-    "test_roc_auc": 0.8396
+    "test_roc_auc": 0.8396,
+    "corpus": "corpus_broad.parquet",
+    "sha256": "252bde2bdbea7a972f4ebdd074bae51ef5afee695169f844d87955c791850b9b"
   },
   "tfidf_logreg_hurtlex_strict_s42": {
     "path": "models/tfidf_logreg_hurtlex_strict_s42/model.joblib",
@@ -279,7 +323,9 @@
     "git_sha": "20932f6",
     "threshold": 0.5681,
     "val_macro_f1": 0.7872427654699108,
-    "test_macro_f1": 0.7859143939521913
+    "test_macro_f1": 0.7859143939521913,
+    "corpus": "corpus_strict.parquet",
+    "sha256": "f2fbebebe4b8f59483a1a0e2300d96ebf71ab272d9ee228037504cc8326e0637"
   },
   "pt_logreg_strict_s42": {
     "path": "models/pt_logreg_strict_s42/model.joblib",
@@ -290,7 +336,9 @@
     "threshold": 0.5666,
     "test_macro_f1": 0.7572,
     "test_roc_auc": 0.9015,
-    "note": "EXPERIMENTO, NAO SERVIDO: dobra o recall de odio em PT (0.3162 -> 0.6225) mas triplica o falso positivo em frases neutras com termo de identidade (9/20 contra 3/20 do stack), marcando pessoas LGBT, negras e muculmanas falando de si. Ver methodology/pt_recall_x_vies.md"
+    "note": "EXPERIMENTO, NAO SERVIDO: dobra o recall de odio em PT (0.3162 -> 0.6225) mas triplica o falso positivo em frases neutras com termo de identidade (9/20 contra 3/20 do stack), marcando pessoas LGBT, negras e muculmanas falando de si. Ver methodology/pt_recall_x_vies.md",
+    "corpus": "corpus_strict.parquet",
+    "sha256": "35d068ef4f8e517450caaf4f3122ae621b843f598ab3ca1f6590f22f7b86166c"
   },
   "tfidf_logreg_commercial_strict_s42": {
     "path": "models/tfidf_logreg_commercial_strict_s42/model.joblib",
@@ -301,7 +349,9 @@
     "threshold": 0.5171,
     "val_macro_f1": 0.7678591648556938,
     "test_macro_f1": 0.768587959305223,
-    "note": "EXPERIMENTO, NAO SERVIDO: treinado so em multioff+vidgen+hatexplain (commercial_whitelist). Treino fica sem textos em PT (as 2 fontes comerciais sob strict sao 100% EN); recall PT despenca de 0.3211 para 0.0123. Ver methodology/DECISOES_METODOLOGICAS.md, 2026-10-07 Etapa 2.2."
+    "note": "EXPERIMENTO, NAO SERVIDO: treinado so em multioff+vidgen+hatexplain (commercial_whitelist). Treino fica sem textos em PT (as 2 fontes comerciais sob strict sao 100% EN); recall PT despenca de 0.3211 para 0.0123. Ver methodology/DECISOES_METODOLOGICAS.md, 2026-10-07 Etapa 2.2.",
+    "corpus": "corpus_strict_commercial.parquet",
+    "sha256": "d04ebdb7595a1c01c4592312e81289edc64a6a1813e504df47db7a9188a8ca1b"
   },
   "tfidf_logreg_commercial_toldbr_strict_s42": {
     "path": "models/tfidf_logreg_commercial_toldbr_strict_s42/model.joblib",
@@ -312,7 +362,9 @@
     "threshold": 0.6008,
     "val_macro_f1": 0.7712333284050537,
     "test_macro_f1": 0.7699413451169153,
-    "note": "EXPERIMENTO, NAO SERVIDO: whitelist comercial + ToLD-BR (CC BY-SA 4.0, licenca pendente de confirmacao, nao entra por padrao). 14.856 textos PT no treino, mas recall PT continua baixo (0.0172): ToLD-BR tem poucos positivos de odio (269/14.856) e nao basta para compensar a falta de hatebr/pt_fortuna. Ver methodology/DECISOES_METODOLOGICAS.md, 2026-10-07 Etapa 2.2."
+    "note": "EXPERIMENTO, NAO SERVIDO: whitelist comercial + ToLD-BR (CC BY-SA 4.0, licenca pendente de confirmacao, nao entra por padrao). 14.856 textos PT no treino, mas recall PT continua baixo (0.0172): ToLD-BR tem poucos positivos de odio (269/14.856) e nao basta para compensar a falta de hatebr/pt_fortuna. Ver methodology/DECISOES_METODOLOGICAS.md, 2026-10-07 Etapa 2.2.",
+    "corpus": "corpus_strict_commercial_toldbr.parquet",
+    "sha256": "4ae07943834031d3b916abe771ac3ba3a06ef3f15a19244460a4493175f404cb"
   },
   "tfidf_logreg_commercial_broad_s42": {
     "path": "models/tfidf_logreg_commercial_broad_s42/model.joblib",
@@ -323,7 +375,9 @@
     "threshold": 0.4419,
     "val_macro_f1": 0.7118337352370727,
     "test_macro_f1": 0.7039835017310037,
-    "note": "EXPERIMENTO, NAO SERVIDO: whitelist comercial sob broad (multioff entra aqui, ainda sem PT). Recall PT 0.0572. Ver methodology/DECISOES_METODOLOGICAS.md, 2026-10-07 Etapa 2.2."
+    "note": "EXPERIMENTO, NAO SERVIDO: whitelist comercial sob broad (multioff entra aqui, ainda sem PT). Recall PT 0.0572. Ver methodology/DECISOES_METODOLOGICAS.md, 2026-10-07 Etapa 2.2.",
+    "corpus": "corpus_broad_commercial.parquet",
+    "sha256": "b93c21f8b6a56b3e9e39db91c694fb94c7b13bcab0fe3e7e3cb230b20cc95567"
   },
   "tfidf_logreg_commercial_toldbr_broad_s42": {
     "path": "models/tfidf_logreg_commercial_toldbr_broad_s42/model.joblib",
@@ -334,7 +388,9 @@
     "threshold": 0.5059,
     "val_macro_f1": 0.7322681592403577,
     "test_macro_f1": 0.7217304575489341,
-    "note": "EXPERIMENTO, NAO SERVIDO: whitelist comercial + ToLD-BR sob broad. 14.855 textos PT no treino com 2.875 positivos (broad dobra os positivos de ToLD-BR), recall PT sobe a 0.2365 -- melhor que as outras 3 variantes comerciais, mas ainda bem abaixo do corpus completo (0.5164). Ver methodology/DECISOES_METODOLOGICAS.md, 2026-10-07 Etapa 2.2."
+    "note": "EXPERIMENTO, NAO SERVIDO: whitelist comercial + ToLD-BR sob broad. 14.855 textos PT no treino com 2.875 positivos (broad dobra os positivos de ToLD-BR), recall PT sobe a 0.2365 -- melhor que as outras 3 variantes comerciais, mas ainda bem abaixo do corpus completo (0.5164). Ver methodology/DECISOES_METODOLOGICAS.md, 2026-10-07 Etapa 2.2.",
+    "corpus": "corpus_broad_commercial_toldbr.parquet",
+    "sha256": "82b719b213d4d91f6ddb19725fffe8c44600dadd49acfbcae99eec538c94f468"
   },
   "tfidf_char_logreg_strict_s42": {
     "path": "models/tfidf_char_logreg_strict_s42/model.joblib",
@@ -344,7 +400,9 @@
     "git_sha": "998f5a5",
     "threshold": 0.59,
     "val_macro_f1": 0.7790428995829974,
-    "test_macro_f1": 0.7748820448887707
+    "test_macro_f1": 0.7748820448887707,
+    "corpus": "corpus_strict.parquet",
+    "sha256": "61e5910f98d813976fa78b75f1923a6005cd13a568bfe8ffab0aff1da7c5fc7e"
   },
   "tfidf_char_logreg_broad_s42": {
     "path": "models/tfidf_char_logreg_broad_s42/model.joblib",
@@ -354,6 +412,8 @@
     "git_sha": "998f5a5",
     "threshold": 0.5196,
     "val_macro_f1": 0.7463001985819099,
-    "test_macro_f1": 0.7408163587226991
+    "test_macro_f1": 0.7408163587226991,
+    "corpus": "corpus_broad.parquet",
+    "sha256": "a58d5a05efedad2506cf6f027075f3ff5c23e266fe12b4f0fa54380476905dd7"
   }
 }

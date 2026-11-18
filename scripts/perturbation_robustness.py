@@ -198,10 +198,10 @@ def main() -> None:
         rng = random.Random(42)
         rng_t = random.Random(42)
         targeted = base.apply(
-            lambda r: perturb_targeted(r["text_clean"], r["language"], targets, trate, rng_t), axis=1)
+            lambda r: perturb_targeted(r["text_clean"], r["language"], targets, trate, rng_t), axis=1)  # noqa: B023 (apply eager: rng_t da volta atual)
         variants = {
             "limpo": base["text_clean"],
-            f"ofuscacao_aleatoria_{rate}": base["text_clean"].map(lambda t: perturb_random(t, rate, rng)),
+            f"ofuscacao_aleatoria_{rate}": base["text_clean"].map(lambda t: perturb_random(t, rate, rng)),  # noqa: B023
             f"ofuscacao_direcionada_{trate}": targeted,
             "identidade_removida": remove_identity(base),
         }
