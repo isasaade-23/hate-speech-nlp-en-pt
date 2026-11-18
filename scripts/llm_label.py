@@ -245,6 +245,10 @@ def carregar_feitos(arq: Path) -> dict[str, dict]:
 
 
 def carregar_itens(ids_csv: str, n: int | None) -> pd.DataFrame:
+    cab = pd.read_csv(ids_csv, nrows=0).columns
+    if "texto" in cab:  # fora do corpus: o CSV traz o texto
+        d = pd.read_csv(ids_csv, usecols=["id", "texto"]).astype({"id": str})
+        return d.head(n) if n is not None else d
     ids = pd.read_csv(ids_csv, usecols=["id"]).id.astype(str)
     if n is not None:
         ids = ids.head(n)

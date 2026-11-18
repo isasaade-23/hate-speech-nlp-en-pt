@@ -84,3 +84,7 @@ _arquivo/*.zip
 # Auditoria com IDs das bases: so Isabela e Vini (nao vai ao repo publico)
 reports/tables/auditoria_pt_dups.csv
 reports/tables/hatebr_partidarismo_flip.csv
+
+# Bases candidatas de PT (OLID-BR, TuPy): dados e amostras ficam fora do repo; so os scripts entram
+_candidatas_pt/*
+!_candidatas_pt/*.py

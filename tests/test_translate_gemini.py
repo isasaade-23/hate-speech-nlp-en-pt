@@ -204,7 +204,7 @@ def test_completo_checkpoint_a_cada_50_e_retomada(monkeypatch, tmp_path):
     tg.cmd_traduzir(args)
     feitos = tg.carregar_feitos()
     assert len(feitos) == 120 and {f["modelo"] for f in feitos.values()} == {"gemini-3.5-flash"}
-    motivos = [json.loads(l)["motivo"] for l in (tmp_path / "ckpt.jsonl").read_text().splitlines()]
+    motivos = [json.loads(ln)["motivo"] for ln in (tmp_path / "ckpt.jsonl").read_text().splitlines()]
     assert motivos.count("50 traducoes") == 2 and motivos[-1] == "fim"
     antes = (tmp_path / "saida.jsonl").read_text()
     tg.cmd_traduzir(args)  # retomada: nada pendente, nada reescrito
