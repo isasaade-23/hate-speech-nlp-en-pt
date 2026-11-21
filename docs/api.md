@@ -13,11 +13,10 @@ POST /v1/predict          (header X-API-Key: <chave>)
 
 ```json
 {
-  "text": "...",
   "label": "hate",
   "score": 0.74,
   "language": {"detected": "pt", "confidence": 0.86},
-  "model_version": "tfidf_logreg_strict_s42",
+  "model_version": "stack_strict_s42",
   "latency_ms": 35
 }
 ```
@@ -38,7 +37,8 @@ Access and limits:
 - Errors always have the form `{"error": {"code": "...", "message": "..."}}`.
 - Logs record client name, counts, language and latency, never the text. Validation errors
   do not echo the input.
-- Terms: research and evaluation use only (see `LICENSE-MODEL.md`).
+- The response does not echo the input text; in a batch, order follows the request.
+- Terms: research and evaluation use only (see `LICENSE-MODEL.md` and `docs/api_termos_privacidade.md`).
 
 A Gradio demo (`python demo/app.py`) is the human-facing version of the same model: a page
 where you type EN/PT text and see the prediction.
