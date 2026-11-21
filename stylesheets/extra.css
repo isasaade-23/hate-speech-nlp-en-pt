@@ -1,0 +1,17 @@
+/* Project visual identity: slate base, coral accent (amber in dark). */
+:root {
+  --md-primary-fg-color: #3D5A80;
+  --md-primary-fg-color--light: #5A78A0;
+  --md-primary-fg-color--dark: #1F3050;
+  --md-accent-fg-color: #EE6C4D;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-accent-fg-color: #F4A261;
+  --md-primary-fg-color: #3D5A80;
+}
+
+.md-header,
+.md-tabs {
+  background-color: #1F3050;
+}
