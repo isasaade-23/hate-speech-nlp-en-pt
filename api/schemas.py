@@ -24,7 +24,7 @@ class LanguageInfo(BaseModel):
 
 
 class Prediction(BaseModel):
-    text: str
+    # sem eco do texto: a resposta não devolve a entrada; no lote a ordem é a da requisição
     label: str
     score: float
     # limiar aplicado a ESTE texto: hoje é sempre o global, mas o roteamento por

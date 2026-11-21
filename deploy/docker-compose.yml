@@ -8,7 +8,9 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - HSC_MODEL_ID=${HSC_MODEL_ID:-}
+      - HSC_MODEL_ID=${HSC_MODEL_ID:-stack_strict_s42}
+      - HSC_API_KEYS=${HSC_API_KEYS:?defina HSC_API_KEYS (nome:sha256hex,...)}
+      - HSC_RATE_PER_MIN=${HSC_RATE_PER_MIN:-600}
     restart: unless-stopped
 
   demo:
@@ -18,6 +20,4 @@ services:
     image: hsc-demo
     ports:
       - "7860:7860"
-    depends_on:
-      - api
     restart: unless-stopped

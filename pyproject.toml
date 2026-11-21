@@ -40,7 +40,7 @@ train = [
     "requests>=2.31",           # scripts/ and tools/ (LLM judge, translation, doccano)
 ]
 embeddings = ["sentence-transformers>=2.6"]   # multilingual SBERT (pulls torch CPU)
-api = ["fastapi>=0.110", "uvicorn[standard]>=0.29", "slowapi>=0.1.9"]
+api = ["fastapi>=0.110", "uvicorn[standard]>=0.29"]
 demo = ["gradio>=4.20"]
 dev = ["pytest>=8.0", "ruff>=0.3", "black>=24.0", "isort>=5.13", "pre-commit>=3.6", "nbstripout>=0.7"]
 

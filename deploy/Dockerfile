@@ -20,7 +20,11 @@ RUN pip install -e . --no-deps
 # App code, configs, and the trained model bundle
 COPY api ./api
 COPY configs ./configs
-COPY models ./models
+# So o bundle servido (+ registry). O .joblib nao esta no git: o build roda onde os pesos existem.
+ARG MODEL_ID=stack_strict_s42
+ENV HSC_MODEL_ID=${MODEL_ID}
+COPY models/registry.json ./models/registry.json
+COPY models/${MODEL_ID} ./models/${MODEL_ID}
 
 # non-root
 RUN useradd -m appuser && chown -R appuser /app
