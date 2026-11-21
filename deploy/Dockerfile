@@ -8,6 +8,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
+# lightgbm precisa de libgomp (ausente no python:slim)
+RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 && rm -rf /var/lib/apt/lists/*
+
 # Serving deps first (better layer caching)
 COPY deploy/requirements-serve.txt ./
 RUN pip install -r requirements-serve.txt
