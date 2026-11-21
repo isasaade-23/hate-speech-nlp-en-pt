@@ -55,6 +55,29 @@ assets/      committed figures (regenerate with assets/make_figures.py)
 Runs are seeded and config-driven; `models/registry.json` links each model id to its
 config, git SHA, and metrics.
 
+## Order of the analysis scripts (`scripts/`)
+
+Run from the repo root after the pipeline above (frozen split and `models/registry.json`
+in place). Order inferred from each script's docstring and inputs; the scripts are not chained
+by a runner. Scripts marked (API) need keys kept outside the repo.
+
+1. **Product model**: `tune_tfidf_logreg.py` (Optuna search), `fit_platt_demo.py` and
+   `calibrate_demo.py` (calibration, fit on validation only), `build_stack.py` (served stack).
+2. **Comparison on the v5 test**: `adversarial_slice.py`, `leaderboard_v5.py`.
+3. **Phase 0, PT audit**: `auditoria_pt.py` (integrity, learning curve), `llm_label.py` (API,
+   judge of the label), `hatebr_partidarismo.py` (API, partyism under strict v2).
+4. **PT recall and identity bias**: `pt_gap.py`, `pt_boost.py`, `pt_identity_probe.py`,
+   `pt_threshold_bias.py`, `pt_ensemble.py`, then the release gate `bias_gate_v5.py`.
+5. **Step 2.2**: `commercial_retrain_compare.py` (retrain on the commercial corpus).
+6. **Step 2.3**: `perturbation_robustness.py` (obfuscation, identity terms).
+7. **Step 2.4**: `translate_pilot.py` (MarianMT and Qwen), `translate_gemini.py` (API),
+   `avaliar_traducao.py` (quality of the 500 pilot translations).
+8. **Step 2.5**: `generate_synthetic.py` (PT-BR synthetic data, local Ollama, seeds from
+   permissive sources only).
+9. **Extension and field tests**: `export_extension_model.py`, `field_harvest.py`,
+   `field_score.py`.
+10. **Side probe**: `probe_lfm25_encoder.py` (frozen LFM2.5 embeddings, CPU head).
+
 ## Releasing and DOI (Zenodo)
 
 The repository ships a `.zenodo.json` with citation metadata. To mint a DOI:
