@@ -10,7 +10,7 @@ pip install -r requirements.txt && pip install -e .
 ## Local pipeline (classical track, CPU)
 
 ```bash
-hsc ingest                       # 4 datasets -> common schema
+hsc ingest                       # 8 datasets -> common schema
 hsc probe-dataset2               # resolve the unlabeled 1/2/3 tweets source
 hsc harmonize --policy strict    # (and --policy broad)
 hsc split --policy strict        # leakage-safe frozen split

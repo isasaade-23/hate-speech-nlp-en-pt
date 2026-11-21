@@ -44,8 +44,8 @@ Três perfis, decisão registrada com os números:
 
 **Todos os modelos atuais são research-only**: foram treinados no corpus completo, que
 mistura fontes não-comerciais (memotion "só citação", tweets_ip licença incerta,
-pt_fortuna "unknown"). A `commercial_whitelist` (labels.yaml) tem só **multioff**
-(Apache-2.0, 743 linhas). É pequeno demais para um modelo sozinho.
+pt_fortuna "unknown"). A `commercial_whitelist` (labels.yaml) tem três fontes:
+**multioff** (Apache-2.0), **vidgen** (CC BY 4.0) e **hatexplain**.
 
 **Caminho para o modelo comercial:** retreinar a pipeline (mesma config) sobre dados de
 licença permissiva apenas: multioff + dados externos a verificar (HateBR/ToLD-BR em PT,

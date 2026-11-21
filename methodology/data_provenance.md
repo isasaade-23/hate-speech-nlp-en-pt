@@ -40,7 +40,7 @@ texto de rede social. O dataset segue ingerido e recuperável.
 - **Modelo de pesquisa:** treinado em todos os datasets. Uso research-only. Não
   redistribuir comercialmente sem esclarecer licenças de memotion, tweets_ip e pt_fortuna.
 - **Modelo de produto:** treinado apenas na `commercial_whitelist` de configs/labels.yaml
-  (hoje: multioff) mais dados externos de licença permissiva a verificar (candidatos PT:
+  (hoje: multioff, vidgen e hatexplain) mais dados externos de licença permissiva a verificar (candidatos PT:
   HateBR, ToLD-BR, OffComBR; candidatos EN: OLID/OffensEval, HatEval sob suas licenças).
 
 ### Pendências de licenciamento (bloqueiam venda, não o artigo)
