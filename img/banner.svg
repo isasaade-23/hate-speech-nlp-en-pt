@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="340" viewBox="0 0 1280 340" role="img" aria-label="Bilingual Hate-Speech Detection">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1F3050"/>
+      <stop offset="0.62" stop-color="#2C4468"/>
+      <stop offset="1" stop-color="#3D5A80"/>
+    </linearGradient>
+    <linearGradient id="rule" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#EE6C4D"/>
+      <stop offset="1" stop-color="#F4A261"/>
+    </linearGradient>
+    <style>
+      .t  { font-family: 'Lato','Segoe UI',system-ui,-apple-system,sans-serif; }
+      .title  { font-weight: 800; }
+      .mono   { font-family: 'JetBrains Mono','SFMono-Regular',Consolas,monospace; }
+    </style>
+  </defs>
+
+  <rect width="1280" height="340" fill="url(#bg)"/>
+  <!-- coral accent spine (the 10% pinch) -->
+  <rect x="0" y="0" width="8" height="340" fill="#EE6C4D"/>
+
+  <!-- decorative token cluster (speech / text), low opacity -->
+  <g opacity="0.9">
+    <rect x="905" y="70"  width="150" height="26" rx="13" fill="#F6F2EE" opacity="0.10"/>
+    <rect x="905" y="108" width="230" height="26" rx="13" fill="#F6F2EE" opacity="0.14"/>
+    <rect x="905" y="146" width="120" height="26" rx="13" fill="#EE6C4D" opacity="0.55"/>
+    <rect x="905" y="184" width="196" height="26" rx="13" fill="#F6F2EE" opacity="0.10"/>
+    <rect x="905" y="222" width="164" height="26" rx="13" fill="#F4A261" opacity="0.45"/>
+    <circle cx="1160" cy="83"  r="6" fill="#F6F2EE" opacity="0.18"/>
+    <circle cx="1196" cy="121" r="6" fill="#EE6C4D" opacity="0.5"/>
+    <circle cx="1120" cy="235" r="6" fill="#F4A261" opacity="0.5"/>
+  </g>
+
+  <!-- eyebrow -->
+  <text x="64" y="86" class="t" font-size="20" letter-spacing="3" fill="#F4A261">NLP · CONTENT MODERATION · REPRODUCIBLE ML</text>
+
+  <!-- title -->
+  <text x="62" y="150" class="t title" font-size="58" fill="#F6F2EE">Bilingual Hate-Speech Detection</text>
+
+  <!-- subtitle -->
+  <text x="64" y="196" class="t" font-size="25" fill="#C9D3E0">English &amp; Portuguese · classical vs. transformer · deployable API</text>
+
+  <!-- proof chips -->
+  <g class="mono" font-size="17" fill="#F6F2EE">
+    <rect x="64"  y="232" width="232" height="40" rx="8" fill="#F6F2EE" opacity="0.08"/>
+    <text x="82"  y="258">macro-F1 0.75 · XLM-R</text>
+    <rect x="308" y="232" width="250" height="40" rx="8" fill="#F6F2EE" opacity="0.08"/>
+    <text x="326" y="258">neural &gt; classical (McNemar)</text>
+    <rect x="570" y="232" width="220" height="40" rx="8" fill="#F6F2EE" opacity="0.08"/>
+    <text x="588" y="258">leakage-safe · 16 models</text>
+  </g>
+
+  <!-- bottom accent rule -->
+  <rect x="64" y="300" width="726" height="4" rx="2" fill="url(#rule)"/>
+</svg>
