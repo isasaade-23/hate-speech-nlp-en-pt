@@ -10,6 +10,7 @@ pip install -r requirements.txt && pip install -e .
 ## Local pipeline (classical track, CPU)
 
 ```bash
+python scripts/download_data.py  # public sources -> data/source_zips (see its output for manual ones)
 hsc ingest                       # 8 datasets -> common schema
 hsc probe-dataset2               # resolve the unlabeled 1/2/3 tweets source
 hsc harmonize --policy strict    # (and --policy broad)

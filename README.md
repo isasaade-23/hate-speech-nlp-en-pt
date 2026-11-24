@@ -204,12 +204,12 @@ pip install -r requirements.txt && pip install -e .
 
 # 2. Download the 8 source datasets
 # Each has its own license and URL — see data/MANIFEST.csv for the full table
-# (license, size, commercial_ok). Download each one from its url_origem and save
-# it under data/source_zips/ with the exact zip filename configs/data.yaml expects
-# (e.g. data/source_zips/hatebr.zip). memotion, tweets_ip and pt_fortuna have
+# (license, size, commercial_ok). memotion, tweets_ip and pt_fortuna have
 # licenses still pending confirmation (see MANIFEST) — fine for research use,
 # do not ship them in a commercial product.
-mkdir -p data/source_zips   # then place the 8 zips here
+python scripts/download_data.py   # 5 public sources, pinned commits, sha256-checked,
+                                  # zipped into data/source_zips/; prints what to do
+                                  # for tweets_ip, multioff and memotion (manual)
 
 # 3. Reproduce the local pipeline (classical track, CPU)
 hsc ingest                       # 8 sources -> common schema (data/interim)
