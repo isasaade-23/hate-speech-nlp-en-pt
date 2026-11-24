@@ -41,7 +41,6 @@ train = [
 ]
 embeddings = ["sentence-transformers>=2.6"]   # multilingual SBERT (pulls torch CPU)
 api = ["fastapi>=0.110", "uvicorn[standard]>=0.29"]
-demo = ["gradio>=4.20"]
 dev = ["pytest>=8.0", "ruff>=0.3", "black>=24.0", "isort>=5.13", "pre-commit>=3.6", "nbstripout>=0.7"]
 
 [project.scripts]

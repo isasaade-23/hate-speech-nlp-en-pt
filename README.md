@@ -4,8 +4,8 @@
 
 # Bilingual Hate-Speech Detection (EN / PT)
 
-**Binary hate-speech classification for English and Portuguese social-media text.
-A reproducible study comparing classical models with transformers, plus a deployable inference API.**
+**Binary hate-speech classification for English and Portuguese social-media text, with the
+reproducible pipeline behind the Luciola site and API.**
 
 [![CI](https://github.com/isasaade-23/hate-speech-nlp-en-pt/actions/workflows/ci.yml/badge.svg)](https://github.com/isasaade-23/hate-speech-nlp-en-pt/actions/workflows/ci.yml)
 [![Docs](https://img.shields.io/badge/docs-online-3D5A80?style=flat-square)](https://isasaade-23.github.io/hate-speech-nlp-en-pt/)
@@ -13,336 +13,163 @@ A reproducible study comparing classical models with transformers, plus a deploy
 ![Python](https://img.shields.io/badge/python-3.12-3D5A80?style=flat-square)
 ![License](https://img.shields.io/badge/code-AGPL--3.0-3D5A80?style=flat-square)
 ![Model license](https://img.shields.io/badge/model-research%20only-EE6C4D?style=flat-square)
-![Style](https://img.shields.io/badge/lint-ruff%20%2B%20black-3D5A80?style=flat-square)
-![Models](https://img.shields.io/badge/models-16%20compared-EE6C4D?style=flat-square)
 
-**[Try the live demo](https://luciola.65-108-90-215.sslip.io)** ·
-**[Documentation](https://isasaade-23.github.io/hate-speech-nlp-en-pt/)** ·
-**[Code](https://github.com/isasaade-23/hate-speech-nlp-en-pt)**
+[Português](README.pt-BR.md) ·
+**[Live site](https://luciola.65-108-90-215.sslip.io)** ·
+**[Documentation](https://isasaade-23.github.io/hate-speech-nlp-en-pt/)**
 
 </div>
 
----
+## What this repository does
 
-## Current status (2026-10-06)
+It builds one text-only classifier for English and Portuguese, from the public datasets to the
+model served by the site and the API. Every number in this README comes from a file in
+`reports/` produced by the code here. Site code lives in
+[hate-speech-demo](https://github.com/isasaade-23/hate-speech-demo) and the browser extension in
+[luciola-extension](https://github.com/isasaade-23/luciola-extension).
 
-- **Corpus v5**, 8 sources ingested (see [`data/MANIFEST.csv`](data/MANIFEST.csv) for licenses and
-  download links). One source, memotion, is excluded from the primary training corpus since
-  Beta 2.0 and kept only as an external test set.
-- **Served model: the stacked ensemble (stack v5)** — ROC-AUC 0.8875, macro-F1 0.791, recall on
-  hate 0.736 on the frozen v5 test. Still what runs behind the live demo and the API.
-- **Chosen candidate, not yet served: twitter-XLM-R.** The 2026-08-24 bias gate (see
-  [`methodology/pt_recall_x_vies.md`](methodology/pt_recall_x_vies.md)) found it raises recall on
-  Portuguese hate from 0.316 to **0.507** while *lowering* identity-term over-flagging from 0.137 to
-  **0.119** — an improvement on both axes, not a trade-off. It is blocked on deployment, not
-  quality: the checkpoint is 1.1 GB, too large for the current free-tier hosting. Needs ONNX int8
-  quantization or paid infrastructure before it can replace the stack.
-- **Next steps:** see [Etapa 2](#próximos-passos-etapa-2) below.
+## Served model and result
 
-## Overview
+The served model is a stacked ensemble (stack v5). A meta logistic regression combines three
+TF-IDF models (logistic regression, linear SVM, LightGBM). The meta model, the decision threshold
+and the Platt calibration are fit on the validation split only.
 
-This project trains and rigorously compares hate-speech classifiers for a **bilingual (EN + PT),
-text-only** setting, with language detection at the input. It pursues a dual goal: a
-**reproducible research artifact** (every table and figure is generated from code) and a
-**deployable product** (a calibrated inference API with a documented model-selection decision).
+On the frozen v5 test (16,261 rows, strict label policy):
 
-The scientific core is a fair, leakage-safe comparison of two model families under one protocol:
-
-- **Classical / tabular:** TF-IDF (word + character n-grams) and frozen multilingual
-  sentence embeddings (SBERT) feeding Logistic Regression, Linear SVM, and LightGBM.
-- **Transformers:** XLM-RoBERTa (bilingual), BERTimbau (PT), and BERTweet (EN), fine-tuned on Colab.
-
-## Live demo
-
-The interactive demo, **Luciola**, runs the lightweight CPU model in the browser, in English or
-Portuguese, in a light or dark theme. It classifies text live and renders the stop-word ablation
-as an interactive heatmap.
-**[Open Luciola](https://luciola.65-108-90-215.sslip.io)** — served from our own machine, so it never sleeps.
-A mirror runs on [Streamlit Community Cloud](https://luciola-hatecheck.streamlit.app/), which hibernates when idle.
-
-There is also a **browser extension** that runs the linear member of the served ensemble
-fully inside the browser, with no network access and no server:
-**[luciola-extension](https://github.com/isasaade-23/luciola-extension)** (v0.2.0 serves the
-corpus v5 linear member; parity with the Python model verified below 1e-8 on a golden set).
-
-## Key results (Beta 2.0 phase 2, corpus v5)
-
-Corpus v5 (2026-08-16) adds two commercially-licensed English sources: Vidgen et al. 2021
-*Dynamically Generated* (41k synthetic adversarial entries, 54% hate, CC BY 4.0) and
-HateXplain (20k Twitter+Gab posts, MIT). The corpus doubled to 113,826 rows strict and hate
-prevalence rose from 8% to 28.8%. On the (much harder, 36% adversarial) v5 test the stacked
-ensemble scores **ROC-AUC 0.8875, macro-F1 0.791, recall on hate 0.736** — recall on hate
-jumped from 0.55 to 0.74, the most product-visible effect. Full v5 tables, the per-source
-breakdown and the language-balance analysis are in [docs/results.md](docs/results.md).
-
-**That average is carried by English.** Split by language on the same test
-(`reports/tables/stack_slices_v5_strict.csv`), recall on hate is **0.776 in English
-(n=11,513) and 0.316 in Portuguese (n=4,748)**. In Portuguese the model recovers under a
-third of the hate it is shown. The cause is measured and it is not the method: of the eight
-corpus sources, the three permissively licensed ones are all English, and the four
-Portuguese ones are restrictive or of indeterminate licence. See
-[the slice table](docs/results.md#slices-the-aggregate-hides-the-language-gap).
-
-| Model (strict, test v5) | ROC-AUC | macro-F1 | Recall on hate |
-|----------------|---------|----------|----------------|
+| Model | ROC-AUC | macro-F1 | Recall on hate |
+|---|---|---|---|
 | **Stacked ensemble (served)** | **0.8875** | **0.7906** | **0.7359** |
 | tfidf_logreg | 0.884 | 0.788 | 0.707 |
 | tfidf_lgbm | 0.870 | 0.773 | 0.715 |
 | tfidf_svm | 0.855 | 0.768 | 0.679 |
 
-Numbers below describe corpus v4 and are not comparable (the test split changed).
+The average hides the language gap. Recall on hate is 0.776 in English (n=11,513) and 0.316 in
+Portuguese (n=4,748), in `reports/tables/stack_slices_v5_strict.csv`. The three permissively
+licensed sources are all English, and the Portuguese sources are smaller and carry restrictive
+or unclear licenses.
 
-## Beta 2.0 (corpus v4)
+## Data
 
-Beta 2.0 follows the roadmap in Gandhi et al. (2024), *Hate speech detection: A comprehensive
-review of recent works*, Expert Systems ([doi:10.1111/exsy.13562](https://doi.org/10.1111/exsy.13562)):
-stacked ensembles and affective-lexicon features are the levers with documented gains, and
-text-only models collapse on meme OCR.
+Corpus v5 (strict) has 113,826 rows from six sources, 28.8% labelled hate. Two more sources
+(MultiOFF, Memotion) are kept only as external tests. Licenses and origin are in
+[`data/MANIFEST.csv`](data/MANIFEST.csv) and
+[`methodology/data_provenance.md`](methodology/data_provenance.md).
 
-- **The Beta 2.0 model was a calibrated stacked ensemble.** A meta logistic regression over the
-  three TF-IDF models (LogReg, SVM, LightGBM), with the meta weights, decision threshold and
-  Platt calibration all fit on validation only. Test (strict, v4): ROC-AUC 0.877, macro-F1 0.711,
-  ECE 0.044, 15 MB, ~34 ms per text on CPU. The same architecture, retrained on corpus v5, is
-  what the demo serves today. Adding the two SBERT members reaches AUC 0.886
-  but requires a 470 MB encoder; documented as a trade-off.
-- **Meme OCR was demoted to an external test set.** Its per-source ROC-AUC was 0.547 (random):
-  the meme's hate lives in the image + text jointly, which the survey confirms for text-only
-  models (0.48-0.53). The primary corpus (v4) is social-media text: 53,540 rows after
-  deduplication, five sources, three of them Portuguese (per-source AUC: HateBR 0.91,
-  ToLD-Br 0.91, EN tweets 0.83, Fortuna 0.75).
-- **Growing the Portuguese side paid off twice.** HateBR (7k Instagram comments) and ToLD-Br
-  (21k tweets) raised the PT share to ~55% of the corpus and made PT the model's strongest
-  language.
-- **Honest probabilities.** The served score is Platt-calibrated on validation: test ECE
-  dropped from 0.16 (raw) to 0.03-0.04 at zero cost in macro-F1.
-- **Leakage-safe by construction.** Exact + near-duplicate (MinHash/LSH) deduplication and a
-  group-stratified, frozen split guarantee no paraphrase crosses train/test. A CI test enforces it.
-- **Negative results, tested and reported.** Bayesian HPO over the TF-IDF family, per-language
-  thresholds, stop-word removal and frozen 230M-encoder embeddings all measured at or below the
-  baseline; each is documented in the decision log instead of silently dropped.
+| Source | Language | Rows in corpus v5 | How to get it |
+|---|---|---|---|
+| Vidgen et al. 2021 (adversarial) | EN | 41,097 | `scripts/download_data.py` |
+| ToLD-BR | PT | 20,797 | `scripts/download_data.py` |
+| tweets_ip | EN | 20,302 | not public, ask the maintainer |
+| HateXplain | EN | 19,189 | `scripts/download_data.py` |
+| HateBR | PT | 6,777 | `scripts/download_data.py` |
+| Fortuna et al. 2019 | PT | 5,664 | `scripts/download_data.py` |
 
-### Archived: v1 study results (original 4-dataset corpus)
-
-The classical-vs-transformer comparison below was run on the original corpus (before HateBR,
-ToLD-Br and the meme-OCR demotion). The transformers have not yet been re-run on corpus v4
-(they need Colab GPU), so these numbers describe that earlier corpus, not the current one.
-
-- **Transformers won, significantly**: XLM-R macro-F1 0.750 (strict), BERTweet 0.748 (broad),
-  ~4 points over the best classical baseline (paired McNemar with Holm, p = 0.003 / p < 0.001).
-- **Cross-lingual transfer is where embeddings earn their keep**: TF-IDF collapses EN→PT
-  zero-shot (0.42) while multilingual SBERT transfers (0.63).
-- **A data-integrity bug, found and fixed**: the Portuguese source was decoded as latin-1 when
-  it is UTF-8; the byte-level audit and rebuild lifted EN→PT transfer by ~4 points.
-
-<div align="center">
-
-![Classical vs. transformer leaderboard](assets/leaderboard.png)
-
-*v1 study figure: test macro-F1 by model and label policy on the original corpus. Transformers
-(coral) topped both policies; the gap over the best classical baseline was statistically
-significant.*
-
-</div>
-
-### Beta 2.0 comparison (corpus v4, test)
-
-| Model (strict) | ROC-AUC | macro-F1 | Recall on hate |
-|----------------|---------|----------|----------------|
-| **Stacked ensemble (then served)** | **0.877** | **0.711** | 0.548 |
-| tfidf_logreg | 0.873 | 0.702 | 0.481 |
-| tfidf_lgbm | 0.860 | 0.707 | 0.497 |
-| tfidf_svm | 0.855 | 0.695 | 0.521 |
-| Stack + SBERT members (not served) | 0.886 | 0.715 | 0.511 |
-
-### v1 study: final comparison (test macro-F1, original corpus)
-
-| Policy | Best transformer | Best classical | Δ | Significance (McNemar + Holm) |
-|--------|------------------|----------------|----|-------------------------------|
-| strict | XLM-R · **0.750** | tfidf_logreg · 0.709 | +0.041 | p = 0.003 |
-| broad  | BERTweet · **0.748** | tfidf_lgbm · 0.698 | +0.050 | p < 0.001 |
-
-### v1 study: cross-lingual & cross-domain transfer
-
-<div align="center">
-
-![Transfer experiment](assets/transfer.png)
-
-</div>
-
-| Experiment (broad) | TF-IDF (word) | SBERT (multilingual) |
-|--------------------|:-------------:|:--------------------:|
-| EN → PT (zero-shot) | 0.418 | **0.626** |
-| PT → EN (zero-shot) | 0.445 | **0.674** |
-
-The label boundary between *offensive* and *hateful* is treated as a first-class variable. Every
-result is reported under two policies, **strict** (only explicit hate is positive) and **broad**
-(offensive folded into hate). This turns label heterogeneity into a sensitivity analysis.
+`download_data.py` fetches each file at a pinned commit and checks its sha256 against the copy
+used in corpus v5. Two label policies are built and reported side by side. Strict marks only
+explicit hate. Broad also marks offensive language. The mapping is in
+[`methodology/label_mapping.md`](methodology/label_mapping.md).
 
 ## Pipeline
 
 ```mermaid
 flowchart LR
-    A[6 sources<br/>EN tweets · PT tweets · PT comments<br/>EN memes OCR as external test] --> B[Ingest<br/>common schema]
-    B --> C[Harmonize<br/>strict / broad policies]
-    C --> D[Dedup + leakage-safe split<br/>MinHash/LSH · grouped · frozen]
-    D --> E[Language ID<br/>lingua]
-    E --> F{Train}
-    F --> G[Classical<br/>TF-IDF · SBERT → LogReg/SVM/LGBM]
-    F --> H[Transformers<br/>XLM-R · BERTimbau · BERTweet]
-    G --> I[Evaluate<br/>macro-F1 · McNemar · calibration · bias · transfer]
-    H --> I
-    I --> J[Product model<br/>Pareto selection]
-    J --> K[Inference API<br/>FastAPI + Gradio]
+    A[6 sources<br/>EN + PT] --> B[Ingest<br/>common schema]
+    B --> C[Harmonize<br/>strict / broad]
+    C --> D[Dedup + grouped split<br/>frozen]
+    D --> E[Language ID]
+    E --> F[Train<br/>TF-IDF and SBERT models]
+    F --> G[Stack + Platt<br/>fit on validation]
+    G --> H[Evaluate<br/>slices, bias gate, robustness]
+    H --> I[FastAPI]
 ```
 
 ## Quickstart
 
 ```bash
-# 1. Environment (Python 3.12)
-python -m venv .venv && . .venv/Scripts/activate      # Windows: .venv\Scripts\activate
+python -m venv .venv && . .venv/Scripts/activate      # Linux/macOS: . .venv/bin/activate
 pip install -r requirements.txt && pip install -e .
 
-# 2. Download the 8 source datasets
-# Each has its own license and URL — see data/MANIFEST.csv for the full table
-# (license, size, commercial_ok). memotion, tweets_ip and pt_fortuna have
-# licenses still pending confirmation (see MANIFEST) — fine for research use,
-# do not ship them in a commercial product.
-python scripts/download_data.py   # 5 public sources, pinned commits, sha256-checked,
-                                  # zipped into data/source_zips/; prints what to do
-                                  # for tweets_ip, multioff and memotion (manual)
-
-# 3. Reproduce the local pipeline (classical track, CPU)
-hsc ingest                       # 8 sources -> common schema (data/interim)
-hsc probe-dataset2               # resolve the unlabeled 1/2/3 tweets source
-hsc harmonize --policy strict    # (and --policy broad)
-hsc harmonize --policy strict --commercial          # commercial-only corpus (multioff+vidgen+hatexplain)
-hsc harmonize --policy strict --commercial --include-toldbr   # same, + ToLD-BR opted in
-hsc split --policy strict        # leakage-safe frozen split
-hsc langid  --policy strict      # language detection
-hsc train -c configs/classical/tfidf_logreg.yaml --policy strict
-hsc report                       # leaderboard + breakdown tables
-
-# 4. Deeper evaluation (Fase 9)
-hsc analyze                      # paired McNemar + calibration
-hsc transfer                     # cross-lingual / cross-domain
-hsc bias                         # identity-term bias probe
-hsc errors                       # qualitative error analysis
-hsc product                      # product model selection (Pareto)
+python scripts/download_data.py                       # 5 public sources -> data/source_zips/
+hsc ingest && hsc probe-dataset2
+hsc harmonize --policy strict && hsc split --policy strict && hsc langid --policy strict
+hsc train -c configs/classical/tfidf_logreg.yaml --policy strict   # repeat for svm and lgbm
+python scripts/build_stack.py --policy strict         # served stack -> models/stack_strict_s42/
+hsc report
+pytest -q                                             # leakage gate, metrics, API contract
 ```
 
-Transformer fine-tuning runs on Google Colab (GPU): open
-[`notebooks/colab_neural.ipynb`](notebooks/colab_neural.ipynb). It is a self-contained notebook that
-uploads the frozen corpus and trains XLM-R / BERTimbau / BERTweet with the same protocol.
+The full order, including calibration and the evaluation scripts, is in
+[`docs/reproducibility.md`](docs/reproducibility.md). Transformers train on Colab with
+[`notebooks/colab_neural.ipynb`](notebooks/colab_neural.ipynb). The API runs with
+`uvicorn api.main:app` (see [`docs/api.md`](docs/api.md)).
 
-### Serve the API
+## Portuguese study (`scripts/`)
 
-```bash
-uvicorn api.main:app --reload
-# POST /predict {"text": "..."}  ->  {label, score, language, model_version, latency_ms}
-```
+Each script answers one question about the Portuguese gap and writes a table to `reports/tables/`.
 
-## Próximos passos (Etapa 2)
+| Script | Question |
+|---|---|
+| `auditoria_pt.py` | Are there duplicates across splits, and does more PT data still help (learning curve)? |
+| `llm_label.py` | Does an LLM judge agree with the original PT labels? |
+| `hatebr_partidarismo.py` | How does HateBR's partyism code change the strict label? |
+| `pt_gap.py` | Where does the stack lose recall in PT, without retraining? |
+| `pt_boost.py` | Which levers raise PT recall without a GPU? |
+| `pt_threshold_bias.py` | What does a PT-specific threshold cost in identity bias? |
+| `pt_ensemble.py` | Does combining the stack with a PT-only model help on the PT slice? |
+| `pt_identity_probe.py` | Does a model flag people who describe their own identity? |
+| `bias_gate_v5.py` | Release gate, so no candidate raises identity over-flagging in PT. |
+| `perturbation_robustness.py` | How do spelling obfuscation and identity terms move the score? |
+| `commercial_retrain_compare.py` | What is left when training only on commercially licensed sources? |
 
-In rough order of effort. Items 2.1–2.2 are done; 2.3–2.7 are scoped but not started.
+Decisions and their dates are logged in
+[`methodology/DECISOES_METODOLOGICAS.md`](methodology/DECISOES_METODOLOGICAS.md) (Portuguese).
 
-- [x] **2.1 Commercial-corpus flag** — `hsc harmonize --commercial` restricts the primary corpus
-  to `configs/labels.yaml`'s `commercial_whitelist` (multioff, vidgen, hatexplain);
-  `--include-toldbr` opts ToLD-BR in separately, since its license (CC BY-SA 4.0) is still
-  pending confirmation.
-- [x] **2.2 Commercial-corpus baseline** — retrained `tfidf_logreg` on the commercial corpus
-  (train only; val/test untouched) and compared against the same model on the full corpus and
-  against the served stack v5, on the same frozen test. **Negative result, as expected:** under
-  `strict` the commercial sources are 100% English, so the commercial train set has zero
-  Portuguese text and recall on PT hate collapses to 0.01–0.02 (vs. 0.32 full-corpus); adding
-  ToLD-BR (license still pending) barely helps under `strict` (too few hate-labeled rows) and
-  helps more under `broad` (0.24, still well below 0.52 full-corpus). The identity-bias probe
-  looks better on the commercial models, but that is an artifact of near-zero PT recall, not
-  real fairness — see [`methodology/DECISOES_METODOLOGICAS.md`](methodology/DECISOES_METODOLOGICAS.md)
-  (2026-10-07) for the full tables. No commercial variant is a serving candidate.
-- [ ] **2.3 Rule-based perturbations** — typos, missing accents, spacing, partial censorship,
-  "0dio"-style substitutions, applied at the same rate to hate and non-hate; plus a masked
-  version of the test set to measure robustness.
-- [ ] **2.4 PT machine translation of the permissive sources** — local open LLM, output goes to
-  the Etapa 3 human-validation queue, never straight into training.
-- [ ] **2.5 Synthetic data from a local open LLM** — seeds only from permissive sources; from
-  restricted sources, only aggregate statistics (proportions, target groups, length). N-gram
-  overlap and similarity check against real data: no near-duplicate text. Also queued for
-  validation.
-- [ ] **2.6 Synthetic-vs-real training experiments** — A (current corpus), B (100% synthetic),
-  C (permissive + synthetic), D (C + translations). Same frozen test, same identity probe.
-- [ ] **2.7 Encoder comparison** — twitter-XLM-R, moBERTo, NorBERTo, BERTomelo, mmBERT. Check
-  each one's Hugging Face license before training. Decide by the double criterion
-  (recall × identity bias), the same gate that selected twitter-XLM-R above.
+## Open points for review
 
-## Product model selection
-
-Choosing the served model is a Pareto trade-off, not just the top macro-F1
-(see [`methodology/product_decision.md`](methodology/product_decision.md)):
-
-| Profile | Model | Why |
-|---------|-------|-----|
-| **Served (Beta 2.0 phase 2, corpus v5)** | **stacked ensemble (3 TF-IDF models)** | AUC 0.8875, recall on hate 0.736, Platt-calibrated, 32 MB, ~30 ms/text on CPU |
-| Best AUC measured (v4) | stack + SBERT members | AUC 0.886 on v4; awaiting a v5 re-run on Colab |
-| v1 study best quality | XLM-R | Highest macro-F1 on the original corpus; needs a GPU |
-
-**License gate:** all current models are trained on the full corpus and are therefore
-research-only. A commercially clear model must be retrained on permissively licensed data.
-Since corpus v5 the whitelist holds three sources (MultiOFF Apache-2.0, Vidgen CC BY 4.0,
-HateXplain MIT), so a real-text product model is now possible. See
-[`methodology/data_provenance.md`](methodology/data_provenance.md).
+- PT recall on hate is 0.316 against 0.776 in English.
+- twitter-XLM-R raised PT recall from 0.316 to 0.507 and lowered identity over-flagging from
+  0.137 to 0.119 in the bias gate ([`methodology/pt_recall_x_vies.md`](methodology/pt_recall_x_vies.md)).
+  It is not served because the checkpoint has 1.1 GB.
+- Transformers were trained on the earlier corpus and were not retrained on corpus v5.
+- Adding SBERT members to the stack gave +0.009 AUC on corpus v4. It was not rerun on v5.
+- Already measured without gain, so not worth repeating: Bayesian hyperparameter search,
+  per-language threshold, normalization ablation, frozen LFM2.5 encoder (AUC 0.670), stop-word
+  removal, HurtLex lexicon features, `min_df=2`.
 
 ## Repository layout
 
 ```
-configs/        experiment configs (data, labels, classical, neural): the methodology, as code
-src/hsc/        installable package: ingest, harmonize, clean, splits, langid,
-                features (tfidf, embeddings), models, train, evaluate, analysis,
-                transfer, bias_probe, error_analysis, product, inference
-api/            FastAPI service      demo/   Gradio demo      deploy/  Docker
-notebooks/      self-contained Colab notebook for the transformers
-methodology/    decision log, data provenance, label mapping, experiment log, limitations
-tests/          leakage gate + metric + contract tests (pytest)
-assets/         committed figures (regenerate with assets/make_figures.py)
+configs/      data, label and model configs (the methodology as code)
+src/hsc/      package and `hsc` CLI: ingest, harmonize, clean, splits, langid, features,
+              models, train, evaluate, analysis, transfer, bias_probe, product, inference
+scripts/      download, stack build, v5 evaluation and the Portuguese study
+api/ deploy/  FastAPI service and Docker
+notebooks/    Colab notebooks for the transformers
+models/       model cards, metrics and registry (weights are regenerated, not committed)
+reports/      metrics and tables produced by the code
+methodology/  decision log, provenance, label mapping, limitations
+tests/        leakage gate, metric and contract tests (pytest)
+docs/         documentation site (mkdocs)
 ```
-
-## Reproducibility & methodology
-
-Experiments are config-driven and seeded; each run records its config, git SHA, and seed. The
-decision trail lives in [`methodology/`](methodology/): a chronological decision log, data
-provenance with licenses, the label-mapping rationale, the experiment log, and known limitations.
 
 ## Responsible use
 
-This is a probabilistic research classifier, not a moderation oracle. It reflects the biases of its
-training data. An identity-disclosure probe (2026-08-24, updated 2026-09-10) found that a
-Portuguese-only model variant over-flagged real non-hateful identity sentences by 34.0% (vs. 13.7%
-for the served model), including sentences where LGBT, Black, and Muslim people simply describe
-themselves. That variant was blocked from release; see
-[`methodology/pt_recall_x_vies.md`](methodology/pt_recall_x_vies.md) for the full result and the
-release-gate decision it produced. It should
-support, never replace, human review. Redistribution is bound by the individual dataset licenses.
-
-## Support
-
-This is independent research, self-funded and unpaid outside the author's stipend.
-One-off donations: [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/ailuciola)
+This is a probabilistic research classifier and should support human review, not replace it.
+It reflects the biases of its training data. A Portuguese-only variant over-flagged real
+non-hateful identity sentences in 34.0% of cases against 13.7% for the served model, and was
+blocked from release ([`methodology/pt_recall_x_vies.md`](methodology/pt_recall_x_vies.md)).
 
 ## License
 
-Two licenses, because they cover different things.
+**Code**: [GNU AGPL v3.0](LICENSE). Running a modified version as a network service requires
+offering its source to the service's users (AGPL section 13).
 
-**Code**: [GNU Affero General Public License v3.0](LICENSE). You may use, study, modify and
-redistribute it. If you run a modified version as a network service, you must offer that
-service's users the corresponding source (AGPL section 13).
-
-**Trained model artifacts** (the bundles under `models/`): research and educational use only,
-no commercial use. They are not under the AGPL because the training-data licenses restrict
-what can be granted downstream. Terms and per-source detail in [`LICENSE-MODEL.md`](LICENSE-MODEL.md)
-and `methodology/data_provenance.md`.
+**Trained model artifacts**: research and educational use only, no commercial use, because the
+training-data licenses restrict what can be granted. See [`LICENSE-MODEL.md`](LICENSE-MODEL.md).
 
 ## Author
 
-**Isabela Venancio da Silva**. PhD candidate in Public Health (ML applied to health), University of
-São Paulo (FSP-USP), LABDAPS.
-[ORCID](https://orcid.org/0000-0003-0156-7837) ·
-[Lattes](http://lattes.cnpq.br/7006765766090773)
+**Isabela Venancio da Silva**, PhD candidate in Public Health, University of São Paulo (FSP-USP),
+LABDAPS. [ORCID](https://orcid.org/0000-0003-0156-7837) ·
+[Lattes](http://lattes.cnpq.br/7006765766090773) ·
+[Ko-fi](https://ko-fi.com/ailuciola)

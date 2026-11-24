@@ -47,7 +47,7 @@ hsc report && hsc analyze && hsc bias
 ```
 configs/     experiment configs (the methodology, as code)
 src/hsc/     installable package (ingest ... train ... evaluate ... product ... inference)
-api/ demo/ deploy/    FastAPI service, Gradio demo, Docker
+api/ deploy/ FastAPI service, Docker
 methodology/ decision log, provenance, label mapping, experiment log, limitations
 tests/       leakage gate + metric + contract tests
 assets/      committed figures (regenerate with assets/make_figures.py)
@@ -71,13 +71,8 @@ by a runner. Scripts marked (API) need keys kept outside the repo.
    `pt_threshold_bias.py`, `pt_ensemble.py`, then the release gate `bias_gate_v5.py`.
 5. **Step 2.2**: `commercial_retrain_compare.py` (retrain on the commercial corpus).
 6. **Step 2.3**: `perturbation_robustness.py` (obfuscation, identity terms).
-7. **Step 2.4**: `translate_pilot.py` (MarianMT and Qwen), `translate_gemini.py` (API),
-   `avaliar_traducao.py` (quality of the 500 pilot translations).
-8. **Step 2.5**: `generate_synthetic.py` (PT-BR synthetic data, local Ollama, seeds from
-   permissive sources only).
-9. **Extension and field tests**: `export_extension_model.py`, `field_harvest.py`,
-   `field_score.py`.
-10. **Side probe**: `probe_lfm25_encoder.py` (frozen LFM2.5 embeddings, CPU head).
+
+`translate_gemini.py` is not a step: `llm_label.py` imports its API-key rotation.
 
 ## Releasing and DOI (Zenodo)
 

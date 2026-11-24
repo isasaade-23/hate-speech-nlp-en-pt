@@ -1,5 +1,5 @@
 # Build context = repo root (compose uses context: ..). Keep it tiny: the images
-# only COPY src/, api/, demo/, configs/, models/, pyproject.toml, README.md.
+# only COPY src/, api/, configs/, models/, pyproject.toml, README.md.
 # Everything below would just bloat the context sent to the daemon.
 .git
 .github

@@ -1,4 +1,4 @@
-# Run api + demo together:  docker compose -f deploy/docker-compose.yml up --build
+# Run the api:  docker compose -f deploy/docker-compose.yml up --build
 services:
   api:
     build:
@@ -11,13 +11,4 @@ services:
       - HSC_MODEL_ID=${HSC_MODEL_ID:-stack_strict_s42}
       - HSC_API_KEYS=${HSC_API_KEYS:?defina HSC_API_KEYS (nome:sha256hex,...)}
       - HSC_RATE_PER_MIN=${HSC_RATE_PER_MIN:-600}
-    restart: unless-stopped
-
-  demo:
-    build:
-      context: ..
-      dockerfile: deploy/Dockerfile.demo
-    image: hsc-demo
-    ports:
-      - "7860:7860"
     restart: unless-stopped

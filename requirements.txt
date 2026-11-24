@@ -25,7 +25,6 @@ sentence-transformers>=2.6        # multilingual SBERT track + cross-lingual tra
 
 # Optional serving extras (install as needed):
 #   fastapi>=0.110 uvicorn[standard]>=0.29   # product API
-#   gradio>=4.20                    # web demo
 
 # Dev:
 #   pytest ruff black isort pre-commit nbstripout

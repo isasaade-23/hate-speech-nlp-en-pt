@@ -40,8 +40,8 @@ Access and limits:
 - The response does not echo the input text; in a batch, order follows the request.
 - Terms: research and evaluation use only (see `LICENSE-MODEL.md` and `docs/api_termos_privacidade.md`).
 
-A Gradio demo (`python demo/app.py`) is the human-facing version of the same model: a page
-where you type EN/PT text and see the prediction.
+The human-facing version of the same model is the site (https://luciola.65-108-90-215.sslip.io),
+whose code lives in the separate `hate-speech-demo` repository.
 
 ## Serving
 

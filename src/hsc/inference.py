@@ -2,7 +2,7 @@
 
 Loads a trained bundle (vectorizer + estimator + tuned threshold) from the registry,
 runs the SAME cleaning as training (light profile) and the language-detection front-end,
-and returns a structured prediction. Used by api/service.py and demo/app.py.
+and returns a structured prediction. Used by api/service.py.
 """
 
 from __future__ import annotations

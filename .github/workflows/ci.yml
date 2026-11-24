@@ -27,7 +27,7 @@ jobs:
           pip install -e ".[dev,api,train]"
 
       - name: Lint (ruff)
-        run: ruff check src tests api demo assets scripts tools
+        run: ruff check src tests api assets scripts
 
       - name: Tests (includes the leakage-safe split gate)
         run: pytest
