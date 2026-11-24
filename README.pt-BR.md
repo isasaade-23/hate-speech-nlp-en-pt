@@ -124,10 +124,12 @@ As decisões e suas datas estão em
 - O twitter-XLM-R subiu o recall em PT de 0,316 para 0,507 e baixou a supermarcação de identidade
   de 0,137 para 0,119 no gate de viés ([`methodology/pt_recall_x_vies.md`](methodology/pt_recall_x_vies.md)).
   Não está servido porque o checkpoint tem 1,1 GB.
-- Os transformers foram treinados no corpus anterior e não foram retreinados no corpus v5.
+- No mesmo teste v5, os transformers ajustados têm macro-F1 maior que o stack servido
+  (LFM2.5-Encoder 0,854, twitter-XLM-R 0,848, XLM-R 0,842, stack 0,791), em
+  `reports/tables/leaderboard_v5_strict.csv`. Nenhum está servido ainda, por tamanho e custo de CPU.
 - Membros SBERT no stack deram +0,009 de AUC no corpus v4. Não foi refeito no v5.
 - Já medido sem ganho, sem necessidade de repetir: busca bayesiana de hiperparâmetros, limiar
-  por idioma, ablação de normalização, encoder LFM2.5 congelado (AUC 0,670), remoção de stop
+  por idioma, ablação de normalização, encoder LFM2.5 congelado (macro-F1 0,670), remoção de stop
   words, atributos do léxico HurtLex, `min_df=2`.
 
 ## Estrutura das pastas

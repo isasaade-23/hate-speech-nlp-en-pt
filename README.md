@@ -130,10 +130,12 @@ Decisions and their dates are logged in
 - twitter-XLM-R raised PT recall from 0.316 to 0.507 and lowered identity over-flagging from
   0.137 to 0.119 in the bias gate ([`methodology/pt_recall_x_vies.md`](methodology/pt_recall_x_vies.md)).
   It is not served because the checkpoint has 1.1 GB.
-- Transformers were trained on the earlier corpus and were not retrained on corpus v5.
+- On the same v5 test, fine-tuned transformers reach a higher macro-F1 than the served stack
+  (LFM2.5-Encoder 0.854, twitter-XLM-R 0.848, XLM-R 0.842, stack 0.791), in
+  `reports/tables/leaderboard_v5_strict.csv`. None is served yet, because of size and CPU cost.
 - Adding SBERT members to the stack gave +0.009 AUC on corpus v4. It was not rerun on v5.
 - Already measured without gain, so not worth repeating: Bayesian hyperparameter search,
-  per-language threshold, normalization ablation, frozen LFM2.5 encoder (AUC 0.670), stop-word
+  per-language threshold, normalization ablation, frozen LFM2.5 encoder (macro-F1 0.670), stop-word
   removal, HurtLex lexicon features, `min_df=2`.
 
 ## Repository layout
